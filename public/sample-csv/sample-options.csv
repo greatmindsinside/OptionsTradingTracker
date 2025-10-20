@@ -1,0 +1,5 @@
+Symbol,Buy / Sell,Instrument,Date,Strike,Expiration,Type,Side,Amount,Fees,Total Amount
+AMD,Buy,Option,2024-01-15,$120.00,2024-02-16,Call,Buy to open,$2.50,$0.65,-$315.65
+AMD,Sell,Option,2024-02-16,$120.00,2024-02-16,Call,Sell to close,$0.05,$0.65,$4.35
+AAPL,Sell,Option,2024-01-20,$180.00,2024-02-16,Put,Sell to open,$3.20,$0.65,$319.35
+TSLA,Buy,Option,2024-01-25,$250.00,2024-03-15,Call,Buy to open,$5.75,$0.65,-$640.65
