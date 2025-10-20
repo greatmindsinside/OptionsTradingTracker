@@ -1,17 +1,11 @@
 import '@testing-library/jest-dom';
-import { vi } from 'vitest';
+import { beforeEach, vi } from 'vitest';
 
 // Global test setup
 beforeEach(() => {
   // Reset any global state before each test
+  vi.clearAllMocks();
 });
-
-// Mock console methods in tests to avoid noise
-global.console = {
-  ...console,
-  warn: vi.fn(),
-  error: vi.fn(),
-};
 
 // Mock localStorage
 const localStorageMock = {
@@ -20,14 +14,6 @@ const localStorageMock = {
   removeItem: vi.fn(),
   clear: vi.fn(),
 };
-global.localStorage = localStorageMock;
-
-// Mock fetch for API calls
-global.fetch = vi.fn();
-
-// Mock URL.createObjectURL for file handling
-global.URL.createObjectURL = vi.fn(() => 'mocked-object-url');
-global.URL.revokeObjectURL = vi.fn();
 
 // Mock window.matchMedia for responsive design tests
 Object.defineProperty(window, 'matchMedia', {
@@ -36,10 +22,27 @@ Object.defineProperty(window, 'matchMedia', {
     matches: false,
     media: query,
     onchange: null,
-    addListener: vi.fn(), // deprecated
-    removeListener: vi.fn(), // deprecated
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
   })),
+});
+
+// Mock URL.createObjectURL for file handling
+Object.defineProperty(window.URL, 'createObjectURL', {
+  value: vi.fn(() => 'mocked-object-url'),
+  writable: true,
+});
+
+Object.defineProperty(window.URL, 'revokeObjectURL', {
+  value: vi.fn(),
+  writable: true,
+});
+
+// Make localStorage available globally in tests
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+  writable: true,
 });
