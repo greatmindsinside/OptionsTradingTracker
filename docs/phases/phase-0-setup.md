@@ -69,9 +69,9 @@
 - [x] Create basic App.tsx with routing placeholder
 - [x] Set up React Router for navigation
 - [x] Configure path aliases (@/ for src/) in Vite and TypeScript
-- [ ] Add environment variables setup (.env files)
+- [x] Add environment variables setup (.env files)
 - [x] Create error boundary component for development
-- [ ] Set up basic global styles and CSS architecture
+- [x] Set up basic global styles and CSS architecture
 - [x] Add sample CSV files in /public/sample-csv
 
 ### Git Workflow & CI/CD
@@ -122,7 +122,7 @@
 - [x] ESLint catches common TypeScript/React issues
 - [x] Prettier formats code consistently on save
 - [x] VS Code provides proper IntelliSense and debugging
-- [ ] Environment variables load correctly in development
+- [x] Environment variables load correctly in development
 - [x] Path aliases resolve properly (@/components/...)
 - [x] Error boundaries catch and display development errors
 - [x] GitHub Actions CI passes on all PRs
