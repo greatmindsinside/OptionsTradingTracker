@@ -1,0 +1,96 @@
+{
+  "name": "Options Trading Tracker",
+  "short_name": "Options Tracker",
+  "description": "Professional options trading analysis and portfolio management",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "categories": ["finance", "productivity", "business"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/icons/icon-base.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop-home.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Dashboard Overview"
+    },
+    {
+      "src": "/screenshots/mobile-calculator.png",
+      "sizes": "375x667",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Options Calculator"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Portfolio Dashboard",
+      "short_name": "Portfolio",
+      "description": "View portfolio performance and analytics",
+      "url": "/portfolio",
+      "icons": [
+        {
+          "src": "/icons/shortcut-portfolio.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Import Data",
+      "short_name": "Import",
+      "description": "Import trading data from CSV files",
+      "url": "/import",
+      "icons": [
+        {
+          "src": "/icons/shortcut-import.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Wheel Tracker",
+      "short_name": "Wheel",
+      "description": "Track wheel strategy performance",
+      "url": "/wheel",
+      "icons": [
+        {
+          "src": "/icons/shortcut-wheel.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Options Calculator",
+      "short_name": "Calculator",
+      "description": "Calculate options strategy metrics",
+      "url": "/analysis",
+      "icons": [
+        {
+          "src": "/icons/shortcut-calculator.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

@@ -1,0 +1,53 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+    - banner [ref=e6]:
+        - generic [ref=e8]:
+            - generic [ref=e9]: Wheel To Tendies Pipeline
+            - generic [ref=e10]:
+                - generic [ref=e11]: Filter tickers
+                - generic [ref=e12]:
+                    - img [ref=e13]
+                    - textbox "Filter tickers" [ref=e15]
+            - generic [ref=e16]:
+                - button "💸 Premium Printer" [ref=e17] [cursor=pointer]
+                - button "📊 Ledger" [ref=e18] [cursor=pointer]
+    - main [ref=e20]:
+        - generic [ref=e21]:
+            - generic [ref=e22]:
+                - generic [ref=e23]:
+                    - generic [ref=e24]: 💰 Premium This Week
+                    - generic [ref=e25]: $0.00
+                    - generic [ref=e26]: Net option cash flow
+                - generic [ref=e27]:
+                    - generic [ref=e28]: 🏦 Capital In Puts
+                    - generic [ref=e29]: $0
+                    - generic [ref=e30]: Open short puts collateral
+                - generic [ref=e31]:
+                    - generic [ref=e32]: 🛡️ Shares For Calls
+                    - generic [ref=e33]: '0'
+                    - generic [ref=e34]: 0 symbols
+            - heading "📈 Wheel Phase" [level=3] [ref=e37]
+            - generic [ref=e38]:
+                - heading "⏳ Upcoming Expirations" [level=3] [ref=e40]
+                - generic [ref=e42]: No upcoming expirations
+        - generic [ref=e43]:
+            - generic [ref=e44]:
+                - generic [ref=e45]:
+                    - heading "📣 Alerts" [level=3] [ref=e46]
+                    - generic [ref=e47]: auto from data
+                - generic [ref=e48]: All quiet
+            - generic [ref=e49]:
+                - generic [ref=e50]:
+                    - heading "📦 Shares" [level=3] [ref=e51]
+                    - button "Show" [ref=e52] [cursor=pointer]
+                - generic [ref=e53]:
+                    - generic [ref=e54]:
+                        - generic [ref=e55]: Symbol
+                        - generic [ref=e56]: Shares
+                        - generic [ref=e57]: Covered
+                        - generic [ref=e58]: Uncovered
+                        - generic [ref=e59]: Avg Cost
+                    - generic [ref=e60]: No data
+```

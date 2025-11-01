@@ -1,0 +1,51 @@
+.toggleButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg-elevated, var(--color-surface));
+  border: 1px solid var(--color-border-primary, var(--color-border));
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary, var(--color-text));
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+}
+
+.toggleButton:hover {
+  background: var(--color-bg-secondary, var(--color-surface-secondary));
+  border-color: var(--color-border-focus, var(--color-border-focus));
+  transform: translateY(-1px);
+}
+
+.toggleButton:focus {
+  outline: 2px solid var(--color-border-focus, var(--color-border-focus));
+  outline-offset: 2px;
+}
+
+/* Ensure proper text contrast in all themes */
+.toggleButton .label {
+  color: var(--color-text-primary, var(--color-text));
+}
+
+.toggleButton .icon {
+  color: var(--color-text-primary, var(--color-text));
+}
+
+.icon {
+  font-size: var(--font-size-base);
+  display: flex;
+  align-items: center;
+}
+
+.label {
+  font-family: var(--font-family-sans);
+}
+
+@media (max-width: 640px) {
+  .label {
+    display: none;
+  }
+}

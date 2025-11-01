@@ -1,29 +1,13 @@
 /**
- * Utility Classes
+ * DEPRECATED FILE
  * 
- * Single-purpose utility classes for common styling needs.
- * These follow a functional CSS approach for rapid development.
+ * This file has been consolidated into src/index.css on October 31, 2025.
+ * It is no longer imported and can be safely deleted.
+ * 
+ * All utility classes now live in src/index.css.
  */
 
-/* Flexbox utilities */
-.flex {
-  display: flex;
-}
-.inline-flex {
-  display: inline-flex;
-}
-.flex-col {
-  flex-direction: column;
-}
-.flex-row {
-  flex-direction: row;
-}
-.flex-wrap {
-  flex-wrap: wrap;
-}
-.flex-nowrap {
-  flex-wrap: nowrap;
-}
+/* This file intentionally left empty to avoid CSS parsing errors */
 
 .items-start {
   align-items: flex-start;
@@ -488,4 +472,150 @@
   .lg\:text-xl {
     font-size: var(--font-size-xl);
   }
+}
+
+/* Additional utilities for complete coverage */
+.min-h-screen {
+  min-height: 100vh;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Missing background colors */
+.bg-gray-50 {
+  background-color: var(--color-surface);
+}
+
+.bg-blue-100 {
+  background-color: var(--color-primary-100);
+}
+
+.bg-yellow-100 {
+  background-color: var(--color-warning-100);
+}
+
+.bg-purple-100 {
+  background-color: #ede9fe;
+}
+
+.bg-orange-100 {
+  background-color: #fed7aa;
+}
+
+.bg-green-100 {
+  background-color: var(--color-success-100);
+}
+
+.bg-gray-100 {
+  background-color: var(--color-gray-200);
+}
+
+/* Missing text colors */
+.text-blue-800 {
+  color: var(--color-primary-800);
+}
+
+.text-yellow-800 {
+  color: var(--color-warning-700);
+}
+
+.text-purple-800 {
+  color: #7c3aed;
+}
+
+.text-orange-800 {
+  color: #ea580c;
+}
+
+.text-green-800 {
+  color: var(--color-success-700);
+}
+
+.text-gray-800 {
+  color: var(--color-gray-700);
+}
+
+/* Missing border utilities */
+.border-blue-600 {
+  border-color: var(--color-primary-600);
+}
+
+/* Robinhood Primary Button Colors (Green Theme) */
+.bg-blue-600 {
+  background-color: var(--color-primary-600);
+}
+
+.bg-blue-700 {
+  background-color: var(--color-primary-700);
+}
+
+.hover\:bg-blue-700:hover {
+  background-color: var(--color-primary-700);
+}
+
+/* Additional utility classes for consistency */
+.text-blue-600 {
+  color: var(--color-primary-600);
+}
+
+.border-blue-500 {
+  border-color: var(--color-primary-500);
+}
+
+/* Gray border colors */
+.border-gray-200 {
+  border-color: var(--color-border);
+}
+
+.border-gray-300 {
+  border-color: var(--color-border);
+}
+
+/* Golden Ratio Layout Utilities */
+.golden-major {
+  flex: 1.618;
+}
+
+.golden-minor {
+  flex: 1;
+}
+
+.w-golden-major {
+  width: 61.8%;
+}
+
+.w-golden-minor {
+  width: 38.2%;
+}
+
+.max-w-golden-major {
+  max-width: 61.8%;
+}
+
+.max-w-golden-minor {
+  max-width: 38.2%;
+}
+
+/* Golden ratio spacing */
+.gap-golden {
+  gap: 1.618rem;
+}
+
+.p-golden {
+  padding: 1.618rem;
+}
+
+.m-golden {
+  margin: 1.618rem;
 }

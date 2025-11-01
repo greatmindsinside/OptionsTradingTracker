@@ -1,0 +1,120 @@
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: flex-end;
+}
+
+@media (min-width: 768px) {
+  .controls {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.timeRangeSelector {
+  display: flex;
+  gap: 1px;
+  background: var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.timeButton {
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+}
+
+.timeButton:hover {
+  background: var(--color-background);
+  color: var(--color-text);
+}
+
+.timeButton.active {
+  background: var(--color-primary-500);
+  color: white;
+}
+
+.metricSelector {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.metricButton {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid;
+  border-radius: var(--radius-md);
+  background: transparent;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+}
+
+.metricButton:hover {
+  opacity: 0.8;
+}
+
+/* Tooltip Styles */
+.tooltip {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-3);
+  max-width: 200px;
+}
+
+.tooltipHeader {
+  margin-bottom: var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+}
+
+.tooltipContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.tooltipItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+}
+
+.tooltipDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tooltipLabel {
+  color: var(--color-text-secondary);
+  flex: 1;
+}
+
+.tooltipValue {
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-mono);
+}
+
+.tooltipValue.positive {
+  color: var(--color-success-600);
+}
+
+.tooltipValue.negative {
+  color: var(--color-danger-600);
+}

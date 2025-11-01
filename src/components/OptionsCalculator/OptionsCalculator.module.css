@@ -1,0 +1,36 @@
+.calculator {
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: var(--space-6);
+}
+
+.calculatorGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+}
+
+@media (max-width: 1024px) {
+  .calculatorGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.inputForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.inputRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+@media (max-width: 640px) {
+  .inputRow {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+}

@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Icon Generator</title>
+</head>
+<body>
+  <canvas id="canvas" width="152" height="152"></canvas>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Create gradient
+    const gradient = ctx.createLinearGradient(0, 0, 152, 152);
+    gradient.addColorStop(0, '#4F46E5');
+    gradient.addColorStop(1, '#7C3AED');
+    
+    // Background with rounded corners
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.roundRect(0, 0, 152, 152, 35.72);
+    ctx.fill();
+    
+    // Options symbol
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.font = 'bold 53.199999999999996px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Φ', 76, 59.28);
+    
+    // Chart line
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.lineWidth = 2.432;
+    ctx.beginPath();
+    ctx.moveTo(24.32, 103.36000000000001);
+    ctx.lineTo(47.12, 95);
+    ctx.lineTo(71.44, 100.32000000000001);
+    ctx.lineTo(95, 89.07199999999999);
+    ctx.lineTo(127.67999999999999, 83.144);
+    ctx.stroke();
+    
+    // Data points
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    [
+      [47.12, 95],
+      [71.44, 100.32000000000001],
+      [95, 89.07199999999999]
+    ].forEach(([x, y]) => {
+      ctx.beginPath();
+      ctx.arc(x, y, 2.432, 0, 2 * Math.PI);
+      ctx.fill();
+    });
+    
+    // Bottom text
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.font = '600 9.576px sans-serif';
+    ctx.fillText('OPTIONS', 76, 133.76);
+    
+    // Save as PNG (manual process - this generates the canvas)
+    console.log('Generated 152x152 icon canvas');
+  </script>
+</body>
+</html>

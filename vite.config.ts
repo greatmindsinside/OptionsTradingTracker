@@ -15,6 +15,13 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
       exclude: ['node_modules/', 'tests/', '**/*.d.ts', '**/*.config.{js,ts}', '**/coverage/**'],
     },
+    // Handle sql.js WASM loading in test environment
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        singleThread: true,
+      },
+    },
   },
   resolve: {
     alias: {
@@ -26,7 +33,16 @@ export default defineConfig({
       '@/workers': '/src/workers',
     },
   },
+  optimizeDeps: {
+    exclude: ['sql.js'],
+  },
   define: {
     global: 'globalThis',
   },
+  server: {
+    fs: {
+      allow: ['..'],
+    },
+  },
+  assetsInclude: ['**/*.wasm'],
 });
