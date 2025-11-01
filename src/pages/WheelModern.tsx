@@ -455,9 +455,9 @@ export default function WheelModern() {
     right,
     children,
   }) => (
-    <div className="rounded-2xl border border-slate-700 bg-slate-900/60 backdrop-blur p-4">
+    <div className="rounded-2xl border border-green-500/20 bg-linear-to-br from-black/80 to-zinc-950/90 backdrop-blur-xl p-4 shadow-lg shadow-green-500/10">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-slate-200 font-semibold">{title}</h3>
+        <h3 className="text-green-400 font-semibold">{title}</h3>
         {right}
       </div>
       {children}
@@ -470,12 +470,12 @@ export default function WheelModern() {
     sub,
     testId,
   }) => (
-    <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-4">
-      <div className="text-xs text-slate-400">{label}</div>
-      <div className="text-2xl font-semibold mt-1" data-testid={testId}>
+    <div className="rounded-2xl border border-green-500/30 bg-linear-to-br from-black/80 to-green-950/20 backdrop-blur-xl p-4 shadow-lg shadow-green-500/20 hover:shadow-green-400/30 transition-shadow">
+      <div className="text-xs text-green-400/80 font-medium">{label}</div>
+      <div className="text-2xl font-bold mt-1 text-green-400" data-testid={testId}>
         {value}
       </div>
-      {sub && <div className="text-xs text-slate-500 mt-1">{sub}</div>}
+      {sub && <div className="text-xs text-zinc-500 mt-1">{sub}</div>}
     </div>
   );
 
@@ -485,24 +485,24 @@ export default function WheelModern() {
   }) => (
     <button
       onClick={onClick}
-      className="text-xs px-2 py-1 rounded border border-slate-600 hover:bg-slate-800"
+      className="text-xs px-2 py-1 rounded border border-green-500/40 bg-green-500/10 hover:bg-green-500/20 hover:border-green-400/60 transition-all text-green-400"
     >
       {children}
     </button>
   );
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-black text-slate-100 cyber-bg">
+    <div className="min-h-screen relative overflow-hidden bg-black text-zinc-100 cyber-bg">
       {/* Glow orbs */}
-      <div className="pointer-events-none absolute -top-24 -left-20 rounded-full bg-emerald-500/20 blur-3xl h-112 aspect-square" />
-      <div className="pointer-events-none absolute -bottom-32 -right-24 rounded-full bg-fuchsia-600/25 blur-3xl h-128 aspect-square" />
+      <div className="pointer-events-none absolute -top-24 -left-20 rounded-full bg-green-500/15 blur-3xl h-112 aspect-square" />
+      <div className="pointer-events-none absolute -bottom-32 -right-24 rounded-full bg-green-400/20 blur-3xl h-128 aspect-square" />
 
       {/* Header */}
       <header className="wheel-header">
         <div className="wheel-header__inner">
           {/* Brand/Title */}
           <h1 className="wheel-header__brand" data-testid="wheel.title">
-            💰 Wheel Tracker
+            💰 Wheel To Tendies Pipeline
           </h1>
 
           {/* Search */}
@@ -554,7 +554,7 @@ export default function WheelModern() {
               disabled={importing}
               aria-busy={importing}
             >
-              {importing ? '⏳ Importing...' : '💸 Import CSV'}
+              {importing ? '⏳ Importing...' : '💸 Premium Printer'}
             </button>
             <button
               onClick={() => setDataOpen(true)}
@@ -600,20 +600,18 @@ export default function WheelModern() {
                 {ft.map(t => (
                   <div
                     key={t}
-                    className="rounded-xl border border-slate-700 p-3 flex items-center gap-3"
+                    className="rounded-xl border border-green-500/20 bg-zinc-950/60 p-3 flex items-center gap-3 hover:border-green-400/40 transition-colors"
                   >
                     <div
-                      className="text-lg font-semibold cursor-pointer"
+                      className="text-lg font-semibold cursor-pointer text-green-400 hover:text-green-300 transition-colors"
                       onClick={() => setContextSymbol(t)}
                     >
                       {t}
                     </div>
-                    <span className="text-xs px-2 py-1 rounded border border-slate-600">
+                    <span className="text-xs px-2 py-1 rounded border border-green-500/40 bg-green-500/15 text-green-400">
                       {phaseFor(t)}
                     </span>
-                    <div className="text-xs text-slate-500 ml-auto">
-                      Earnings {earn[t] || 'TBD'}
-                    </div>
+                    <div className="text-xs text-zinc-500 ml-auto">Earnings {earn[t] || 'TBD'}</div>
                     <RowBtn onClick={() => setContextSymbol(t)}>Open</RowBtn>
                   </div>
                 ))}
@@ -634,26 +632,26 @@ export default function WheelModern() {
                     const d = daysTo(row.expiration);
                     const color =
                       d === 0
-                        ? 'border-red-500/60 bg-red-500/10'
+                        ? 'border-red-500/60 bg-red-500/10 text-red-300'
                         : d <= 7
-                          ? 'border-amber-500/60 bg-amber-500/10'
-                          : 'border-slate-700 bg-slate-900/40';
+                          ? 'border-amber-500/60 bg-amber-500/10 text-amber-300'
+                          : 'border-green-500/20 bg-zinc-950/40';
                     return (
                       <div
                         key={row.id}
-                        className={`rounded-lg border ${color} p-3 flex items-center gap-3`}
+                        className={`rounded-lg border ${color} p-3 flex items-center gap-3 hover:border-green-400/40 transition-colors`}
                       >
                         <div
-                          className="font-semibold cursor-pointer"
+                          className="font-semibold cursor-pointer text-green-400 hover:text-green-300 transition-colors"
                           onClick={() => setContextSymbol(row.symbol)}
                         >
                           {row.symbol}
                         </div>
-                        <div className="text-xs">
+                        <div className="text-xs text-zinc-400">
                           {row.type} {row.strike}
                         </div>
                         <div
-                          className={`text-xs px-2 py-1 rounded border border-slate-600 ${d === 0 ? 'badge-urgent' : d <= 7 ? 'badge-glow' : ''}`}
+                          className={`text-xs px-2 py-1 rounded border ${d === 0 ? 'border-red-500/40 bg-red-500/20 badge-urgent' : d <= 7 ? 'border-amber-500/40 bg-amber-500/20 badge-glow' : 'border-green-500/40 bg-green-500/15'}`}
                         >
                           {row.expiration} · DTE {d}
                         </div>
@@ -696,12 +694,15 @@ export default function WheelModern() {
       {/* Actions Drawer */}
       {actionsOpen && (
         <div className="fixed inset-0 z-20">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setActionsOpen(false)} />
-          <div className="absolute right-0 top-0 h-full w-[520px] bg-slate-950 border-l border-slate-800 p-4 overflow-y-auto">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setActionsOpen(false)}
+          />
+          <div className="absolute right-0 top-0 h-full w-[520px] bg-black border-l border-green-500/30 shadow-2xl shadow-green-500/20 p-4 overflow-y-auto">
             <div className="flex items-center justify-between mb-3">
-              <div className="text-lg font-semibold">🧰 Actions</div>
+              <div className="text-lg font-semibold text-green-400">🧰 Actions</div>
               <button
-                className="px-2 py-1 rounded border border-slate-600"
+                className="px-2 py-1 rounded border border-green-500/30 hover:border-green-400/50 hover:bg-zinc-950/60 transition-all text-green-400"
                 onClick={() => setActionsOpen(false)}
               >
                 Close
@@ -712,7 +713,7 @@ export default function WheelModern() {
                 <button
                   key={t}
                   onClick={() => setActionsTab(t)}
-                  className={`px-3 py-1 rounded border ${actionsTab === t ? 'border-emerald-400 text-emerald-300' : 'border-slate-700'}`}
+                  className={`px-3 py-1 rounded border transition-all ${actionsTab === t ? 'border-green-400 bg-green-500/15 text-green-400 shadow-lg shadow-green-500/30' : 'border-zinc-700 hover:border-green-500/30 text-zinc-400'}`}
                 >
                   {t}
                 </button>
@@ -720,18 +721,18 @@ export default function WheelModern() {
             </div>
             {actionsTab === 'Import' && (
               <div className="space-y-3" data-testid="drawer.import">
-                <div className="text-sm text-slate-400">
+                <div className="text-sm text-zinc-400">
                   Import Robinhood CSV. Creates trades and emits a data updated event.
                 </div>
                 <button
-                  className="px-3 py-2 rounded border border-slate-600"
+                  className="px-3 py-2 rounded border border-green-500/40 bg-green-500/15 hover:bg-green-500/25 hover:border-green-400/60 transition-all text-green-400"
                   onClick={handleImportClick}
                   data-testid="drawer.import.choose"
                   disabled={importing}
                 >
                   {importing ? 'Importing...' : 'Choose File'}
                 </button>
-                <div className="text-xs text-slate-500">
+                <div className="text-xs text-zinc-500">
                   After import the summary and tables will refresh.
                 </div>
               </div>
@@ -785,12 +786,15 @@ export default function WheelModern() {
       {/* Data Explorer Modal */}
       {dataOpen && (
         <div className="fixed inset-0 z-30">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setDataOpen(false)} />
-          <div className="absolute inset-10 bg-slate-950 border border-slate-800 rounded-2xl p-4 overflow-y-auto">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setDataOpen(false)}
+          />
+          <div className="absolute inset-10 bg-black border border-green-500/30 rounded-2xl p-4 overflow-y-auto shadow-2xl shadow-green-500/20">
             <div className="flex items-center justify-between mb-3">
-              <div className="text-lg font-semibold">🗃️ Database Preview</div>
+              <div className="text-lg font-semibold text-green-400">🗃️ Database Preview</div>
               <button
-                className="px-2 py-1 rounded border border-slate-600"
+                className="px-2 py-1 rounded border border-green-500/30 hover:border-green-400/50 hover:bg-zinc-950/60 transition-all text-green-400"
                 onClick={() => setDataOpen(false)}
               >
                 Close
@@ -818,7 +822,7 @@ const InlineDateEdit: React.FC<{ date: string; onSave: (ymd: string) => void }> 
   if (!editing)
     return (
       <button
-        className="text-xs px-2 py-1 rounded border border-slate-600"
+        className="text-xs px-2 py-1 rounded border border-green-500/30 hover:border-green-400/50 transition-colors text-green-400"
         onClick={() => setEditing(true)}
       >
         📝 Edit
@@ -828,12 +832,12 @@ const InlineDateEdit: React.FC<{ date: string; onSave: (ymd: string) => void }> 
     <div className="flex items-center gap-2">
       <input
         type="date"
-        className="text-xs px-2 py-1 rounded bg-slate-900/60 border border-slate-700"
+        className="text-xs px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
         value={val}
         onChange={e => setVal(e.target.value)}
       />
       <button
-        className="text-xs px-2 py-1 rounded border border-emerald-500 text-emerald-300"
+        className="text-xs px-2 py-1 rounded border border-green-500 bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
         onClick={() => {
           onSave(val);
           setEditing(false);
@@ -842,7 +846,7 @@ const InlineDateEdit: React.FC<{ date: string; onSave: (ymd: string) => void }> 
         Save
       </button>
       <button
-        className="text-xs px-2 py-1 rounded border border-slate-600"
+        className="text-xs px-2 py-1 rounded border border-zinc-600 text-zinc-400 hover:border-zinc-500 transition-colors"
         onClick={() => setEditing(false)}
       >
         Cancel
@@ -922,7 +926,7 @@ const LotTable: React.FC<{ lots: Lot[]; pos: Position[]; onOpenSymbol: (s: strin
   }, [lots, pos]);
   return (
     <div className="text-sm">
-      <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr_1.2fr] gap-6 px-2 py-1 text-slate-400">
+      <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr_1.2fr] gap-6 px-2 py-1 text-zinc-500">
         <div>Symbol</div>
         <div className="text-right">Shares</div>
         <div className="text-right">Covered</div>
@@ -932,9 +936,12 @@ const LotTable: React.FC<{ lots: Lot[]; pos: Position[]; onOpenSymbol: (s: strin
       {rows.map(r => (
         <div
           key={r.t}
-          className="grid grid-cols-[1.2fr_1fr_1fr_1fr_1.2fr] gap-6 px-2 py-1 items-center rounded hover:bg-slate-900/40"
+          className="grid grid-cols-[1.2fr_1fr_1fr_1fr_1.2fr] gap-6 px-2 py-1 items-center rounded hover:bg-zinc-950/60 text-zinc-300"
         >
-          <button className="text-left underline" onClick={() => onOpenSymbol(r.t)}>
+          <button
+            className="text-left underline text-green-400 hover:text-green-300 transition-colors"
+            onClick={() => onOpenSymbol(r.t)}
+          >
             {r.t}
           </button>
           <div className="text-right tabular-nums">{r.shares}</div>
@@ -943,7 +950,7 @@ const LotTable: React.FC<{ lots: Lot[]; pos: Position[]; onOpenSymbol: (s: strin
           <div className="text-right tabular-nums">${fmt(r.avg, 2)}</div>
         </div>
       ))}
-      {rows.length === 0 && <div className="text-center text-slate-500 py-4">No data</div>}
+      {rows.length === 0 && <div className="text-center text-zinc-600 py-4">No data</div>}
     </div>
   );
 };
@@ -976,10 +983,10 @@ const ManualForms: React.FC<{
             value={sym}
             onChange={e => setSym(e.target.value.toUpperCase())}
             placeholder="Symbol"
-            className="px-3 py-2 rounded bg-slate-900/60 border border-slate-700 w-40"
+            className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 w-40 text-green-400"
           />
           <button
-            className="px-3 py-2 rounded border border-emerald-500 text-emerald-300"
+            className="px-3 py-2 rounded border border-green-500 bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
             onClick={() => {
               onAddSymbol(sym);
               setSym('');
@@ -996,16 +1003,16 @@ const ManualForms: React.FC<{
             value={esym}
             onChange={e => setEsym(e.target.value.toUpperCase())}
             placeholder="Symbol"
-            className="px-3 py-2 rounded bg-slate-900/60 border border-slate-700 w-32"
+            className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 w-32 text-green-400"
           />
           <input
             type="date"
             value={edate}
             onChange={e => setEdate(e.target.value)}
-            className="px-3 py-2 rounded bg-slate-900/60 border border-slate-700 w-44"
+            className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 w-44 text-green-400"
           />
           <button
-            className="px-3 py-2 rounded border border-emerald-500 text-emerald-300"
+            className="px-3 py-2 rounded border border-green-500 bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
             onClick={() => {
               onAddEarnings(esym, edate);
               setEsym('');
@@ -1060,12 +1067,12 @@ const AddOptionInline: React.FC<{
         value={sym}
         onChange={e => setSym(e.target.value.toUpperCase())}
         placeholder="Symbol"
-        className="px-2 py-1 rounded bg-slate-900/60 border border-slate-700 w-24"
+        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 w-24 text-green-400"
       />
       <select
         value={type}
         onChange={e => setType(e.target.value as OptType)}
-        className="px-2 py-1 rounded bg-slate-900/60 border border-slate-700"
+        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
       >
         <option value="P">P</option>
         <option value="C">C</option>
@@ -1073,7 +1080,7 @@ const AddOptionInline: React.FC<{
       <select
         value={side}
         onChange={e => setSide(e.target.value as Side)}
-        className="px-2 py-1 rounded bg-slate-900/60 border border-slate-700"
+        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
       >
         <option value="S">S</option>
         <option value="B">B</option>
@@ -1082,7 +1089,7 @@ const AddOptionInline: React.FC<{
         type="number"
         value={qty}
         onChange={e => setQty(parseInt(e.target.value || '1'))}
-        className="px-2 py-1 rounded bg-slate-900/60 border border-slate-700 w-20"
+        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 w-20 text-green-400"
         placeholder="Qty"
       />
       <input
@@ -1090,7 +1097,7 @@ const AddOptionInline: React.FC<{
         step=".01"
         value={strike}
         onChange={e => setStrike(parseFloat(e.target.value || '0'))}
-        className="px-2 py-1 rounded bg-slate-900/60 border border-slate-700 w-24"
+        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 w-24 text-green-400"
         placeholder="Strike"
       />
       <input
@@ -1098,7 +1105,7 @@ const AddOptionInline: React.FC<{
         step=".01"
         value={entry}
         onChange={e => setEntry(parseFloat(e.target.value || '0'))}
-        className="px-2 py-1 rounded bg-slate-900/60 border border-slate-700 w-24"
+        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 w-24 text-green-400"
         placeholder="Entry"
       />
       <input
@@ -1106,24 +1113,24 @@ const AddOptionInline: React.FC<{
         step=".01"
         value={mark}
         onChange={e => setMark(parseFloat(e.target.value || '0'))}
-        className="px-2 py-1 rounded bg-slate-900/60 border border-slate-700 w-20"
+        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 w-20 text-green-400"
         placeholder="Mark"
       />
       <input
         type="number"
         value={dte}
         onChange={e => setDte(parseInt(e.target.value || '0'))}
-        className="px-2 py-1 rounded bg-slate-900/60 border border-slate-700 w-20"
+        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 w-20 text-green-400"
         placeholder="DTE"
       />
       <input
         type="date"
         value={opened}
         onChange={e => setOpened(e.target.value)}
-        className="px-2 py-1 rounded bg-slate-900/60 border border-slate-700"
+        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
       />
       <button
-        className="px-3 py-1 rounded border border-emerald-500 text-emerald-300"
+        className="px-3 py-1 rounded border border-green-500 bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
         onClick={() => {
           onAdd({ sym, type, side, qty, strike, entry, mark, dte, opened: opened || undefined });
           setSym('');
@@ -1148,13 +1155,13 @@ const AddLotInline: React.FC<{
         value={sym}
         onChange={e => setSym(e.target.value.toUpperCase())}
         placeholder="Symbol"
-        className="px-2 py-1 rounded bg-slate-900/60 border border-slate-700 w-24"
+        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 w-24 text-green-400"
       />
       <input
         type="number"
         value={qty}
         onChange={e => setQty(parseInt(e.target.value || '0'))}
-        className="px-2 py-1 rounded bg-slate-900/60 border border-slate-700 w-24"
+        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 w-24 text-green-400"
         placeholder="Qty"
       />
       <input
@@ -1162,17 +1169,17 @@ const AddLotInline: React.FC<{
         step=".01"
         value={cost}
         onChange={e => setCost(parseFloat(e.target.value || '0'))}
-        className="px-2 py-1 rounded bg-slate-900/60 border border-slate-700 w-24"
+        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 w-24 text-green-400"
         placeholder="Cost"
       />
       <input
         type="date"
         value={opened}
         onChange={e => setOpened(e.target.value)}
-        className="px-2 py-1 rounded bg-slate-900/60 border border-slate-700"
+        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
       />
       <button
-        className="px-3 py-1 rounded border border-emerald-500 text-emerald-300"
+        className="px-3 py-1 rounded border border-green-500 bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
         onClick={() => {
           onAdd({ sym, qty, cost, opened: opened || undefined });
           setSym('');
@@ -1192,11 +1199,16 @@ const PhaseOverride: React.FC<{
 }> = ({ tickers, current, onOpenSymbol, onSave }) => (
   <div className="space-y-2" data-testid="drawer.phase">
     {tickers.map(t => (
-      <div key={t} className="flex items-center gap-3 rounded border border-slate-700 p-2">
-        <div className="font-semibold w-16">{t}</div>
-        <div className="text-xs px-2 py-1 rounded border border-slate-600">{current(t)}</div>
+      <div
+        key={t}
+        className="flex items-center gap-3 rounded border border-green-500/20 bg-zinc-950/40 p-2"
+      >
+        <div className="font-semibold w-16 text-green-400">{t}</div>
+        <div className="text-xs px-2 py-1 rounded border border-green-500/30 bg-green-500/10 text-green-400">
+          {current(t)}
+        </div>
         <button
-          className="text-xs px-2 py-1 rounded border border-slate-600"
+          className="text-xs px-2 py-1 rounded border border-green-500/30 hover:border-green-400/50 text-green-400 transition-colors"
           onClick={() => onOpenSymbol(t)}
         >
           Open
@@ -1204,7 +1216,7 @@ const PhaseOverride: React.FC<{
         <select
           id={`phase-${t}`}
           defaultValue={current(t)}
-          className="ml-auto text-xs px-2 py-1 rounded bg-slate-900/60 border border-slate-700"
+          className="ml-auto text-xs px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
         >
           {[
             'Sell Cash Secured Puts',
@@ -1221,7 +1233,7 @@ const PhaseOverride: React.FC<{
           ))}
         </select>
         <button
-          className="text-xs px-2 py-1 rounded border border-emerald-500 text-emerald-300"
+          className="text-xs px-2 py-1 rounded border border-green-500 bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
           onClick={() => {
             const val = (document.getElementById(`phase-${t}`) as HTMLSelectElement)
               .value as WheelPhase;
@@ -1232,7 +1244,7 @@ const PhaseOverride: React.FC<{
         </button>
       </div>
     ))}
-    {tickers.length === 0 && <div className="text-sm text-slate-500">No symbols</div>}
+    {tickers.length === 0 && <div className="text-sm text-zinc-600">No symbols</div>}
   </div>
 );
 
@@ -1251,7 +1263,7 @@ const DataExplorer: React.FC<{
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-3 py-1 rounded border ${tab === t ? 'border-emerald-400 text-emerald-300' : 'border-slate-700'}`}
+            className={`px-3 py-1 rounded border transition-colors ${tab === t ? 'border-green-400 bg-green-500/15 text-green-400 shadow-lg shadow-green-500/20' : 'border-zinc-700 text-zinc-400 hover:border-green-500/30'}`}
           >
             {t}
           </button>
@@ -1299,11 +1311,14 @@ const DataExplorer: React.FC<{
       {tab === 'Ledger' && (
         <div className="text-sm space-y-1 max-h-64 overflow-auto">
           {ledger.map(e => (
-            <div key={e.id} className="px-2 py-1 rounded border border-slate-700">
+            <div
+              key={e.id}
+              className="px-2 py-1 rounded border border-green-500/20 bg-zinc-950/40 text-zinc-300"
+            >
               {e.when} · {e.kind} · {e.symbol || ''}
             </div>
           ))}
-          {ledger.length === 0 && <div className="text-slate-500">Empty</div>}
+          {ledger.length === 0 && <div className="text-zinc-600">Empty</div>}
         </div>
       )}
     </div>
@@ -1311,9 +1326,9 @@ const DataExplorer: React.FC<{
 };
 
 const Stat: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-  <div className="rounded-xl border border-slate-700 p-3">
-    <div className="text-xs text-slate-400">{label}</div>
-    <div className="text-lg font-semibold">{value}</div>
+  <div className="rounded-xl border border-green-500/20 bg-zinc-950/40 p-3">
+    <div className="text-xs text-zinc-500">{label}</div>
+    <div className="text-lg font-semibold text-green-400">{value}</div>
   </div>
 );
 
@@ -1322,24 +1337,22 @@ const MiniTable: React.FC<{ title: string; cols: string[]; rows: (string | numbe
   cols,
   rows,
 }) => (
-  <div className="rounded-xl border border-slate-700 p-3">
-    <div className="font-semibold mb-2">{title}</div>
+  <div className="rounded-xl border border-green-500/20 bg-zinc-950/40 p-3">
+    <div className="font-semibold mb-2 text-green-400">{title}</div>
     <div className="grid" style={{ gridTemplateColumns: `repeat(${cols.length},minmax(0,1fr))` }}>
       {cols.map(c => (
-        <div key={c} className="text-xs text-slate-400 pb-1">
+        <div key={c} className="text-xs text-zinc-500 pb-1">
           {c}
         </div>
       ))}
       {rows.map((r, i) =>
         r.map((cell, j) => (
-          <div key={`${i}-${j}`} className="text-sm py-1 border-t border-slate-800">
+          <div key={`${i}-${j}`} className="text-sm py-1 border-t border-zinc-800 text-zinc-300">
             {cell}
           </div>
         ))
       )}
-      {rows.length === 0 && (
-        <div className="col-span-full text-sm text-slate-500 py-2">No rows</div>
-      )}
+      {rows.length === 0 && <div className="col-span-full text-sm text-zinc-600 py-2">No rows</div>}
     </div>
   </div>
 );
@@ -1362,11 +1375,14 @@ const TickerDrawer: React.FC<{
   const { covered, uncovered } = computeCover(shares, shortCalls);
   return (
     <div className="fixed inset-0 z-30">
-      <div className="absolute inset-0 bg-black/60" onClick={close} />
-      <div className="absolute right-0 top-0 h-full w-[560px] bg-slate-950 border-l border-slate-800 p-4 overflow-y-auto">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={close} />
+      <div className="absolute right-0 top-0 h-full w-[560px] bg-black border-l border-green-500/30 shadow-2xl shadow-green-500/20 p-4 overflow-y-auto">
         <div className="flex items-center justify-between mb-3">
-          <div className="text-lg font-semibold">{symbol}</div>
-          <button className="px-2 py-1 rounded border border-slate-600" onClick={close}>
+          <div className="text-lg font-semibold text-green-400">{symbol}</div>
+          <button
+            className="px-2 py-1 rounded border border-green-500/30 hover:border-green-400/50 text-green-400 transition-colors"
+            onClick={close}
+          >
             Close
           </button>
         </div>
@@ -1381,11 +1397,17 @@ const TickerDrawer: React.FC<{
           cols={['Type', 'Side', 'Qty', 'Strike', 'Entry', 'Mark', 'DTE']}
           rows={P.map(p => [p.type, p.side, p.qty, p.strike, `$${p.entry}`, `$${p.mark}`, p.dte])}
         />
-        <div className="mt-4 text-sm text-slate-400">Earnings {earn[symbol] || 'TBD'}</div>
+        <div className="mt-4 text-sm text-zinc-500">Earnings {earn[symbol] || 'TBD'}</div>
         <div className="mt-4 flex gap-2">
-          <button className="px-3 py-2 rounded border border-slate-600">💵 Sell Call</button>
-          <button className="px-3 py-2 rounded border border-slate-600">🔁 Roll</button>
-          <button className="px-3 py-2 rounded border border-slate-600">Close</button>
+          <button className="px-3 py-2 rounded border border-green-500/30 bg-green-500/10 hover:bg-green-500/20 text-green-400 transition-colors">
+            💵 Sell Call
+          </button>
+          <button className="px-3 py-2 rounded border border-green-500/30 bg-green-500/10 hover:bg-green-500/20 text-green-400 transition-colors">
+            🔁 Roll
+          </button>
+          <button className="px-3 py-2 rounded border border-green-500/30 bg-green-500/10 hover:bg-green-500/20 text-green-400 transition-colors">
+            Close
+          </button>
         </div>
       </div>
     </div>

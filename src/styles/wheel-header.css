@@ -34,28 +34,115 @@
    BRAND / TITLE
    ============================================ */
 
+/**
+ * Brand text with futuristic cyberpunk aesthetic
+ * - Animated neon green to blood red gradient
+ * - Multiple text shadows for depth and glow
+ * - Pulsing animation for dynamic effect
+ */
 .wheel-header__brand {
-  flex: 0 0 auto;
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 800;
-  letter-spacing: -0.02em;
-  background: linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #8b5cf6 100%);
-  background-clip: text;
+  letter-spacing: -0.025em;
+  background: linear-gradient(
+    135deg,
+    #00ff41 0%,
+    /* Neon green */ #39ff14 25%,
+    /* Bright lime green */ #ff0000 50%,
+    /* Blood red */ #8b0000 75%,
+    /* Dark red */ #00ff41 100% /* Back to neon green */
+  );
+  background-size: 300% 300%;
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-size: 200% 200%;
-  animation: gradientShift 6s ease infinite;
-  cursor: default;
-  user-select: none;
+  animation:
+    cyberpunkGradient 6s ease infinite,
+    glitchPulse 3s ease-in-out infinite;
+  text-shadow:
+    0 0 10px rgba(0, 255, 65, 0.5),
+    0 0 20px rgba(255, 0, 0, 0.3),
+    0 0 30px rgba(0, 255, 65, 0.2);
+  position: relative;
 }
 
-@keyframes gradientShift {
+/**
+ * Pseudo-element for additional glow effect
+ */
+.wheel-header__brand::before {
+  content: '💰 Wheel To Tendies Pipeline';
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: linear-gradient(135deg, #00ff41 0%, #ff0000 50%, #00ff41 100%);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: blur(8px);
+  opacity: 0.6;
+  animation: cyberpunkGradient 6s ease infinite;
+  z-index: -1;
+}
+
+/**
+ * Cyberpunk gradient animation - shifts colors continuously
+ */
+@keyframes cyberpunkGradient {
   0%,
   100% {
     background-position: 0% 50%;
   }
   50% {
     background-position: 100% 50%;
+  }
+}
+
+/**
+ * Subtle glitch pulse effect
+ */
+@keyframes glitchPulse {
+  0%,
+  100% {
+    text-shadow:
+      0 0 10px rgba(0, 255, 65, 0.5),
+      0 0 20px rgba(255, 0, 0, 0.3),
+      0 0 30px rgba(0, 255, 65, 0.2);
+  }
+  50% {
+    text-shadow:
+      0 0 15px rgba(255, 0, 0, 0.7),
+      0 0 25px rgba(0, 255, 65, 0.4),
+      0 0 35px rgba(255, 0, 0, 0.3);
+  }
+}
+
+/**
+ * Hover effect - intensifies the glow
+ */
+.wheel-header__brand:hover {
+  animation:
+    cyberpunkGradient 3s ease infinite,
+    glitchPulse 1.5s ease-in-out infinite;
+  text-shadow:
+    0 0 15px rgba(0, 255, 65, 0.8),
+    0 0 30px rgba(255, 0, 0, 0.6),
+    0 0 45px rgba(0, 255, 65, 0.4),
+    0 0 60px rgba(255, 0, 0, 0.2);
+}
+
+/**
+ * Mobile responsive sizing
+ */
+@media (max-width: 768px) {
+  .wheel-header__brand {
+    font-size: 1.25rem;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .wheel-header__brand {
+    font-size: 1.5rem;
   }
 }
 
