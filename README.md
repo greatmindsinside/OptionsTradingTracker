@@ -25,13 +25,6 @@ yarn dev
 
 ## 🚀 Features
 
-### 🧮 **Options Calculations Engine**
-
-- **Covered Calls**: Break-even, max profit, return analysis, Greeks
-- **Cash-Secured Puts**: Effective basis, assignment probability, risk metrics
-- **Long Calls**: Intrinsic/time value, moneyness classification, P&L scenarios
-- **Interactive Calculators**: Real-time updates with parameter changes
-
 ### 🎡 **Wheel Strategy Tracking**
 
 - **Complete Lifecycle Management**: CSP → Assignment → CC → Close cycle tracking
@@ -40,19 +33,12 @@ yarn dev
 - **Performance Analytics**: ROO/ROR calculations, cycle metrics, portfolio aggregation
 - **Management Dashboard**: Filter, search, and analyze wheel performance
 
-### 💰 **Tax Lot Management**
+### � **Trade Journal**
 
-- **Multiple Allocation Methods**: FIFO, LIFO, HIFO, LOFO lot tracking
-- **Wash Sale Detection**: Automated 61-day wash sale identification and adjustment
-- **Tax-Loss Harvesting**: Optimization recommendations and timing strategies
-- **Cost Basis Tracking**: Accurate basis calculations with adjustment history
-
-### 📊 **Advanced Analytics**
-
-- **Portfolio Analysis**: Comprehensive P&L tracking and risk metrics
-- **Performance Dashboards**: Interactive charts and KPI monitoring
-- **Risk Management**: Position sizing and exposure analysis
-- **Historical Tracking**: Time-series analysis of strategy performance
+- **Trade Logging**: Comprehensive record of all options trades
+- **Advanced Filtering**: Filter by type, status, symbol, date range
+- **Trade Editing**: Edit and update trade details inline
+- **CSV Export**: Export journal data for external analysis
 
 ### 🔧 **Data Management**
 
@@ -63,142 +49,73 @@ yarn dev
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 19 + TypeScript + Vite
-- **Database**: SQLite-WASM with OPFS storage
-- **Testing**: Vitest + Playwright + axe-core
-- **Styling**: CSS Modules with CSS Variables
-- **State**: Zustand for state management
-- **Charts**: Recharts for data visualization
+For the full, up-to-date repository tree, see: docs/PROJECT_ORGANIZATION.md.
 
-## 📋 Prerequisites
-
-- Node.js 18+
-- Yarn 4.7.0+ (with Corepack enabled)
-- Git with SSH or HTTPS access to GitHub
-
-## 🚀 Quick Start
-
-```bash
-# Clone the repository
-git clone https://github.com/greatmindsinside/OptionsTradingTracker.git
-cd OptionsTradingTracker
-
-# Install dependencies
-yarn install
-
-# Start development server
-yarn dev
-
-# Run tests
-yarn test:all
-
-# Build for production
-yarn build
-```
-
-## 📁 Project Structure
+Brief view of the app source:
 
 ```
 src/
-├── components/              # Reusable UI components
-│   ├── Button/              # Component library with CSS modules
-│   ├── CalculatorCard/      # Options strategy calculators
-│   ├── ChartContainer/      # Chart wrapper with loading states
-│   ├── GreeksChart/         # Greeks visualization
-│   ├── LifecycleTimeline/   # Wheel cycle timeline visualization
-│   ├── OptionsCalculator/   # Interactive strategy calculator
-│   ├── PnLChart/           # Portfolio performance charts
-│   ├── PortfolioSummary/   # Portfolio metrics dashboard
-│   ├── PositionTracker/    # Individual position management
-│   ├── RiskDashboard/      # Risk metrics and analysis
-│   └── ThemeToggle/        # Dark/light theme switcher
-├── contexts/               # React context providers
-│   ├── theme.ts           # Theme configuration
-│   └── ThemeContext.tsx   # Theme state management
-├── hooks/                 # Custom React hooks
-│   └── useTheme.ts       # Theme toggle functionality
-├── modules/              # Core business logic
-│   ├── calc/            # Options calculations engine
-│   │   ├── cashSecuredPut.ts    # CSP strategy calculations
-│   │   ├── coveredCall.ts       # CC strategy calculations
-│   │   ├── longCall.ts          # Long call calculations
-│   │   └── common.ts            # Shared calculation utilities
-│   ├── csv/             # CSV import/export functionality
-│   │   ├── parse.ts           # CSV parsing utilities
-│   │   └── brokers/           # Broker-specific parsers
-│   ├── db/              # Database layer
-│   │   ├── sqlite.ts          # SQLite-WASM wrapper
-│   │   ├── migrations.ts      # Database migrations
-│   │   ├── query-helpers.ts   # Database query utilities
-│   │   └── dao/               # Data access objects
-│   ├── import/          # Data import pipeline
-│   │   ├── BatchImportService.ts  # Bulk import processing
-│   │   └── brokers/               # Broker adapters
-│   ├── price/           # Price data management
-│   │   └── adapters/          # Price data sources
-│   ├── tax/             # Tax calculations
-│   │   ├── lots.ts           # Tax lot management
-│   │   ├── washSales.ts      # Wash sale detection
-│   │   └── scheduleD.ts      # Tax reporting
-│   └── wheel/           # Wheel strategy logic
-│       ├── lifecycle.ts      # Cycle detection and linking
-│       └── analytics.ts      # Performance calculations
-├── pages/               # Page components
-│   ├── HomePage.tsx         # Dashboard and overview
-│   ├── ImportPage.tsx       # CSV import interface
-│   ├── VisualizationPage.tsx # Charts and analytics
-│   ├── PortfolioPage.tsx    # Portfolio management
-│   ├── TaxPage.tsx          # Tax reporting
-│   └── Wheel.tsx            # Wheel strategy dashboard
-├── styles/              # Global styles and themes
-│   ├── themes.css          # Theme variables
-│   ├── base.css           # Base styles
-│   ├── utilities.css      # Utility classes
-│   └── accessibility.css # A11y improvements
-├── utils/               # Utility functions
-│   └── env.ts            # Environment configuration
-└── workers/             # Web workers (future use)
+├── App.tsx, main.tsx, index.css
+├── components/
+│   ├── Button/              # CVA-based button
+│   ├── ThemeToggle/
+│   ├── ui/                  # Input, Modal, Select
+│   ├── EditEntryForm.tsx
+│   └── ErrorBoundary.tsx
+├── modules/                 # Business logic (calc, csv, import, tax, wheel)
+├── pages/                   # wheel/, journal/, NotFoundPage.tsx
+├── stores/                  # Zustand stores
+└── styles/wheel-header.css
 ```
 
-│ └── WheelTimelineDemo.tsx # Demo components
-├── pages/ # Route-level page components  
-│ ├── Wheel.tsx # Wheel strategy management
-│ ├── TaxPage.tsx # Tax lot management
-│ ├── AnalysisPage.tsx # Options analysis
-│ └── HomePage.tsx # Portfolio dashboard
-├── modules/ # Business logic modules
-│ ├── calc/ # Options calculations (✅ Complete)
-│ │ ├── common.ts # Shared utilities & Greeks
-│ │ ├── coveredCall.ts # Covered Call calculator
-│ │ ├── cashSecuredPut.ts # Cash-Secured Put calculator
-│ │ ├── longCall.ts # Long Call calculator
-│ │ └── index.ts # Module exports
-│ ├── wheel/ # Wheel strategy system (✅ Complete)
-│ │ ├── lifecycle.ts # State machine and enums
-│ │ ├── engine.ts # Cycle detection logic
-│ │ ├── analytics.ts # Performance calculations
-│ │ └── index.ts # Module exports
-│ ├── tax/ # Tax management (✅ Complete)
-│ │ ├── lot-manager.ts # Tax lot allocation engine
-│ │ ├── wash-sales.ts # Wash sale detection
-│ │ └── index.ts # Module exports
-│ ├── price/ # Price data system (🚧 In Progress)
-│ │ ├── manager.ts # Price data coordination
-│ │ ├── adapters/ # Data source adapters
-│ │ └── storage.ts # Price history storage
-│ ├── db/ # Database operations (✅ Complete)
-│ │ ├── sqlite.ts # SQLite-WASM integration
-│ │ ├── migrations/ # Database migrations
-│ │ └── validation.ts # Schema validation
-│ └── import/ # CSV import system
-│ ├── batch-import.ts # Import orchestration  
-│ ├── broker-adapters/ # Broker-specific parsers
-│ └── csv-parser.ts # Core CSV parsing
+│ ├── Modal.tsx # Modal dialog
+│ └── Select.tsx # Select dropdown
+├── contexts/ # React context providers
+│ ├── theme.ts # Theme configuration
+│ └── ThemeContext.tsx # Theme state management
+├── hooks/ # Custom React hooks
+│ └── useTheme.ts # Theme toggle functionality
+├── modules/ # Core business logic
+│ ├── calc/ # Options calculations engine
+│ │ ├── cashSecuredPut.ts # CSP strategy calculations
+│ │ ├── coveredCall.ts # CC strategy calculations
+│ │ ├── longCall.ts # Long call calculations
+│ │ └── common.ts # Shared calculation utilities
+│ ├── csv/ # CSV import/export functionality
+│ │ ├── parse.ts # CSV parsing utilities
+│ │ └── brokers/ # Broker-specific parsers
+│ ├── db/ # Database layer
+│ │ ├── sqlite.ts # SQLite-WASM wrapper
+│ │ ├── migrations.ts # Database migrations
+│ │ ├── query-helpers.ts # Database query utilities
+│ │ └── dao/ # Data access objects
+│ ├── import/ # Data import pipeline
+│ │ ├── BatchImportService.ts # Bulk import processing
+│ │ └── brokers/ # Broker adapters
+│ ├── price/ # Price data management
+│ │ └── adapters/ # Price data sources
+│ ├── tax/ # Tax calculations
+│ │ ├── lots.ts # Tax lot management
+│ │ ├── washSales.ts # Wash sale detection
+│ │ └── scheduleD.ts # Tax reporting
+│ └── wheel/ # Wheel strategy logic
+│ ├── lifecycle.ts # Cycle detection and linking
+│ └── analytics.ts # Performance calculations
+├── pages/ # Page components
+│ ├── journal/ # JournalPage (trade logging)
+│ ├── wheel/ # WheelPage (strategy management & CSV import)
+│ └── NotFoundPage.tsx # 404 error page
+├── styles/ # Global styles and themes
+│ └── wheel-header.css # Wheel page header animations
+├── index.css # Single source of truth (Tailwind v4 + global patterns)
 ├── utils/ # Utility functions
-└── workers/ # Web Workers for calculations
+│ └── env.ts # Environment configuration
+└── workers/ # Web workers (future use)
+
+````
 
 tests/
-├── unit/ # Unit tests (Vitest) - 240 tests ✅  
+├── unit/ # Unit tests (Vitest) - 240 tests ✅
 │ ├── modules/ # Business logic tests
 │ │ ├── calc/ # Options calculations
 │ │ ├── db/ # Database operations
@@ -219,8 +136,8 @@ tests/
 
 ### 🔄 Getting Started with CSV Import
 
-1. **Navigate to Import Page**: Click "Import Data" from the main navigation
-2. **Upload CSV File**: Drag and drop or click to select your broker's CSV export
+1. **Navigate to Wheel Page**: The default landing page includes CSV import functionality
+2. **Upload CSV File**: Use the import section to drag and drop or select your broker's CSV export
    - **Supported Brokers**: Robinhood, TD Ameritrade, Schwab, E\*TRADE, IBKR
 3. **Review Data**: Preview parsed trades and verify accuracy
 4. **Import**: Click "Import" to process data into your portfolio
@@ -232,17 +149,12 @@ tests/
 2. **Manual Linking**: Use the Wheel page to manually link related trades
 3. **Analytics**: View cycle performance, ROO/ROR, and timeline visualization
 
-### 💰 Tax Lot Management
+### � Journal Page
 
-1. **Configuration**: Choose your preferred lot selection method (FIFO/LIFO/etc.)
-2. **Wash Sale Detection**: Automatically flags potential wash sales
-3. **Tax Reports**: Generate Schedule D compatible reports
-
-### 📊 Analysis and Visualization
-
-1. **Portfolio Dashboard**: Overview of positions, P&L, and risk metrics
-2. **Strategy Calculators**: Interactive tools for covered calls, CSPs, and long calls
-3. **Performance Charts**: Historical P&L, Greeks evolution, and risk analysis
+1. **Trade Logging**: View and edit all imported trades
+2. **Filtering**: Filter by trade type, status, symbol, and date range
+3. **Manual Entry**: Add or edit trades directly in the journal
+4. **Export**: Export journal data for external analysis
 
 ## 🧪 Testing
 
@@ -266,7 +178,7 @@ yarn test:watch
 
 # Coverage report
 yarn test:coverage
-```
+````
 
 ### Test Statistics
 

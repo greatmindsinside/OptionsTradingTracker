@@ -4,6 +4,7 @@
  */
 
 import { forwardRef } from 'react';
+import { clsx } from 'clsx';
 import styles from './InputGroup.module.css';
 
 interface InputGroupProps {
@@ -52,14 +53,14 @@ export const InputGroup = forwardRef<HTMLInputElement, InputGroupProps>(
     const hasError = Boolean(error);
 
     return (
-      <div className={`${styles.inputGroup} ${className}`}>
-        <label htmlFor={inputId} className={styles.label}>
+      <div className={clsx(styles.inputGroup, className)}>
+        <label htmlFor={inputId} className="label">
           {label}
-          {required && <span className={styles.required}>*</span>}
+          {required && <span className="label-required">*</span>}
         </label>
 
-        <div className={`${styles.inputWrapper} ${hasError ? styles.error : ''}`}>
-          {prefix && <span className={styles.prefix}>{prefix}</span>}
+        <div className={clsx('input-wrapper', hasError && 'error')}>
+          {prefix && <span className="input-prefix">{prefix}</span>}
 
           <input
             ref={ref}
@@ -73,14 +74,13 @@ export const InputGroup = forwardRef<HTMLInputElement, InputGroupProps>(
             min={min}
             max={max}
             step={step}
-            className={styles.input}
             data-testid={testId}
             aria-invalid={hasError}
             aria-describedby={hasError ? `${inputId}-error` : undefined}
             {...props}
           />
 
-          {suffix && <span className={styles.suffix}>{suffix}</span>}
+          {suffix && <span className="input-suffix">{suffix}</span>}
         </div>
 
         {error && (

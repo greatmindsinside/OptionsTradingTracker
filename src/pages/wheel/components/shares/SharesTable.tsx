@@ -17,10 +17,10 @@ export const SharesTable: React.FC = () => {
       {rows.map(r => (
         <div
           key={r.t}
-          className="grid grid-cols-[1.2fr_1fr_1fr_1fr_1.2fr] gap-6 px-2 py-1 items-center rounded hover:bg-zinc-950/60 text-zinc-300"
+          className="grid grid-cols-[1.2fr_1fr_1fr_1fr_1.2fr] items-center gap-6 rounded px-2 py-1 text-zinc-300 hover:bg-zinc-950/60"
         >
           <button
-            className="text-left underline text-green-400 hover:text-green-300 transition-colors"
+            className="text-left text-green-400 underline transition-colors hover:text-green-300"
             onClick={() => openContext(r.t)}
           >
             {r.t}
@@ -31,7 +31,7 @@ export const SharesTable: React.FC = () => {
           <div className="text-right tabular-nums">${r.avg.toFixed(2)}</div>
         </div>
       ))}
-      {rows.length === 0 && <div className="text-center text-zinc-600 py-4">No data</div>}
+      {rows.length === 0 && <div className="py-4 text-center text-zinc-600">No data</div>}
     </div>
   );
 };

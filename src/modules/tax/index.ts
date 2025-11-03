@@ -14,4 +14,4 @@ export type {
   TaxOptimization,
 } from './tax-lots';
 
-export { default as TaxLotDashboard } from '../../components/TaxLotDashboard';
+// TaxLotDashboard component removed - was only used in deleted TaxPage

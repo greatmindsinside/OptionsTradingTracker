@@ -25,20 +25,20 @@ export const Select: React.FC<SelectProps> = ({
       {label && (
         <label
           htmlFor={selectId}
-          className="text-[11px] uppercase tracking-wide text-zinc-400/90 mb-1 ml-0.5"
+          className="mb-1 ml-0.5 text-[11px] tracking-wide text-zinc-400/90 uppercase"
         >
           {label}
         </label>
       )}
       <div className="relative">
         {icon && (
-          <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-green-500/60">
+          <div className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-green-500/60">
             {icon}
           </div>
         )}
         <select
           id={selectId}
-          className={`h-9 w-full ${icon ? 'pl-9' : 'pl-3'} pr-10 rounded-lg border border-green-500/20 bg-zinc-950/60 text-green-300 shadow-inner appearance-none focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-400/40 ${align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : 'text-left'} ${error ? 'border-red-500/50' : ''} ${className}`}
+          className={`h-9 w-full ${icon ? 'pl-9' : 'pl-3'} appearance-none rounded-lg border border-green-500/60 bg-zinc-950/60 pr-10 text-green-300 shadow-inner focus:border-green-400/70 focus:ring-2 focus:ring-green-500/30 focus:outline-none ${align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : 'text-left'} ${error ? 'border-red-500/50' : ''} ${className}`}
           {...props}
         >
           {options.map(option => (
@@ -49,7 +49,7 @@ export const Select: React.FC<SelectProps> = ({
         </select>
         {/* Chevron */}
         <svg
-          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500/60"
+          className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-green-500/60"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -61,7 +61,7 @@ export const Select: React.FC<SelectProps> = ({
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </div>
-      {error && <span className="text-xs text-red-400 mt-1 ml-0.5">{error}</span>}
+      {error && <span className="mt-1 ml-0.5 text-xs text-red-400">{error}</span>}
     </div>
   );
 };

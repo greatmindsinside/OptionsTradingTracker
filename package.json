@@ -24,6 +24,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.546.0",
@@ -46,6 +47,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@types/eslint-plugin-tailwindcss": "^3",
     "@types/jsdom": "^27",
     "@types/node": "^24.8.1",
     "@types/papaparse": "^5.3.16",
@@ -61,6 +63,7 @@
     "eslint": "^9.36.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.22",
+    "eslint-plugin-tailwindcss": "^3.18.2",
     "globals": "^16.4.0",
     "husky": "^9.1.7",
     "jsdom": "^27.0.1",
@@ -68,6 +71,7 @@
     "playwright-core": "^1.56.1",
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.7.1",
     "tailwindcss": "^4.1.16",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.45.0",

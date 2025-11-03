@@ -18,7 +18,7 @@ export const DataExplorer: React.FC = () => {
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-3 py-1 rounded border transition-colors ${tab === t ? 'border-green-400 bg-green-500/15 text-green-400 shadow-lg shadow-green-500/20' : 'border-zinc-700 text-zinc-400 hover:border-green-500/30'}`}
+            className={`rounded border px-3 py-1 transition-colors ${tab === t ? 'border-green-400 bg-green-500/15 text-green-400 shadow-lg shadow-green-500/20' : 'border-zinc-700 text-zinc-400 hover:border-green-500/30'}`}
           >
             {t}
           </button>
@@ -64,11 +64,11 @@ export const DataExplorer: React.FC = () => {
         </div>
       )}
       {tab === 'Ledger' && (
-        <div className="text-sm space-y-1 max-h-64 overflow-auto">
+        <div className="max-h-64 space-y-1 overflow-auto text-sm">
           {ledger.map(e => (
             <div
               key={e.id}
-              className="px-2 py-1 rounded border border-green-500/20 bg-zinc-950/40 text-zinc-300"
+              className="rounded border border-green-500/20 bg-zinc-950/40 px-2 py-1 text-zinc-300"
             >
               {e.when} · {e.kind} · {e.symbol || ''}
             </div>

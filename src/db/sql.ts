@@ -95,6 +95,36 @@ function applySchemaIfNeeded() {
       ]
     );
   }
+
+  // Run migrations for existing databases
+  runMigrations();
+}
+
+function runMigrations() {
+  // Check if audit columns exist
+  try {
+    const columns = db.exec('PRAGMA table_info(journal)');
+    if (columns && columns[0]) {
+      const columnNames = columns[0].values.map(col => col[1] as string);
+
+      // Migration 001: Add audit columns if they don't exist
+      if (!columnNames.includes('deleted_at')) {
+        console.log('Running migration: Add audit columns to journal table');
+        db.exec(`
+          ALTER TABLE journal ADD COLUMN deleted_at TEXT DEFAULT NULL;
+          ALTER TABLE journal ADD COLUMN edited_by TEXT DEFAULT NULL;
+          ALTER TABLE journal ADD COLUMN edit_reason TEXT DEFAULT NULL;
+          ALTER TABLE journal ADD COLUMN original_entry_id TEXT DEFAULT NULL;
+          ALTER TABLE journal ADD COLUMN created_at TEXT DEFAULT CURRENT_TIMESTAMP;
+          ALTER TABLE journal ADD COLUMN updated_at TEXT DEFAULT CURRENT_TIMESTAMP;
+        `);
+        db.exec('CREATE INDEX IF NOT EXISTS idx_journal_deleted_at ON journal(deleted_at);');
+        console.log('✅ Migration complete: Audit columns added');
+      }
+    }
+  } catch (e) {
+    console.error('Migration error:', e);
+  }
 }
 
 export async function initDb() {
@@ -149,8 +179,36 @@ export async function initDb() {
   ready = true;
 }
 
-export function all<T = unknown>(sql: string, params: (number | string | null)[] = []): T[] {
-  const stmt = db.prepare(sql);
+export function all<T = unknown>(
+  sql: string,
+  params: (number | string | null)[] = [],
+  includeDeleted = false
+): T[] {
+  let modifiedSql = sql;
+
+  // Automatically filter out deleted entries unless explicitly included
+  if (!includeDeleted && sql.toLowerCase().includes('from journal')) {
+    const sqlLower = sql.toLowerCase();
+
+    // Check if WHERE clause already exists
+    if (sqlLower.includes('where')) {
+      // Don't modify if deleted_at is already in the query
+      if (!sqlLower.includes('deleted_at')) {
+        modifiedSql = sql.replace(/WHERE/i, 'WHERE deleted_at IS NULL AND');
+      }
+    } else {
+      // Add WHERE clause before ORDER BY, GROUP BY, or LIMIT
+      const insertPoint = sql.search(/\b(ORDER\s+BY|GROUP\s+BY|LIMIT)\b/i);
+      if (insertPoint !== -1) {
+        modifiedSql =
+          sql.slice(0, insertPoint) + 'WHERE deleted_at IS NULL ' + sql.slice(insertPoint);
+      } else {
+        modifiedSql = sql + ' WHERE deleted_at IS NULL';
+      }
+    }
+  }
+
+  const stmt = db.prepare(modifiedSql);
   try {
     stmt.bind(params as unknown as import('sql.js').BindParams);
     const rows: T[] = [];
@@ -176,6 +234,41 @@ export async function saveDb() {
   const u8 = new Uint8Array(data);
   if (opfsRoot) await opfsWriteFile(DB_NAME, u8);
   else lsSet(DB_NAME, u8);
+}
+
+// Update all journal rows for a given symbol/strike/expiration to a new expiration date (YYYY-MM-DD)
+// Returns the number of rows affected (best-effort; not used by callers yet)
+export async function updateExpirationForPosition(
+  symbol: string,
+  strike: number,
+  oldExpirationYmd: string,
+  newExpirationYmd: string
+): Promise<number> {
+  // Ensure DB is ready
+  if (!ready) await initDb();
+  const now = new Date().toISOString();
+  // Store ISO timestamp; journal.expiration is full ISO string
+  const newIso = new Date(newExpirationYmd).toISOString();
+
+  // We update all non-deleted rows that share the same option identity
+  // (symbol, strike, expiration by YMD). This covers sell_to_open and option_premium rows.
+  const sql = `UPDATE journal
+               SET expiration = ?, updated_at = ?
+               WHERE symbol = ?
+                 AND strike = ?
+                 AND substr(expiration,1,10) = ?
+                 AND deleted_at IS NULL`;
+
+  // Estimate affected rows (pre-update)
+  const before = all<{ id: string }>(
+    `SELECT id FROM journal WHERE symbol = ? AND strike = ? AND substr(expiration,1,10) = ? AND deleted_at IS NULL`,
+    [symbol, String(strike), oldExpirationYmd]
+  );
+
+  run(sql, [newIso, now, symbol, String(strike), oldExpirationYmd]);
+  await saveDb();
+
+  return before.length;
 }
 
 export async function insertJournalRows(rows: JournalRow[]) {
@@ -207,4 +300,63 @@ export async function insertJournalRows(rows: JournalRow[]) {
   } finally {
     insert.free();
   }
+}
+
+// Soft delete: mark entry as deleted with timestamp
+export function softDelete(entryId: string, reason?: string) {
+  const now = new Date().toISOString();
+
+  // Check if audit columns exist
+  try {
+    const columns = db.exec('PRAGMA table_info(journal)');
+    const hasAuditColumns =
+      columns && columns[0] && columns[0].values.some(col => col[1] === 'deleted_at');
+
+    if (hasAuditColumns) {
+      // Use full update with audit columns
+      run(
+        `UPDATE journal 
+         SET deleted_at = ?, edit_reason = ?, updated_at = ?
+         WHERE id = ?`,
+        [now, reason || 'User deleted', now, entryId]
+      );
+    } else {
+      // Fallback: use hard delete if audit columns don't exist
+      console.warn('Audit columns not found, performing hard delete instead of soft delete');
+      run(`DELETE FROM journal WHERE id = ?`, [entryId]);
+    }
+  } catch (e) {
+    console.error('Error in softDelete:', e);
+    // Last resort: try hard delete
+    run(`DELETE FROM journal WHERE id = ?`, [entryId]);
+  }
+}
+
+// Restore deleted entry
+export function restoreEntry(entryId: string) {
+  try {
+    const columns = db.exec('PRAGMA table_info(journal)');
+    const hasAuditColumns =
+      columns && columns[0] && columns[0].values.some(col => col[1] === 'deleted_at');
+
+    if (hasAuditColumns) {
+      run(
+        `UPDATE journal 
+         SET deleted_at = NULL, edit_reason = NULL, updated_at = ?
+         WHERE id = ?`,
+        [new Date().toISOString(), entryId]
+      );
+    } else {
+      console.warn(
+        'Audit columns not found, restore operation not supported for this database version'
+      );
+    }
+  } catch (e) {
+    console.error('Error in restoreEntry:', e);
+  }
+}
+
+// Hard delete (admin only, for cleanup)
+export function hardDelete(entryId: string) {
+  run('DELETE FROM journal WHERE id = ?', [entryId]);
 }

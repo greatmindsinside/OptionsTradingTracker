@@ -10,7 +10,7 @@ export const InlineDateEdit: React.FC<{ date: string; onSave: (ymd: string) => v
   if (!editing)
     return (
       <button
-        className="text-xs px-2 py-1 rounded border border-green-500/30 hover:border-green-400/50 transition-colors text-green-400"
+        className="rounded border border-green-500/30 px-2 py-1 text-xs text-green-400 transition-colors hover:border-green-400/50"
         onClick={() => setEditing(true)}
       >
         📝 Edit
@@ -20,12 +20,12 @@ export const InlineDateEdit: React.FC<{ date: string; onSave: (ymd: string) => v
     <div className="flex items-center gap-2">
       <input
         type="date"
-        className="text-xs px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
+        className="rounded border border-green-500/30 bg-zinc-950/60 px-2 py-1 text-xs text-green-400"
         value={val}
         onChange={e => setVal(e.target.value)}
       />
       <button
-        className="text-xs px-2 py-1 rounded border border-green-500 bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
+        className="rounded border border-green-500 bg-green-500/15 px-2 py-1 text-xs text-green-400 transition-colors hover:bg-green-500/25"
         onClick={() => {
           onSave(val);
           setEditing(false);
@@ -34,7 +34,7 @@ export const InlineDateEdit: React.FC<{ date: string; onSave: (ymd: string) => v
         Save
       </button>
       <button
-        className="text-xs px-2 py-1 rounded border border-zinc-600 text-zinc-400 hover:border-zinc-500 transition-colors"
+        className="rounded border border-zinc-600 px-2 py-1 text-xs text-zinc-400 transition-colors hover:border-zinc-500"
         onClick={() => setEditing(false)}
       >
         Cancel

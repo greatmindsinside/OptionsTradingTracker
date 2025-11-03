@@ -12,12 +12,12 @@ export function MetricCard({ label, value, subtitle, testId, format = 'number' }
   const displayValue = format === 'currency' ? `$${fmt(value, 2)}` : fmt(value, 0);
 
   return (
-    <div className="rounded-2xl border border-green-500/30 bg-linear-to-br from-black/80 to-green-950/20 backdrop-blur-xl p-4 shadow-lg shadow-green-500/20 hover:shadow-green-400/30 transition-shadow">
-      <div className="text-xs text-green-400/80 font-medium">{label}</div>
-      <div className="text-2xl font-bold mt-1 text-green-400" data-testid={testId}>
+    <div className="rounded-2xl border border-green-500/30 bg-linear-to-br from-black/80 to-green-950/20 p-4 shadow-lg shadow-green-500/20 backdrop-blur-xl transition-shadow hover:shadow-green-400/30">
+      <div className="text-xs font-medium text-green-400/80">{label}</div>
+      <div className="mt-1 text-2xl font-bold text-green-400" data-testid={testId}>
         {displayValue}
       </div>
-      {subtitle && <div className="text-xs text-zinc-500 mt-1">{subtitle}</div>}
+      {subtitle && <div className="mt-1 text-xs text-zinc-500">{subtitle}</div>}
     </div>
   );
 }

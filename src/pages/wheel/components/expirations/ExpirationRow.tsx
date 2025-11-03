@@ -15,20 +15,20 @@ export const ExpirationRow: React.FC<{ row: ExpRow }> = ({ row }) => {
         : 'border-green-500/20 bg-zinc-950/40';
   return (
     <div
-      className={`rounded-lg border ${color} p-3 flex items-center gap-3 hover:border-green-400/40 transition-colors`}
+      className={`rounded-lg border ${color} flex items-center gap-3 p-3 transition-colors hover:border-green-400/40`}
     >
       <div className="font-semibold text-green-400">{row.symbol}</div>
       <div className="text-xs text-zinc-400">
         {row.type} {row.strike}
       </div>
       <div
-        className={`text-xs px-2 py-1 rounded border ${d === 0 ? 'border-red-500/40 bg-red-500/20 badge-urgent' : d <= 7 ? 'border-amber-500/40 bg-amber-500/20 badge-glow' : 'border-green-500/40 bg-green-500/15'}`}
+        className={`rounded border px-2 py-1 text-xs ${d === 0 ? 'badge-urgent border-red-500/40 bg-red-500/20' : d <= 7 ? 'badge-glow border-amber-500/40 bg-amber-500/20' : 'border-green-500/40 bg-green-500/15'}`}
       >
         {row.expiration} · DTE {d}
       </div>
       <div className="ml-auto flex items-center gap-2">
         <InlineDateEdit date={row.expiration} onSave={ymd => updateExpiration(row.id, ymd)} />
-        <button className="text-xs px-2 py-1 rounded border border-green-500/40 bg-green-500/10 hover:bg-green-500/20 hover:border-green-400/60 transition-all text-green-400">
+        <button className="rounded border border-green-500/40 bg-green-500/10 px-2 py-1 text-xs text-green-400 transition-all hover:border-green-400/60 hover:bg-green-500/20">
           Plan Roll
         </button>
       </div>

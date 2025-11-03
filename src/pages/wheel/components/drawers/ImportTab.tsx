@@ -25,13 +25,13 @@ export const ImportTab: React.FC = () => {
           }}
         />
         <button
-          className="px-3 py-2 rounded border border-green-500 bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
+          className="rounded border border-green-500 bg-green-500/15 px-3 py-2 text-green-400 transition-colors hover:bg-green-500/25"
           onClick={() => inputRef.current?.click()}
           disabled={importing}
         >
           {importing ? 'Importing…' : 'Choose CSV'}
         </button>
-        <div className="text-sm text-zinc-500 truncate max-w-60">
+        <div className="max-w-60 truncate text-sm text-zinc-500">
           {fileName || 'No file selected'}
         </div>
       </div>

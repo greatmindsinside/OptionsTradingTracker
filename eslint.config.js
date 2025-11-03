@@ -19,5 +19,7 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    // Note: Tailwind CSS ESLint plugin is temporarily disabled due to Tailwind v4 breaking changes.
+    // We'll re-enable once the plugin updates to support Tailwind v4's exports.
   },
 ]);

@@ -1,47 +1,81 @@
 /**
- * Button Component
- * A reusable button component with consistent styling and variants
+ * Button Component (CVA)
+ * Reusable button with variant and size using global .btn patterns
  */
 
 import React from 'react';
-import styles from './Button.module.css';
+import { cva, type VariantProps } from 'class-variance-authority';
+import clsx from 'clsx';
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
-  size?: 'small' | 'medium' | 'large';
-  loading?: boolean;
+const buttonStyles = cva('btn', {
+  variants: {
+    variant: {
+      primary: 'btn-primary',
+      secondary: 'btn-secondary',
+      ghost: 'btn-ghost',
+      danger: 'btn-danger',
+      // outline maps to secondary style for now
+      outline: 'btn-secondary',
+    },
+    size: {
+      small: 'btn-sm',
+      medium: 'btn-md',
+      large: 'btn-lg',
+      // aliases for convenience
+      sm: 'btn-sm',
+      md: 'btn-md',
+      lg: 'btn-lg',
+    },
+    fullWidth: {
+      true: 'w-full',
+      false: '',
+    },
+    loading: {
+      true: 'opacity-60 pointer-events-none',
+      false: '',
+    },
+  },
+  defaultVariants: {
+    variant: 'primary',
+    size: 'medium',
+    fullWidth: false,
+    loading: false,
+  },
+});
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonStyles> {
   icon?: React.ReactNode;
-  fullWidth?: boolean;
   children: React.ReactNode;
 }
 
 export function Button({
-  variant = 'primary',
-  size = 'medium',
+  variant,
+  size,
   loading = false,
   icon,
-  fullWidth = false,
+  fullWidth,
   children,
   className = '',
   disabled,
   ...props
 }: ButtonProps) {
-  const buttonClasses = [
-    styles.button,
-    styles[variant],
-    styles[size],
-    loading && styles.loading,
-    fullWidth && styles.fullWidth,
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ');
-
+  const isDisabled: boolean = !!disabled || !!loading;
   return (
-    <button className={buttonClasses} disabled={disabled || loading} {...props}>
-      {loading && <span className={styles.spinner} />}
-      {icon && !loading && <span className={styles.icon}>{icon}</span>}
-      <span className={styles.text}>{children}</span>
+    <button
+      className={clsx(buttonStyles({ variant, size, fullWidth, loading }), className)}
+      disabled={isDisabled}
+      {...props}
+    >
+      {loading && (
+        <span
+          aria-hidden
+          className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+        />
+      )}
+      {icon && !loading && <span className="mr-2 inline-flex items-center">{icon}</span>}
+      <span>{children}</span>
     </button>
   );
 }

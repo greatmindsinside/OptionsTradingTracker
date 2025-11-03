@@ -21,22 +21,19 @@
   }
 }
 
+/* Component-specific styles (uses global .card pattern) */
+
 .option {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-4);
-  background: var(--color-surface);
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: var(--transition-fast);
   text-align: left;
+  transition: var(--transition-fast);
 }
 
 .option:hover {
-  border-color: var(--color-primary-300);
-  background: var(--color-surface);
+  border-color: rgb(var(--color-primary-300));
   box-shadow: var(--shadow-sm);
 }
 
@@ -46,9 +43,9 @@
 }
 
 .selected {
-  border-color: var(--color-primary-500);
-  background: var(--color-primary-50);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: rgb(var(--color-primary-500)) !important;
+  background: rgb(var(--color-primary-50));
+  box-shadow: 0 0 0 3px rgb(var(--color-primary-500) / 0.1);
 }
 
 .icon {
@@ -57,14 +54,14 @@
   justify-content: center;
   width: 48px;
   height: 48px;
-  background: var(--color-surface);
+  background: rgb(var(--color-surface));
   border-radius: var(--radius-xl);
   font-size: var(--font-size-2xl);
   flex-shrink: 0;
 }
 
 .selected .icon {
-  background: var(--color-primary-100);
+  background: rgb(var(--color-primary-100));
 }
 
 .content {

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
+import clsx from 'clsx';
 
 interface ModalProps {
   isOpen: boolean;
@@ -36,39 +37,31 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="modal-overlay">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-        onClick={onClose}
-        aria-hidden="true"
-      />
+      <div className="absolute inset-0" onClick={onClose} aria-hidden="true" />
 
       {/* Modal */}
       <div
-        className={`relative ${sizeClasses[size]} w-full mx-4 bg-zinc-900 border border-green-500/20 rounded-2xl shadow-2xl shadow-green-500/20`}
+        className={clsx('modal', sizeClasses[size])}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? 'modal-title' : undefined}
       >
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-green-500/20">
-            <h2 id="modal-title" className="text-lg font-semibold text-green-400">
+          <div className="modal-header">
+            <h2 id="modal-title" className="modal-title">
               {title}
             </h2>
-            <button
-              onClick={onClose}
-              className="text-zinc-400 hover:text-zinc-200 transition-colors"
-              aria-label="Close modal"
-            >
+            <button onClick={onClose} className="modal-close" aria-label="Close modal">
               <X className="h-5 w-5" />
             </button>
           </div>
         )}
 
         {/* Content */}
-        <div className="px-6 py-4 max-h-[calc(100vh-200px)] overflow-y-auto">{children}</div>
+        <div className="modal-content">{children}</div>
       </div>
     </div>
   );

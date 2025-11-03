@@ -25,12 +25,20 @@ CREATE TABLE IF NOT EXISTS journal (
   underlying_price REAL, -- Stock price at entry (for wheel analysis)
   notes TEXT, -- Trade notes, tags, or commentary
   meta TEXT,
+  -- Audit fields for edit/delete tracking
+  deleted_at TEXT DEFAULT NULL,
+  edited_by TEXT DEFAULT NULL,
+  edit_reason TEXT DEFAULT NULL,
+  original_entry_id TEXT DEFAULT NULL,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY(account_id) REFERENCES accounts(id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_journal_ts ON journal(ts);
 CREATE INDEX IF NOT EXISTS idx_journal_symbol ON journal(symbol);
 CREATE INDEX IF NOT EXISTS idx_journal_type ON journal(type);
+CREATE INDEX IF NOT EXISTS idx_journal_deleted_at ON journal(deleted_at);
 
 -- Weekly premium view: sum of option cashflows by ISO week
 CREATE VIEW IF NOT EXISTS v_weekly_premium AS

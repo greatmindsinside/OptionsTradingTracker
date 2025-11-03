@@ -6,6 +6,8 @@ import { useEntriesStore } from '@/stores/useEntriesStore';
 import { useWheelUIStore } from '@/stores/useWheelUIStore';
 import { useWheelStore } from '@/stores/useWheelStore';
 import { fmt } from '@/utils/wheel-calculations';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 
 export const TradeTab: React.FC = () => {
   const { form, submitTrade, resetForm } = useTradeComposer();
@@ -36,27 +38,34 @@ export const TradeTab: React.FC = () => {
     try {
       // Update in-memory journal (for WheelModern compatibility)
       if (form.tradeSide === 'S') {
-        addJournal({
-          kind: form.tradeType === 'P' ? 'sell_put' : 'sell_call',
+        const journalEntry = {
+          kind: (form.tradeType === 'P'
+            ? 'sell_put'
+            : 'sell_call') as import('@/store/journal').JournalKind,
           symbol: S,
           contracts: form.tradeQty,
           strike: form.tradeStrike,
           premium: form.tradeEntry,
           dte: form.tradeDTE,
           fees: form.tradeFees || undefined,
-          when: whenIso,
-        });
-      } else {
-        addJournal({
-          kind: 'buy_close',
-          symbol: S,
           type: form.tradeType,
+          side: form.tradeSide,
+          when: whenIso,
+        };
+        addJournal(journalEntry);
+      } else {
+        const journalEntry = {
+          kind: 'buy_close' as import('@/store/journal').JournalKind,
+          symbol: S,
           contracts: form.tradeQty,
           strike: form.tradeStrike,
           premium: form.tradeEntry,
           fees: form.tradeFees || undefined,
+          type: form.tradeType,
+          side: form.tradeSide,
           when: whenIso,
-        });
+        };
+        addJournal(journalEntry);
       }
 
       // Persist to database (updates both Journal and Wheel pages)
@@ -122,92 +131,95 @@ export const TradeTab: React.FC = () => {
       <div className="text-sm text-zinc-400">Compose a single option trade.</div>
       <div className="grid grid-cols-1 gap-3">
         <div className="flex flex-col gap-2">
-          <label className="text-xs text-zinc-500">Symbol</label>
-          <input
+          <Input
+            label="Symbol"
             value={form.tradeSym}
             onChange={e => form.setTradeSym(e.target.value.toUpperCase())}
             placeholder="e.g. AAPL"
-            className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 w-full text-green-400"
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-2">
-            <label className="text-xs text-zinc-500">Type</label>
-            <select
+            <Select
+              label="Type"
               value={form.tradeType}
               onChange={e => form.setTradeType(e.target.value as OptType)}
-              className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
-            >
-              <option value="P">Put</option>
-              <option value="C">Call</option>
-            </select>
+              options={[
+                { value: 'P', label: 'Put' },
+                { value: 'C', label: 'Call' },
+              ]}
+            />
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-xs text-zinc-500">Side</label>
-            <select
+            <Select
+              label="Side"
               value={form.tradeSide}
               onChange={e => form.setTradeSide(e.target.value as 'S' | 'B')}
-              className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
-            >
-              <option value="S">Sell</option>
-              <option value="B">Buy</option>
-            </select>
+              options={[
+                { value: 'S', label: 'Sell' },
+                { value: 'B', label: 'Buy' },
+              ]}
+            />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-2">
-            <label className="text-xs text-zinc-500">Qty</label>
-            <input
+            <Input
+              label="Qty"
               type="number"
               value={form.tradeQty || ''}
               onChange={e => form.setTradeQty(e.target.value === '' ? 0 : parseInt(e.target.value))}
-              className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
             />
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-xs text-zinc-500">DTE</label>
-            <input
+            <Input
+              label="DTE"
               type="number"
               value={form.tradeDTE || ''}
               onChange={e => form.setTradeDTE(e.target.value === '' ? 0 : parseInt(e.target.value))}
-              className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
             />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-2">
-            <label className="text-xs text-zinc-500">Strike</label>
-            <input
+            <Input
+              label="Strike"
               type="number"
               step="any"
               value={form.tradeStrike || ''}
               onChange={e =>
                 form.setTradeStrike(e.target.value === '' ? 0 : parseFloat(e.target.value))
               }
-              className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
             />
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-xs text-zinc-500">Premium</label>
-            <input
+            <label className="text-xs text-zinc-500">
+              Premium <span className="text-zinc-400">(per share)</span>
+              <span
+                className="ml-2 text-zinc-600"
+                title="Enter the premium received per share (not per contract or total amount)"
+              >
+                ⓘ
+              </span>
+            </label>
+            <Input
               type="number"
               step=".01"
               value={form.tradeEntry || ''}
               onChange={e =>
                 form.setTradeEntry(e.target.value === '' ? 0 : parseFloat(e.target.value))
               }
-              className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
             />
           </div>
         </div>
         <div className="flex flex-col gap-2">
           <label className="text-xs text-zinc-500">
             Fees (optional)
-            <span className="ml-2 text-zinc-600 font-normal">
+            <span className="ml-2 font-normal text-zinc-600">
               ≈ ${(form.tradeQty * 0.7).toFixed(2)} typical
             </span>
           </label>
-          <input
+          <Input
             type="number"
             step="0.01"
             value={form.tradeFees || ''}
@@ -215,9 +227,8 @@ export const TradeTab: React.FC = () => {
               form.setTradeFees(e.target.value === '' ? 0 : parseFloat(e.target.value))
             }
             placeholder={`≈ ${(form.tradeQty * 0.7).toFixed(2)} (${form.tradeQty} contracts × $0.70)`}
-            className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 text-green-400 w-full"
           />
-          <div className="text-xs text-zinc-600 space-y-1">
+          <div className="space-y-1 text-xs text-zinc-600">
             <div>• Most brokers: $0.65/contract + $0.05 regulatory</div>
             <div>
               • Quick fill: ${(form.tradeQty * 0.65).toFixed(2)} (commission only) or $
@@ -233,7 +244,7 @@ export const TradeTab: React.FC = () => {
           ${fmt(Math.max(0, form.tradeFees || 0), 2)}
         </div>
         <button
-          className="w-full px-3 py-2 rounded border border-green-500 bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors font-semibold"
+          className="w-full rounded border border-green-500 bg-green-500/15 px-3 py-2 font-semibold text-green-400 transition-colors hover:bg-green-500/25"
           onClick={handleAddTrade}
         >
           + Add Trade

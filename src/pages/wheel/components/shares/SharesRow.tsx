@@ -8,9 +8,9 @@ export const SharesRow: React.FC<{
   avg: number;
   onOpen: () => void;
 }> = ({ t, shares, covered, uncovered, avg, onOpen }) => (
-  <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr_1.2fr] gap-6 px-2 py-1 items-center rounded hover:bg-zinc-950/60 text-zinc-300">
+  <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr_1.2fr] items-center gap-6 rounded px-2 py-1 text-zinc-300 hover:bg-zinc-950/60">
     <button
-      className="text-left underline text-green-400 hover:text-green-300 transition-colors"
+      className="text-left text-green-400 underline transition-colors hover:text-green-300"
       onClick={onOpen}
     >
       {t}

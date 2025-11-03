@@ -16,19 +16,19 @@ interface SummaryStatsProps {
  */
 export const SummaryStats: React.FC<SummaryStatsProps> = ({ totals }) => {
   return (
-    <div className="grid grid-cols-3 gap-3 shrink-0 ml-auto">
-      <div className="min-w-28 px-4 py-2 rounded-xl border border-emerald-500/20 bg-zinc-950/60 shadow-inner flex flex-col justify-center">
-        <div className="text-[11px] uppercase tracking-wide text-zinc-400/90">In</div>
-        <div className="text-emerald-400 font-semibold">{fmtMoney(totals.inc)}</div>
+    <div className="ml-auto grid shrink-0 grid-cols-3 gap-3">
+      <div className="flex min-w-28 flex-col justify-center rounded-xl border border-emerald-500/20 bg-zinc-950/60 px-4 py-2 shadow-inner">
+        <div className="text-[11px] tracking-wide text-zinc-400/90 uppercase">In</div>
+        <div className="font-semibold text-emerald-400">{fmtMoney(totals.inc)}</div>
       </div>
-      <div className="min-w-28 px-4 py-2 rounded-xl border border-red-500/20 bg-zinc-950/60 shadow-inner flex flex-col justify-center">
-        <div className="text-[11px] uppercase tracking-wide text-zinc-400/90">Out</div>
-        <div className="text-red-400 font-semibold">{fmtMoney(totals.out)}</div>
+      <div className="flex min-w-28 flex-col justify-center rounded-xl border border-red-500/20 bg-zinc-950/60 px-4 py-2 shadow-inner">
+        <div className="text-[11px] tracking-wide text-zinc-400/90 uppercase">Out</div>
+        <div className="font-semibold text-red-400">{fmtMoney(totals.out)}</div>
       </div>
       <div
-        className={`min-w-28 px-4 py-2 rounded-xl border bg-zinc-950/60 shadow-inner flex flex-col justify-center ${totals.net >= 0 ? 'border-emerald-500/20' : 'border-red-500/20'}`}
+        className={`flex min-w-28 flex-col justify-center rounded-xl border bg-zinc-950/60 px-4 py-2 shadow-inner ${totals.net >= 0 ? 'border-emerald-500/20' : 'border-red-500/20'}`}
       >
-        <div className="text-[11px] uppercase tracking-wide text-zinc-400/90">Net</div>
+        <div className="text-[11px] tracking-wide text-zinc-400/90 uppercase">Net</div>
         <div className={`${totals.net >= 0 ? 'text-emerald-400' : 'text-red-400'} font-semibold`}>
           {fmtMoney(totals.net)}
         </div>

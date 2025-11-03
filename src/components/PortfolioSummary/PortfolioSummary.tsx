@@ -3,6 +3,7 @@
  * Displays key portfolio metrics and performance indicators
  */
 
+import clsx from 'clsx';
 import styles from './PortfolioSummary.module.css';
 
 interface PortfolioMetrics {
@@ -111,34 +112,34 @@ export function PortfolioSummary({
 
       <div className={styles.metricsGrid}>
         {/* Total Portfolio Value */}
-        <div className={`${styles.metricCard} ${styles.primary}`}>
+        <div className={clsx('card', styles.metricCard, styles.primary)}>
           <div className={styles.metricLabel}>Total Portfolio Value</div>
           <div className={styles.metricValue}>{formatCurrency(metrics.totalValue)}</div>
-          <div className={`${styles.metricChange} ${getChangeClass(metrics.dayChange)}`}>
+          <div className={clsx(styles.metricChange, getChangeClass(metrics.dayChange))}>
             {formatCurrency(metrics.dayChange)} ({formatPercent(metrics.dayChangePercent)}) today
           </div>
         </div>
 
         {/* Total P&L */}
-        <div className={styles.metricCard}>
+        <div className={clsx('card', styles.metricCard)}>
           <div className={styles.metricLabel}>Total P&L</div>
-          <div className={`${styles.metricValue} ${getChangeClass(metrics.totalPnL)}`}>
+          <div className={clsx(styles.metricValue, getChangeClass(metrics.totalPnL))}>
             {formatCurrency(metrics.totalPnL)}
           </div>
-          <div className={`${styles.metricSubtext} ${getChangeClass(metrics.totalPnL)}`}>
+          <div className={clsx(styles.metricSubtext, getChangeClass(metrics.totalPnL))}>
             {formatPercent(metrics.totalPnLPercent)} return
           </div>
         </div>
 
         {/* Active Positions */}
-        <div className={styles.metricCard}>
+        <div className={clsx('card', styles.metricCard)}>
           <div className={styles.metricLabel}>Active Positions</div>
           <div className={styles.metricValue}>{metrics.activePositions}</div>
           <div className={styles.metricSubtext}>positions open</div>
         </div>
 
         {/* Cash Available */}
-        <div className={styles.metricCard}>
+        <div className={clsx('card', styles.metricCard)}>
           <div className={styles.metricLabel}>Cash Available</div>
           <div className={styles.metricValue}>{formatCurrency(metrics.cashAvailable)}</div>
           <div className={styles.metricSubtext}>buying power</div>
@@ -146,13 +147,22 @@ export function PortfolioSummary({
       </div>
 
       <div className={styles.quickActions}>
-        <button className={styles.actionButton} onClick={handleViewDetails}>
+        <button
+          className={clsx('btn btn-primary', styles.actionButton)}
+          onClick={handleViewDetails}
+        >
           📊 View Details
         </button>
-        <button className={styles.actionButton} onClick={handleAddPosition}>
+        <button
+          className={clsx('btn btn-primary', styles.actionButton)}
+          onClick={handleAddPosition}
+        >
           📈 Add Position
         </button>
-        <button className={styles.actionButton} onClick={handleExportReport}>
+        <button
+          className={clsx('btn btn-secondary', styles.actionButton)}
+          onClick={handleExportReport}
+        >
           📋 Export Report
         </button>
       </div>

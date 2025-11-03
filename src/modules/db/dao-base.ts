@@ -273,10 +273,10 @@ export abstract class BaseDAO<T> {
   /**
    * Called before entity update - override for business rules
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected async beforeUpdate(
     _id: number,
     data: Partial<Omit<T, 'id' | 'created_at'>>,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _existing: T
   ): Promise<Partial<Omit<T, 'id' | 'created_at'>>> {
     return data;

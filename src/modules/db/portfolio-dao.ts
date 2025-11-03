@@ -49,6 +49,14 @@ export class PortfolioDAO extends BaseDAO<Portfolio> {
       const transformedResults = rawResults.map((row: Record<string, unknown>) => {
         const transformed = { ...row };
 
+        // Convert null to undefined for optional fields
+        if (transformed.account_number === null) {
+          transformed.account_number = undefined;
+        }
+        if (transformed.description === null) {
+          transformed.description = undefined;
+        }
+
         // Convert INTEGER (0/1) to boolean for is_active
         if (typeof transformed.is_active === 'number') {
           transformed.is_active = transformed.is_active === 1;

@@ -6,9 +6,9 @@ export const AlertsCard: React.FC = () => {
   const alerts = useAlertGeneration();
   const openContext = useWheelUIStore(s => s.openContext);
   return (
-    <div className="rounded-2xl border border-green-500/20 bg-linear-to-br from-black/80 to-zinc-950/90 backdrop-blur-xl p-4 shadow-lg shadow-green-500/10">
-      <div className="flex items-center justify-between mb-2">
-        <div className="text-green-400 font-semibold">📣 Alerts</div>
+    <div className="rounded-2xl border border-green-500/20 bg-linear-to-br from-black/80 to-zinc-950/90 p-4 shadow-lg shadow-green-500/10 backdrop-blur-xl">
+      <div className="mb-2 flex items-center justify-between">
+        <div className="font-semibold text-green-400">📣 Alerts</div>
         <span className="text-xs text-slate-500">auto from data</span>
       </div>
       <div className="space-y-2">
@@ -16,7 +16,7 @@ export const AlertsCard: React.FC = () => {
         {alerts.map(a => (
           <div
             key={a.id}
-            className="text-sm p-2 rounded border border-slate-700 bg-slate-900/40 flex items-center justify-between"
+            className="flex items-center justify-between rounded border border-slate-700 bg-slate-900/40 p-2 text-sm"
           >
             <span>{a.text}</span>
             <button className="text-xs underline" onClick={() => openContext(a.sym)}>

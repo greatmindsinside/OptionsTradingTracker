@@ -3,6 +3,7 @@
  * A segmented control for selecting options trading strategies
  */
 
+import clsx from 'clsx';
 import styles from './StrategySelector.module.css';
 
 export type StrategyType = 'covered-call' | 'cash-secured-put' | 'long-call';
@@ -54,9 +55,11 @@ export function StrategySelector({
         {strategies.map(strategy => (
           <button
             key={strategy.id}
-            className={`${styles.option} ${
-              selectedStrategy === strategy.id ? styles.selected : ''
-            }`}
+            className={clsx(
+              'card',
+              styles.option,
+              selectedStrategy === strategy.id && styles.selected
+            )}
             onClick={() => onStrategyChange(strategy.id)}
             role="radio"
             aria-checked={selectedStrategy === strategy.id}

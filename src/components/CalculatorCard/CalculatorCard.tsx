@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { clsx } from 'clsx';
 import styles from './CalculatorCard.module.css';
 
 interface CalculatorCardProps {
@@ -27,7 +28,7 @@ export function CalculatorCard({
 }: CalculatorCardProps) {
   return (
     <div
-      className={`${styles.card} ${isActive ? styles.active : ''} ${className}`}
+      className={clsx('card', isActive && styles.active, onActivate && styles.clickable, className)}
       onClick={onActivate}
       role={onActivate ? 'button' : undefined}
       tabIndex={onActivate ? 0 : undefined}
@@ -42,7 +43,7 @@ export function CalculatorCard({
           : undefined
       }
     >
-      <div className={styles.header}>
+      <div className="card-header">
         {icon && <div className={styles.icon}>{icon}</div>}
         <div className={styles.titleSection}>
           <h3 className={styles.title}>{title}</h3>
@@ -50,7 +51,7 @@ export function CalculatorCard({
         </div>
       </div>
 
-      <div className={styles.content}>{children}</div>
+      <div className="card-body">{children}</div>
     </div>
   );
 }

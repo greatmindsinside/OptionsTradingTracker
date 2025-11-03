@@ -9,7 +9,7 @@ export const DataTab: React.FC = () => {
         Open the full-screen Data Explorer to inspect stores.
       </div>
       <button
-        className="px-3 py-2 rounded border border-green-500 bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
+        className="rounded border border-green-500 bg-green-500/15 px-3 py-2 text-green-400 transition-colors hover:bg-green-500/25"
         onClick={toggleData}
       >
         Open Data Explorer

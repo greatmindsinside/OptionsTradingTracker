@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Lot, Position, LedgerEvent } from '@/types/wheel';
-import { daysBetween } from '@/utils/wheel-calculations';
+import { daysBetween, ymd } from '@/utils/wheel-calculations';
+import { updateExpirationForPosition } from '@/db/sql';
 
 interface WheelState {
   lots: Lot[];
@@ -31,7 +32,7 @@ interface WheelState {
   updateExpiration: (rowId: string, newDate: string) => void;
 }
 
-export const useWheelStore = create<WheelState>(set => ({
+export const useWheelStore = create<WheelState>((set, get) => ({
   lots: [],
   positions: [],
   earnings: {},
@@ -53,6 +54,13 @@ export const useWheelStore = create<WheelState>(set => ({
   },
 
   updateExpiration: (rowId, newDate) => {
+    // Compute the old expiration BEFORE mutating state
+    const current = get().positions.find(p => p.id === rowId);
+    const oldExpiration = current
+      ? ymd(new Date(new Date(current.opened).getTime() + current.dte * 864e5))
+      : undefined;
+
+    // Optimistic UI update (adjust DTE in store)
     set(s => ({
       positions: s.positions.map(p =>
         p.id === rowId ? { ...p, dte: Math.max(0, daysBetween(p.opened, newDate)) } : p
@@ -67,5 +75,18 @@ export const useWheelStore = create<WheelState>(set => ({
         },
       ],
     }));
+
+    // Persist to DB in the background
+    (async () => {
+      try {
+        const pos = current || get().positions.find(p => p.id === rowId);
+        if (!pos || !oldExpiration) return;
+        await updateExpirationForPosition(pos.ticker, pos.strike, oldExpiration, newDate);
+        const reload = get().reloadFn;
+        if (reload) await reload();
+      } catch (e) {
+        console.error('Failed to persist expiration update:', e);
+      }
+    })();
   },
 }));

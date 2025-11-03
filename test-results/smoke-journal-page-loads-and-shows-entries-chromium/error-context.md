@@ -1,0 +1,116 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+    - banner [ref=e4]:
+        - generic [ref=e5]:
+            - heading "💰 Wheel To Tendies Pipeline 💼 Wheel Strategy Journal" [level=1] [ref=e6]
+            - generic [ref=e8]:
+                - img
+                - searchbox "Search symbol..." [ref=e9]
+            - button "✨ New Entry" [ref=e10] [cursor=pointer]
+    - main [ref=e12]:
+        - generic [ref=e14]:
+            - generic [ref=e15]:
+                - generic [ref=e16]: Filters
+                - generic [ref=e17]: Totals
+            - generic [ref=e18]:
+                - generic [ref=e19]:
+                    - generic [ref=e20]:
+                        - generic [ref=e21]: Trade Type
+                        - generic [ref=e22]:
+                            - generic:
+                                - img
+                            - combobox "Trade Type" [ref=e23]:
+                                - option "All types" [selected]
+                                - option "Sell to Open"
+                                - option "Buy to Close"
+                                - option "Expiration"
+                                - option "Assignment (Shares)"
+                                - option "Share Sale"
+                                - option "Dividend"
+                                - option "Fee"
+                                - option "Transfer"
+                                - option "Correction"
+                            - img
+                    - generic [ref=e24]:
+                        - generic [ref=e25]: From Date
+                        - textbox "From Date" [ref=e27]
+                    - generic [ref=e28]:
+                        - generic [ref=e29]: To Date
+                        - textbox "To Date" [ref=e31]
+                    - generic [ref=e32]:
+                        - generic [ref=e33]: Status
+                        - generic [ref=e34]:
+                            - generic:
+                                - img
+                            - combobox "Status" [ref=e35]:
+                                - option "All Status" [selected]
+                                - option "Open"
+                                - option "Closed"
+                            - img
+                    - generic [ref=e36]:
+                        - generic: Actions
+                        - button "Clear All" [ref=e37] [cursor=pointer]
+                - generic [ref=e38]:
+                    - generic: Summary
+                    - generic [ref=e39]:
+                        - generic [ref=e40]:
+                            - generic [ref=e41]: In
+                            - generic [ref=e42]: $5.00
+                        - generic [ref=e43]:
+                            - generic [ref=e44]: Out
+                            - generic [ref=e45]: $0.00
+                        - generic [ref=e46]:
+                            - generic [ref=e47]: Net
+                            - generic [ref=e48]: $5.00
+        - generic [ref=e49]:
+            - heading "📊 Wheel Strategy Summary by Ticker" [level=2] [ref=e50]:
+                - generic [ref=e51]: 📊
+                - text: Wheel Strategy Summary by Ticker
+            - generic [ref=e53]:
+                - generic [ref=e54]: AAPL
+                - generic [ref=e55]: 1 days
+                - generic [ref=e56]:
+                    - generic [ref=e57]: 'Premium: $0.00'
+                    - generic [ref=e58]: 'Net P/L: $5.00'
+                    - generic [ref=e59]:
+                        - text: 'Shares:'
+                        - generic [ref=e60]: 0 @ $0.00
+                    - generic [ref=e61]:
+                        - text: 'Open Pos:'
+                        - generic [ref=e62]: 0P / 0C
+        - generic [ref=e63]:
+            - button "📊 Active Entries (1)" [ref=e64] [cursor=pointer]
+            - button "🗑️ Deleted Entries (0)" [ref=e65] [cursor=pointer]
+        - table [ref=e68]:
+            - rowgroup [ref=e69]:
+                - row "Date Symbol Type Qty Strike Exp DTE Stock Amount Notes Actions" [ref=e70]:
+                    - cell "Date" [ref=e71]
+                    - cell "Symbol" [ref=e72]
+                    - cell "Type" [ref=e73]
+                    - cell "Qty" [ref=e74]
+                    - cell "Strike" [ref=e75]
+                    - cell "Exp" [ref=e76]
+                    - cell "DTE" [ref=e77]
+                    - cell "Stock" [ref=e78]
+                    - cell "Amount" [ref=e79]
+                    - cell "Notes" [ref=e80]
+                    - cell "Actions" [ref=e81]
+            - rowgroup [ref=e82]:
+                - row "2025-11-03 AAPL dividend 0 — — — — $5.00 — ✏️ 🗑️" [ref=e83]:
+                    - cell "2025-11-03" [ref=e84]
+                    - cell "AAPL" [ref=e85]
+                    - cell "dividend" [ref=e86]:
+                        - generic [ref=e87]: dividend
+                    - cell "0" [ref=e88]
+                    - cell "—" [ref=e89]
+                    - cell "—" [ref=e90]
+                    - cell "—" [ref=e91]
+                    - cell "—" [ref=e92]
+                    - cell "$5.00" [ref=e93]
+                    - cell "—" [ref=e94]
+                    - cell "✏️ 🗑️" [ref=e95]:
+                        - button "✏️" [ref=e96] [cursor=pointer]
+                        - button "🗑️" [ref=e97] [cursor=pointer]
+```

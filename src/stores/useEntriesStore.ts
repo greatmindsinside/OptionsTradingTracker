@@ -1,5 +1,12 @@
 import { create } from 'zustand';
-import { initDb, all, insertJournalRows, saveDb } from '@/db/sql';
+import {
+  initDb,
+  all,
+  insertJournalRows,
+  saveDb,
+  softDelete,
+  restoreEntry as restoreEntryDb,
+} from '@/db/sql';
 import { buildWhere } from '@/db/queryBuilder';
 import type { Entry, Totals } from '@/types/entry';
 import type { FilterState } from '@/types/entry';
@@ -25,6 +32,10 @@ interface EntriesStore {
   loadEntries: (filters?: FilterState) => Promise<void>;
   addEntry: <K extends TemplateKind>(kind: K, payload: TemplatePayloads[K]) => Promise<void>;
   refreshTotals: (filters?: FilterState) => Promise<void>;
+  deleteEntry: (entryId: string, reason?: string) => Promise<void>;
+  restoreEntry: (entryId: string) => Promise<void>;
+  editEntry: (entryId: string, updates: Partial<Entry>, reason?: string) => Promise<void>;
+  getDeletedEntries: () => Promise<Entry[]>;
 }
 
 const defaultTotals: Totals = { inc: 0, out: 0, net: 0 };
@@ -178,6 +189,118 @@ export const useEntriesStore = create<EntriesStore>((set, get) => ({
     } catch (error) {
       set({ error: (error as Error).message, loading: false });
       throw error;
+    }
+  },
+
+  deleteEntry: async (entryId: string, reason?: string) => {
+    set({ loading: true, error: null });
+
+    try {
+      if (!get().ready) {
+        await initDb();
+        set({ ready: true });
+      }
+
+      // Soft delete the entry
+      softDelete(entryId, reason);
+      await saveDb();
+
+      // Reload entries to reflect changes
+      await get().loadEntries();
+
+      console.log(`✅ Entry ${entryId} soft deleted`);
+      set({ loading: false });
+    } catch (error) {
+      set({ error: (error as Error).message, loading: false });
+      throw error;
+    }
+  },
+
+  restoreEntry: async (entryId: string) => {
+    set({ loading: true, error: null });
+
+    try {
+      if (!get().ready) {
+        await initDb();
+        set({ ready: true });
+      }
+
+      restoreEntryDb(entryId);
+      await saveDb();
+      await get().loadEntries();
+
+      console.log(`✅ Entry ${entryId} restored`);
+      set({ loading: false });
+    } catch (error) {
+      set({ error: (error as Error).message, loading: false });
+      throw error;
+    }
+  },
+
+  editEntry: async (entryId: string, updates: Partial<Entry>, reason?: string) => {
+    set({ loading: true, error: null });
+
+    try {
+      if (!get().ready) {
+        await initDb();
+        set({ ready: true });
+      }
+
+      // Get original entry
+      const original = all<Entry>(
+        'SELECT id, ts, account_id, symbol, type, qty, amount, strike, expiration, underlying_price, notes, meta FROM journal WHERE id = ? AND deleted_at IS NULL',
+        [entryId]
+      )[0];
+
+      if (!original) {
+        throw new Error('Entry not found or already deleted');
+      }
+
+      // Soft delete the original
+      softDelete(entryId, reason || 'Edited by user');
+
+      // Create new entry with updates
+      const corrected: Entry = {
+        ...original,
+        ...updates,
+        id: crypto.randomUUID(),
+      };
+
+      // Insert corrected entry
+      await insertJournalRows([corrected]);
+      await saveDb();
+
+      // Reload
+      await get().loadEntries();
+
+      console.log(
+        `✅ Entry ${entryId} edited (original soft-deleted, new entry ${corrected.id} created)`
+      );
+      set({ loading: false });
+    } catch (error) {
+      set({ error: (error as Error).message, loading: false });
+      throw error;
+    }
+  },
+
+  getDeletedEntries: async () => {
+    try {
+      if (!get().ready) {
+        await initDb();
+        set({ ready: true });
+      }
+
+      // Query deleted entries (pass true to include deleted)
+      const deleted = all<Entry>(
+        'SELECT id, ts, account_id, symbol, type, qty, amount, strike, expiration, underlying_price, notes, meta, deleted_at, edit_reason FROM journal WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC',
+        [],
+        true
+      );
+
+      return deleted;
+    } catch (error) {
+      console.error('Failed to fetch deleted entries:', error);
+      return [];
     }
   },
 }));

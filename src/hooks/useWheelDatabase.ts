@@ -181,6 +181,37 @@ function transformJournalToPositions(entries: Entry[]): Position[] {
     const key = `${entry.symbol}_${entry.strike}_${entry.expiration}`;
 
     if (!positionMap.has(key)) {
+      // Determine option type from journal entry
+      let optionType: 'P' | 'C' = 'P';
+
+      if (
+        entry.type === 'sell_to_open' ||
+        entry.type === 'option_premium' ||
+        entry.type === 'buy_to_close'
+      ) {
+        // Parse meta if it's a JSON string
+        let metaObj: Record<string, unknown> | null | undefined = entry.meta;
+        if (typeof entry.meta === 'string') {
+          try {
+            metaObj = JSON.parse(entry.meta) as Record<string, unknown>;
+          } catch {
+            // If parsing fails, keep as null
+            metaObj = null;
+          }
+        }
+
+        // Check meta.leg
+        if (metaObj && typeof metaObj === 'object' && 'leg' in metaObj) {
+          optionType = metaObj.leg === 'call' ? 'C' : 'P';
+        }
+        // Check kind (for journal entries that use kind)
+        else if ('kind' in entry && (entry.kind === 'sell_call' || entry.kind === 'roll_call')) {
+          optionType = 'C';
+        } else if ('kind' in entry && (entry.kind === 'sell_put' || entry.kind === 'roll_put')) {
+          optionType = 'P';
+        }
+      }
+
       positionMap.set(key, {
         id: key,
         ticker: entry.symbol,
@@ -190,8 +221,7 @@ function transformJournalToPositions(entries: Entry[]): Position[] {
         mark: 0,
         dte: calculateDTE(entry.expiration),
         m: 0,
-        // Infer type from entry meta or default to P
-        type: 'P', // Will be updated based on entry data
+        type: optionType,
         side: 'S',
       });
     }
@@ -226,6 +256,17 @@ function transformJournalToPositions(entries: Entry[]): Position[] {
     }
   });
 
+  // 🔍 DERIVED POSITIONS DEBUG
+  console.log('🔍 DERIVED POSITIONS:', {
+    totalPositions: positions.length,
+    positions: positions.map(p => ({
+      ticker: p.ticker,
+      type: p.type,
+      side: p.side,
+      qty: p.qty,
+      strike: p.strike,
+    })),
+  });
   return positions;
 }
 

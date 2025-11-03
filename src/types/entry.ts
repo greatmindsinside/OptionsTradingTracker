@@ -34,6 +34,13 @@ export const EntrySchema = z.object({
   underlying_price: z.number().nullable(),
   notes: z.string().nullable(),
   meta: z.record(z.string(), z.unknown()).optional(),
+  // Audit trail fields
+  deleted_at: z.string().nullable().optional(),
+  edited_by: z.string().nullable().optional(),
+  edit_reason: z.string().nullable().optional(),
+  original_entry_id: z.string().nullable().optional(),
+  created_at: z.string().nullable().optional(),
+  updated_at: z.string().nullable().optional(),
 });
 
 export type Entry = z.infer<typeof EntrySchema>;

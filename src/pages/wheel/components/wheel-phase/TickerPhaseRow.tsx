@@ -2,29 +2,96 @@ import React from 'react';
 import { usePhaseCalculation } from './usePhaseCalculation';
 import { useWheelStore } from '@/stores/useWheelStore';
 import { useWheelUIStore } from '@/stores/useWheelUIStore';
+import { useEntriesStore } from '@/stores/useEntriesStore';
+import { all } from '@/db/sql';
+import type { Entry } from '@/types/entry';
 
 export const TickerPhaseRow: React.FC<{ ticker: string }> = ({ ticker }) => {
   const { phase } = usePhaseCalculation(ticker);
   const earnings = useWheelStore(s => s.earnings);
   const openContext = useWheelUIStore(s => s.openContext);
+  const { deleteEntry } = useEntriesStore();
+  const reloadFn = useWheelStore(s => s.reloadFn);
+
+  const handleClosePosition = async () => {
+    const confirmed = window.confirm(
+      `Close all positions for ${ticker}?\n\n` +
+        `This will soft-delete all journal entries for this ticker.\n` +
+        `Entries can be restored from the Journal page's Deleted tab.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      // Query database directly for all entries with this ticker (bypassing filters)
+      // Select only core columns that are guaranteed to exist
+      const sql = `
+        SELECT id, ts, account_id, symbol, type, qty, amount, strike, expiration, 
+               underlying_price, notes, meta
+        FROM journal 
+        WHERE symbol = ?
+      `;
+      let tickerEntries = await all<Entry>(sql, [ticker]);
+
+      // Filter out any soft-deleted entries (if the column exists)
+      try {
+        const deletedCheckSql = `
+          SELECT id FROM journal 
+          WHERE symbol = ? AND deleted_at IS NOT NULL AND deleted_at != ''
+        `;
+        const deletedIds = await all<{ id: string }>(deletedCheckSql, [ticker]);
+        const deletedIdSet = new Set(deletedIds.map(d => d.id));
+        tickerEntries = tickerEntries.filter(e => !deletedIdSet.has(e.id));
+      } catch {
+        // If deleted_at column doesn't exist yet, just use all entries
+        console.log('Note: deleted_at column not found, will delete all entries for ticker');
+      }
+
+      if (tickerEntries.length === 0) {
+        alert(`No entries found for ${ticker}`);
+        return;
+      }
+
+      // Delete all entries for this ticker
+      for (const entry of tickerEntries) {
+        await deleteEntry(entry.id, `Position closed for ${ticker}`);
+      }
+
+      // Reload wheel data to reflect changes
+      if (reloadFn) {
+        await reloadFn();
+      }
+
+      alert(`Successfully closed ${tickerEntries.length} entries for ${ticker}`);
+    } catch (err) {
+      alert(`Failed to close position: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  };
 
   return (
-    <div className="rounded-xl border border-green-500/20 bg-zinc-950/60 p-3 flex items-center gap-3 hover:border-green-400/40 transition-colors">
+    <div className="flex items-center gap-3 rounded-xl border border-green-500/20 bg-zinc-950/60 p-3 transition-colors hover:border-green-400/40">
       <div
-        className="text-lg font-semibold cursor-pointer text-green-400 hover:text-green-300 transition-colors"
+        className="cursor-pointer text-lg font-semibold text-green-400 transition-colors hover:text-green-300"
         onClick={() => openContext(ticker)}
       >
         {ticker}
       </div>
-      <span className="text-xs px-2 py-1 rounded border border-green-500/40 bg-green-500/15 text-green-400">
+      <span className="rounded border border-green-500/40 bg-green-500/15 px-2 py-1 text-xs text-green-400">
         {phase}
       </span>
-      <div className="text-xs text-zinc-500 ml-auto">Earnings {earnings[ticker] || 'TBD'}</div>
+      <div className="ml-auto text-xs text-zinc-500">Earnings {earnings[ticker] || 'TBD'}</div>
       <button
         onClick={() => openContext(ticker)}
-        className="text-xs px-2 py-1 rounded border border-green-500/40 bg-green-500/10 hover:bg-green-500/20 hover:border-green-400/60 transition-all text-green-400"
+        className="rounded border border-green-500/40 bg-green-500/10 px-2 py-1 text-xs text-green-400 transition-all hover:border-green-400/60 hover:bg-green-500/20"
       >
         Open
+      </button>
+      <button
+        onClick={handleClosePosition}
+        className="rounded border border-red-500/40 bg-red-500/10 px-2 py-1 text-xs text-red-400 transition-all hover:border-red-400/60 hover:bg-red-500/20"
+        title="Close all positions for this ticker"
+      >
+        ✕ Close
       </button>
     </div>
   );

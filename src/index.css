@@ -24,59 +24,61 @@
 
 :root {
   /* Robinhood-Inspired Color Palette - WCAG AA Compliant */
-  --color-primary-50: #f0fdf4;
-  --color-primary-100: #dcfce7;
-  --color-primary-200: #bbf7d0;
-  --color-primary-300: #86efac;
-  --color-primary-400: #4ade80;
-  --color-primary-500: #0f5f2f;
-  --color-primary-600: #15803d;
-  --color-primary-700: #166534;
-  --color-primary-800: #14532d;
-  --color-primary-900: #052e16;
+  /* RGB triplets for Tailwind opacity modifiers: bg-primary/50, text-success/80, etc. */
+
+  --color-primary-50: 240 253 244; /* #f0fdf4 */
+  --color-primary-100: 220 252 231; /* #dcfce7 */
+  --color-primary-200: 187 247 208; /* #bbf7d0 */
+  --color-primary-300: 134 239 172; /* #86efac */
+  --color-primary-400: 74 222 128; /* #4ade80 */
+  --color-primary-500: 15 95 47; /* #0f5f2f */
+  --color-primary-600: 21 128 61; /* #15803d */
+  --color-primary-700: 22 101 52; /* #166534 */
+  --color-primary-800: 20 83 45; /* #14532d */
+  --color-primary-900: 5 46 22; /* #052e16 */
 
   /* Financial/Trading Colors - WCAG Compliant */
-  --color-success-50: #f0fdf4;
-  --color-success-100: #dcfce7;
-  --color-success-200: #bbf7d0;
-  --color-success-500: #008a03;
-  --color-success-600: #007302;
-  --color-success-700: #006c02;
+  --color-success-50: 240 253 244; /* #f0fdf4 */
+  --color-success-100: 220 252 231; /* #dcfce7 */
+  --color-success-200: 187 247 208; /* #bbf7d0 */
+  --color-success-500: 0 138 3; /* #008a03 */
+  --color-success-600: 0 115 2; /* #007302 */
+  --color-success-700: 0 108 2; /* #006c02 */
 
   /* Error/Loss Colors - WCAG Compliant */
-  --color-error-50: #fef2f2;
-  --color-error-100: #fee2e2;
-  --color-error-200: #fecaca;
-  --color-error-500: #dc2626;
-  --color-error-600: #b91c1c;
-  --color-error-700: #991b1b;
+  --color-error-50: 254 242 242; /* #fef2f2 */
+  --color-error-100: 254 226 226; /* #fee2e2 */
+  --color-error-200: 254 202 202; /* #fecaca */
+  --color-error-500: 220 38 38; /* #dc2626 */
+  --color-error-600: 185 28 28; /* #b91c1c */
+  --color-error-700: 153 27 27; /* #991b1b */
 
   /* Warning/Neutral Colors - WCAG Compliant */
-  --color-warning-50: #fffbeb;
-  --color-warning-100: #fef3c7;
-  --color-warning-200: #fde68a;
-  --color-warning-500: #b45309;
-  --color-warning-600: #92400e;
-  --color-warning-700: #78350f;
+  --color-warning-50: 255 251 235; /* #fffbeb */
+  --color-warning-100: 254 243 199; /* #fef3c7 */
+  --color-warning-200: 253 230 138; /* #fde68a */
+  --color-warning-500: 180 83 9; /* #b45309 */
+  --color-warning-600: 146 64 14; /* #92400e */
+  --color-warning-700: 120 53 15; /* #78350f */
 
   /* Neutral Colors - WCAG Compliant */
-  --color-gray-50: #ffffff;
-  --color-gray-100: #f8fafc;
-  --color-gray-200: #e5e7eb;
-  --color-gray-300: #d1d5db;
-  --color-gray-400: #9ca3af;
-  --color-gray-500: #525252;
-  --color-gray-600: #404040;
-  --color-gray-700: #374151;
-  --color-gray-800: #1f2937;
-  --color-gray-900: #111827;
+  --color-gray-50: 255 255 255; /* #ffffff */
+  --color-gray-100: 248 250 252; /* #f8fafc */
+  --color-gray-200: 229 231 235; /* #e5e7eb */
+  --color-gray-300: 209 213 219; /* #d1d5db */
+  --color-gray-400: 156 163 175; /* #9ca3af */
+  --color-gray-500: 82 82 82; /* #525252 */
+  --color-gray-600: 64 64 64; /* #404040 */
+  --color-gray-700: 55 65 81; /* #374151 */
+  --color-gray-800: 31 41 55; /* #1f2937 */
+  --color-gray-900: 17 24 39; /* #111827 */
 
-  /* Robinhood-Inspired Primary Colors (Green) - WCAG AA Compliant */
-  --color-primary-500: #0f5f2f;
-  --color-primary-600: #15803d;
-  --color-primary-700: #15803d;
-  --color-primary-800: #166534;
-  --color-primary-900: #14532d;
+  /* Semantic color aliases (using RGB triplets) */
+  --primary: var(--color-primary-500);
+  --primary-hover: var(--color-primary-600);
+  --success: var(--color-success-500);
+  --error: var(--color-error-500);
+  --warning: var(--color-warning-500);
 
   /* Typography */
   --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
@@ -155,60 +157,80 @@
 }
 
 /* Dark Theme Override - Robinhood Style */
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  :root {
+    --color-text-primary: 0 0 0; /* #000000 */
+    --color-background: 255 255 255; /* #ffffff */
+    --color-border: 0 0 0; /* #000000 */
+    --color-primary-500: 0 0 255; /* #0000ff */
+  }
+
+  .dark,
+  [data-theme='dark'] {
+    --color-text-primary: 255 255 255; /* #ffffff */
+    --color-background: 0 0 0; /* #000000 */
+    --color-border: 255 255 255; /* #ffffff */
+    --color-primary-500: 0 255 255; /* #00ffff */
+  }
+}
+
+/* Dark Theme Override - Robinhood Style */
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-background: #000000;
-    --color-surface: #171717;
-    --color-surface-secondary: #262626;
-    --color-border: #404040;
-    --color-border-focus: #15803d;
-    --color-text: #ffffff;
-    --color-text-primary: #ffffff;
-    --color-text-secondary: #d4d4d4;
-    --color-text-muted: #a3a3a3;
+    --color-background: 0 0 0; /* #000000 */
+    --color-surface: 23 23 23; /* #171717 */
+    --color-surface-secondary: 38 38 38; /* #262626 */
+    --color-border: 64 64 64; /* #404040 */
+    --color-border-focus: 21 128 61; /* #15803d */
+    --color-text: 255 255 255; /* #ffffff */
+    --color-text-primary: 255 255 255; /* #ffffff */
+    --color-text-secondary: 212 212 212; /* #d4d4d4 */
+    --color-text-muted: 163 163 163; /* #a3a3a3 */
 
     /* Dark mode color overrides - WCAG Compliant */
-    --color-primary-500: #4ade80;
-    --color-primary-600: #22c55e;
-    --color-primary-700: #16a34a;
+    --color-primary-500: 74 222 128; /* #4ade80 */
+    --color-primary-600: 34 197 94; /* #22c55e */
+    --color-primary-700: 22 163 74; /* #16a34a */
 
-    --color-success-500: #4ade80;
-    --color-success-600: #22c55e;
+    --color-success-500: 74 222 128; /* #4ade80 */
+    --color-success-600: 34 197 94; /* #22c55e */
 
-    --color-warning-500: #fbbf24;
-    --color-warning-600: #f59e0b;
+    --color-warning-500: 251 191 36; /* #fbbf24 */
+    --color-warning-600: 245 158 11; /* #f59e0b */
 
-    --color-error-500: #f87171;
-    --color-error-600: #ef4444;
+    --color-error-500: 248 113 113; /* #f87171 */
+    --color-error-600: 239 68 68; /* #ef4444 */
   }
 }
 
 /* Manual dark mode class override - Robinhood Style */
 .dark,
 [data-theme='dark'] {
-  --color-background: #000000;
-  --color-surface: #171717;
-  --color-surface-secondary: #262626;
-  --color-border: #404040;
-  --color-border-focus: #15803d;
-  --color-text: #ffffff;
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #d4d4d4;
-  --color-text-muted: #a3a3a3;
+  --color-background: 0 0 0; /* #000000 */
+  --color-surface: 23 23 23; /* #171717 */
+  --color-surface-secondary: 38 38 38; /* #262626 */
+  --color-border: 64 64 64; /* #404040 */
+  --color-border-focus: 21 128 61; /* #15803d */
+  --color-text: 255 255 255; /* #ffffff */
+  --color-text-primary: 255 255 255; /* #ffffff */
+  --color-text-secondary: 212 212 212; /* #d4d4d4 */
+  --color-text-muted: 163 163 163; /* #a3a3a3 */
 
   /* Dark mode color overrides - WCAG Compliant */
-  --color-primary-500: #4ade80;
-  --color-primary-600: #22c55e;
-  --color-primary-700: #16a34a;
+  --color-primary-500: 74 222 128; /* #4ade80 */
+  --color-primary-600: 34 197 94; /* #22c55e */
+  --color-primary-700: 22 163 74; /* #16a34a */
 
-  --color-success-500: #4ade80;
-  --color-success-600: #22c55e;
+  --color-success-500: 74 222 128; /* #4ade80 */
+  --color-success-600: 34 197 94; /* #22c55e */
 
-  --color-warning-500: #fbbf24;
-  --color-warning-600: #f59e0b;
+  --color-warning-500: 251 191 36; /* #fbbf24 */
+  --color-warning-600: 245 158 11; /* #f59e0b */
 
-  --color-error-500: #f87171;
-  --color-error-600: #ef4444;
+  --color-error-500: 248 113 113; /* #f87171 */
+  --color-error-600: 239 68 68; /* #ef4444 */
 }
 
 /* === base.css (inlined) === */
@@ -1065,10 +1087,270 @@ img {
   margin: 1.618rem;
 }
 
-/* Additional global styles can go here */
+/* ========================================
+   TAILWIND LAYERS
+   ======================================== */
+
+/* Component Layer - Reusable UI patterns with @apply */
+@layer components {
+  /* Button Patterns */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg font-medium transition-colors;
+    @apply focus:ring-2 focus:ring-offset-2 focus:outline-none;
+    @apply disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply border border-green-500/30 bg-green-500/20 text-green-300;
+    @apply hover:bg-green-500/30 focus:ring-green-500/50;
+  }
+
+  .btn-secondary {
+    @apply border border-zinc-700 bg-zinc-800 text-zinc-300;
+    @apply hover:bg-zinc-700 focus:ring-zinc-500;
+  }
+
+  .btn-ghost {
+    @apply text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200;
+  }
+
+  .btn-danger {
+    @apply border border-red-500/30 bg-red-500/20 text-red-300;
+    @apply hover:bg-red-500/30 focus:ring-red-500/50;
+  }
+
+  .btn-sm {
+    @apply h-8 px-3 text-sm;
+  }
+
+  .btn-md {
+    @apply h-9 px-4 text-sm;
+  }
+
+  .btn-lg {
+    @apply h-10 px-6 text-base;
+  }
+
+  /* Card Patterns */
+  .card {
+    @apply rounded-2xl border bg-zinc-900/60 backdrop-blur-sm;
+    @apply shadow-lg;
+  }
+
+  .card-header {
+    @apply border-b border-zinc-700/50 px-6 py-4;
+  }
+
+  .card-body {
+    @apply px-6 py-4;
+  }
+
+  .card-footer {
+    @apply border-t border-zinc-700/50 px-6 py-4;
+  }
+
+  /* Neon Card (Robinhood style) */
+  .neon-card {
+    @apply rounded-2xl border border-green-500/20 bg-zinc-950/40 px-6 py-4;
+  }
+
+  /* Input Patterns */
+  .input {
+    @apply w-full rounded-lg border bg-zinc-950/60 px-3 py-2;
+    @apply border-green-500/20 text-green-300 shadow-inner;
+    @apply focus:border-green-400/40 focus:ring-2 focus:ring-green-500/30 focus:outline-none;
+    @apply placeholder:text-zinc-500;
+  }
+
+  .input-error {
+    @apply border-red-500/50 focus:border-red-400/40 focus:ring-red-500/50;
+  }
+
+  /* Input wrapper with prefix/suffix support */
+  .input-wrapper {
+    @apply relative flex items-center rounded-lg border bg-zinc-950/60;
+    @apply border-green-500/20 transition-colors;
+  }
+  .input-wrapper:focus-within {
+    @apply border-green-400/40 ring-2 ring-green-500/30;
+  }
+  .input-wrapper.error {
+    @apply border-red-500/50;
+  }
+  .input-wrapper.error:focus-within {
+    @apply border-red-400/40 ring-2 ring-red-500/50;
+  }
+  .input-wrapper > input {
+    @apply flex-1 border-0 bg-transparent px-3 py-2 text-green-300 outline-none;
+    @apply placeholder:text-zinc-500;
+  }
+  .input-wrapper > input:disabled {
+    @apply cursor-not-allowed text-zinc-500;
+  }
+  .input-prefix,
+  .input-suffix {
+    @apply rounded-sm bg-zinc-800/50 px-3 py-1 text-xs text-zinc-400;
+  }
+
+  /* Label Patterns */
+  .label {
+    @apply mb-1 ml-0.5 text-xs tracking-wide text-zinc-400/90 uppercase;
+  }
+  .label-required {
+    @apply ml-1 text-red-400;
+  }
+
+  /* Chip/Badge Patterns */
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs;
+    @apply bg-zinc-800/50 text-zinc-300;
+  }
+
+  .chip-success {
+    @apply bg-green-500/20 text-green-300;
+  }
+
+  .chip-error {
+    @apply bg-red-500/20 text-red-300;
+  }
+
+  .chip-warning {
+    @apply bg-amber-500/20 text-amber-300;
+  }
+
+  /* Badge Patterns (square corners vs chips) */
+  .badge {
+    @apply inline-flex items-center rounded-md px-2 py-1 text-xs font-medium;
+    @apply bg-zinc-800/50 text-zinc-300;
+  }
+  .badge-success {
+    @apply bg-green-500/20 text-green-300;
+  }
+  .badge-error {
+    @apply bg-red-500/20 text-red-300;
+  }
+  .badge-warning {
+    @apply bg-amber-500/20 text-amber-300;
+  }
+
+  /* Tooltip Pattern */
+  .tooltip {
+    @apply rounded-lg border border-zinc-700/60 bg-zinc-900/80 p-3 shadow-xl backdrop-blur-md;
+  }
+  .tooltip-header {
+    @apply mb-2 border-b border-zinc-700/60 pb-2 text-sm font-semibold text-zinc-200;
+  }
+  .tooltip-item {
+    @apply flex items-center gap-2 text-xs text-zinc-300;
+  }
+  .tooltip-dot {
+    @apply h-2 w-2 rounded-full;
+  }
+  .tooltip-label {
+    @apply flex-1 text-zinc-400;
+  }
+  .tooltip-value {
+    @apply font-semibold text-zinc-200;
+  }
+
+  /* Segmented control (button group) */
+  .segmented {
+    @apply inline-flex overflow-hidden rounded-md border border-zinc-700/60 bg-zinc-800/60;
+  }
+  .segmented-btn {
+    @apply px-3 py-2 text-sm font-medium text-zinc-300 transition-colors;
+  }
+  .segmented-btn:hover {
+    @apply bg-zinc-700/60 text-zinc-100;
+  }
+  .segmented-btn.active {
+    @apply bg-green-500/30 text-green-100;
+  }
+
+  /* Modal Pattern */
+  .modal-overlay {
+    @apply fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm;
+  }
+  .modal {
+    @apply relative mx-4 w-full max-w-lg rounded-2xl border border-green-500/20 bg-zinc-900 shadow-2xl shadow-green-500/20;
+  }
+  .modal-header {
+    @apply flex items-center justify-between border-b border-green-500/20 px-6 py-4;
+  }
+  .modal-title {
+    @apply text-lg font-semibold text-green-400;
+  }
+  .modal-close {
+    @apply text-zinc-400 transition-colors hover:text-zinc-200;
+  }
+  .modal-content {
+    @apply max-h-[calc(100vh-200px)] overflow-y-auto px-6 py-4;
+  }
+
+  /* Table Pattern */
+  .table-container {
+    @apply overflow-hidden rounded-xl border border-zinc-700/60 bg-zinc-900/60;
+  }
+  .table {
+    @apply w-full border-collapse text-sm;
+  }
+  .table thead {
+    @apply bg-zinc-800/60;
+  }
+  .table th {
+    @apply border-b border-zinc-700/60 px-4 py-3 text-left text-xs font-semibold tracking-wider text-zinc-400 uppercase;
+  }
+  .table td {
+    @apply border-b border-zinc-800/60 px-4 py-3 text-zinc-300;
+  }
+  .table tbody tr:hover {
+    @apply bg-zinc-800/40;
+  }
+  .table tbody tr:last-child td {
+    @apply border-b-0;
+  }
+
+  /* Tabs Pattern */
+  .tabs {
+    @apply mb-6 flex gap-1 border-b border-zinc-700/60;
+  }
+  .tab {
+    @apply inline-flex items-center gap-2 border-b-2 border-transparent px-4 py-3 text-sm text-zinc-400 transition-colors hover:bg-zinc-800/40 hover:text-zinc-200;
+  }
+  .tab-active {
+    @apply border-green-500 text-green-400;
+  }
+
+  /* Symbol text helper */
+  .symbol {
+    @apply font-mono font-medium;
+  }
+}
+
+/* Custom Utility Layer - App-specific utilities */
+@layer utilities {
+  .inset-center {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+}
+
+/* ========================================
+   GLOBAL EFFECTS & ANIMATIONS
+   (Outside layers for specificity)
+   ======================================== */
 
 /*
-	Global UI tokens/extractions used across pages.
+	Global UI effects used across pages.
 	Keep these minimal and prefer Tailwind utilities in JSX. Complex animations
 	and effects live here per project style guide.
 	
@@ -1081,6 +1363,7 @@ img {
     0 0 12px rgba(234, 179, 8, 0.35),
     inset 0 0 6px rgba(234, 179, 8, 0.25);
 }
+
 .badge-urgent {
   box-shadow:
     0 0 14px rgba(239, 68, 68, 0.45),

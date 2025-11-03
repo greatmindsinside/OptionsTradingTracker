@@ -3,6 +3,7 @@
  * Displays formatted calculation results with metrics and risk analysis
  */
 
+import clsx from 'clsx';
 import styles from './ResultsDisplay.module.css';
 import type { RiskFlag } from '@/modules/calc/index';
 
@@ -68,7 +69,7 @@ export function ResultsDisplay({
       {/* Metrics Grid */}
       <div className={styles.metricsGrid}>
         {metrics.map((metric, index) => (
-          <div key={index} className={styles.metricCard}>
+          <div key={index} className={clsx('card', styles.metricCard)}>
             <div className={styles.metricLabel}>{metric.label}</div>
             <div className={styles.metricValue}>{formatValue(metric.value, metric.format)}</div>
             {metric.subtitle && <div className={styles.metricSubtitle}>{metric.subtitle}</div>}
@@ -78,7 +79,7 @@ export function ResultsDisplay({
 
       {/* Greeks Section */}
       {greeks && (
-        <div className={styles.greeksSection}>
+        <div className={clsx('card', styles.greeksSection)}>
           <h4 className={styles.sectionTitle}>Greeks (Educational)</h4>
           <div className={styles.greeksGrid}>
             {greeks.delta !== undefined && (
@@ -105,13 +106,13 @@ export function ResultsDisplay({
 
       {/* Risk Analysis */}
       {risks.length > 0 && (
-        <div className={styles.riskSection}>
+        <div className={clsx('card', styles.riskSection)}>
           <h4 className={styles.sectionTitle}>Risk Analysis</h4>
           <div className={styles.riskList}>
             {risks.map((risk, index) => (
               <div
                 key={index}
-                className={`${styles.riskItem} ${getRiskSeverityClass(risk.severity)}`}
+                className={clsx(styles.riskItem, getRiskSeverityClass(risk.severity))}
               >
                 <div className={styles.riskSeverity}>{risk.severity.toUpperCase()}</div>
                 <div className={styles.riskMessage}>{risk.message}</div>
@@ -123,7 +124,7 @@ export function ResultsDisplay({
 
       {/* No Risk State */}
       {risks.length === 0 && (
-        <div className={styles.noRiskSection}>
+        <div className={clsx('card', styles.noRiskSection)}>
           <div className={styles.noRiskItem}>
             <span className={styles.noRiskIcon}>✅</span>
             <span>No risk flags detected</span>

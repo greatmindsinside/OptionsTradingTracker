@@ -29,42 +29,74 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
-    
+
     <!-- PWA Theme Color -->
     <meta name="theme-color" content="#2563eb" />
     <meta name="background-color" content="#ffffff" />
-    
+
     <!-- iOS PWA Support -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Options Tracker" />
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
-    
+
     <!-- Microsoft Tiles -->
     <meta name="msapplication-TileColor" content="#2563eb" />
     <meta name="msapplication-TileImage" content="/icons/icon-144x144.png" />
-    
+
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Professional options trading analysis and portfolio management tool" />
-    <meta name="keywords" content="options trading, portfolio management, wheel strategy, covered calls, cash secured puts" />
+    <meta
+      name="description"
+      content="Professional options trading analysis and portfolio management tool"
+    />
+    <meta
+      name="keywords"
+      content="options trading, portfolio management, wheel strategy, covered calls, cash secured puts"
+    />
     <meta name="author" content="Options Trading Tracker" />
-    
+
     <!-- Open Graph -->
     <meta property="og:title" content="Options Trading Tracker" />
-    <meta property="og:description" content="Professional options trading analysis and portfolio management tool" />
+    <meta
+      property="og:description"
+      content="Professional options trading analysis and portfolio management tool"
+    />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="/icons/icon-512x512.png" />
-    
+
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Options Trading Tracker" />
-    <meta name="twitter:description" content="Professional options trading analysis and portfolio management tool" />
+    <meta
+      name="twitter:description"
+      content="Professional options trading analysis and portfolio management tool"
+    />
     <meta name="twitter:image" content="/icons/icon-512x512.png" />
-    
+
     <title>Options Trading Tracker</title>
+
+    <!-- Set initial theme ASAP to avoid flash of incorrect theme -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme');
+          var theme = stored === 'light' || stored === 'dark' ? stored : null;
+          if (!theme) {
+            var mql = window.matchMedia('(prefers-color-scheme: dark)');
+            theme = mql.matches ? 'dark' : 'light';
+          }
+          var root = document.documentElement;
+          root.classList.remove('light', 'dark');
+          root.classList.add(theme);
+          root.setAttribute('data-theme', theme);
+        } catch (e) {
+          // no-op
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

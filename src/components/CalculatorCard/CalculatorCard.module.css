@@ -1,38 +1,25 @@
-.card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
+/* Component-specific styles (uses global .card and .card-header patterns) */
+
+.clickable {
+  cursor: pointer;
   transition: all 0.2s ease-in-out;
-  cursor: default;
 }
 
-.card:hover {
+.clickable:hover {
   border-color: var(--color-border-focus);
   box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.1),
     0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-.card[role='button'] {
-  cursor: pointer;
-}
-
-.card[role='button']:focus {
+.clickable:focus {
   outline: 2px solid var(--color-border-focus);
   outline-offset: 2px;
 }
 
 .active {
-  border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.header {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
-  margin-bottom: var(--space-4);
+  border-color: rgb(var(--color-primary-500));
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.2);
 }
 
 .icon {
@@ -41,10 +28,10 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: var(--color-primary-50);
+  background: rgb(var(--color-primary-100));
   border-radius: var(--radius-md);
   font-size: var(--font-size-xl);
-  color: var(--color-primary-600);
+  color: rgb(var(--color-primary-600));
   flex-shrink: 0;
 }
 
@@ -56,17 +43,13 @@
   margin: 0;
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-text);
+  color: rgb(var(--color-text));
   line-height: var(--line-height-tight);
 }
 
 .description {
   margin: var(--space-1) 0 0 0;
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  color: rgb(var(--color-text-secondary));
   line-height: var(--line-height-normal);
-}
-
-.content {
-  min-height: 0; /* Allow content to shrink */
 }

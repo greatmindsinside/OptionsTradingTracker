@@ -19,7 +19,7 @@ Where is this documentation issue located?
 - [ ] Code comments
 - [ ] Phase documentation
 - [ ] Setup instructions
-- [ ] Other: ******\_\_\_\_******
+- [ ] Other: **\*\***\_\_\_\_**\*\***
 
 ## Current State
 

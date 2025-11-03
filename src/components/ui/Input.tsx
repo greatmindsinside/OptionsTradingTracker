@@ -27,14 +27,14 @@ export const Input: React.FC<InputProps> = ({
       {label && (
         <label
           htmlFor={inputId}
-          className="text-[11px] uppercase tracking-wide text-zinc-400/90 mb-1 ml-0.5"
+          className="mb-1 ml-0.5 text-[11px] tracking-wide text-zinc-400/90 uppercase"
         >
           {label}
         </label>
       )}
       <div className="relative">
         {icon && (
-          <div className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 z-10">
+          <div className="pointer-events-none absolute top-1/2 left-2.5 z-10 -translate-y-1/2 text-zinc-400">
             {icon}
           </div>
         )}
@@ -42,16 +42,16 @@ export const Input: React.FC<InputProps> = ({
           id={inputId}
           type={type}
           className={cn(
-            'h-9 w-full rounded-lg border border-green-500/20 bg-zinc-950/60 text-green-300 placeholder-green-400/40 shadow-inner',
-            'focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-400/40 transition-colors',
+            'h-9 w-full rounded-lg border border-green-500/60 bg-zinc-950/60 text-green-300 placeholder-green-400/40 shadow-inner',
+            'transition-colors focus:border-green-400/70 focus:ring-2 focus:ring-green-500/30 focus:outline-none',
             // Padding logic - date inputs need extra right padding for calendar picker
             type === 'date' && icon && align === 'center'
-              ? 'pl-9 pr-10'
+              ? 'pr-10 pl-9'
               : icon && align === 'center'
-                ? 'pl-9 pr-9'
+                ? 'pr-9 pl-9'
                 : icon
-                  ? 'pl-9 pr-3'
-                  : 'pl-3 pr-3',
+                  ? 'pr-3 pl-9'
+                  : 'pr-3 pl-3',
             // Text alignment
             align === 'center' && 'text-center',
             align === 'right' && 'text-right',

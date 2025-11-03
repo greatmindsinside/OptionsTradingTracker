@@ -72,10 +72,10 @@ export default function WheelPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-slate-900 text-white">
         <div className="text-center">
-          <div className="text-4xl mb-4">💸</div>
-          <h1 className="text-2xl font-bold mb-2">Loading Wheel Tracker...</h1>
+          <div className="mb-4 text-4xl">💸</div>
+          <h1 className="mb-2 text-2xl font-bold">Loading Wheel Tracker...</h1>
           <p className="text-slate-400">Initializing database connection</p>
         </div>
       </div>
@@ -84,13 +84,13 @@ export default function WheelPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-slate-900 text-white">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Database Error</h1>
+          <h1 className="mb-4 text-2xl font-bold">Database Error</h1>
           <p className="text-slate-400">{String(error)}</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-emerald-600 rounded"
+            className="mt-4 rounded bg-emerald-600 px-4 py-2"
           >
             Reload Page
           </button>
@@ -102,8 +102,8 @@ export default function WheelPage() {
   return (
     <WheelContainer>
       <WheelHeader />
-      <div className="px-4 sm:px-6 lg:px-8 py-8 flex justify-center">
-        <main className="relative w-full max-w-6xl px-6 py-8 neon-panel rounded-3xl grid grid-cols-3 gap-6">
+      <div className="flex justify-center px-4 py-8 sm:px-6 lg:px-8">
+        <main className="neon-panel relative grid w-full max-w-6xl grid-cols-3 gap-6 rounded-3xl px-6 py-8">
           <div className="col-span-2 space-y-6">
             <SummaryMetrics />
             <WheelPhaseCard />

@@ -1,63 +1,62 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <title>Icon Generator</title>
-</head>
-<body>
-  <canvas id="canvas" width="120" height="120"></canvas>
-  <script>
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    // Create gradient
-    const gradient = ctx.createLinearGradient(0, 0, 120, 120);
-    gradient.addColorStop(0, '#4F46E5');
-    gradient.addColorStop(1, '#7C3AED');
-    
-    // Background with rounded corners
-    ctx.fillStyle = gradient;
-    ctx.beginPath();
-    ctx.roundRect(0, 0, 120, 120, 28.2);
-    ctx.fill();
-    
-    // Options symbol
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.font = 'bold 42px serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('Φ', 60, 46.800000000000004);
-    
-    // Chart line
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.lineWidth = 1.92;
-    ctx.beginPath();
-    ctx.moveTo(19.2, 81.60000000000001);
-    ctx.lineTo(37.2, 75);
-    ctx.lineTo(56.4, 79.2);
-    ctx.lineTo(75, 70.32);
-    ctx.lineTo(100.8, 65.64);
-    ctx.stroke();
-    
-    // Data points
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    [
-      [37.2, 75],
-      [56.4, 79.2],
-      [75, 70.32]
-    ].forEach(([x, y]) => {
+  <head>
+    <title>Icon Generator</title>
+  </head>
+  <body>
+    <canvas id="canvas" width="120" height="120"></canvas>
+    <script>
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+
+      // Create gradient
+      const gradient = ctx.createLinearGradient(0, 0, 120, 120);
+      gradient.addColorStop(0, '#4F46E5');
+      gradient.addColorStop(1, '#7C3AED');
+
+      // Background with rounded corners
+      ctx.fillStyle = gradient;
       ctx.beginPath();
-      ctx.arc(x, y, 1.92, 0, 2 * Math.PI);
+      ctx.roundRect(0, 0, 120, 120, 28.2);
       ctx.fill();
-    });
-    
-    // Bottom text
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.font = '600 7.5600000000000005px sans-serif';
-    ctx.fillText('OPTIONS', 60, 105.6);
-    
-    // Save as PNG (manual process - this generates the canvas)
-    console.log('Generated 120x120 icon canvas');
-  </script>
-</body>
+
+      // Options symbol
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.font = 'bold 42px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Φ', 60, 46.800000000000004);
+
+      // Chart line
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.lineWidth = 1.92;
+      ctx.beginPath();
+      ctx.moveTo(19.2, 81.60000000000001);
+      ctx.lineTo(37.2, 75);
+      ctx.lineTo(56.4, 79.2);
+      ctx.lineTo(75, 70.32);
+      ctx.lineTo(100.8, 65.64);
+      ctx.stroke();
+
+      // Data points
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      [
+        [37.2, 75],
+        [56.4, 79.2],
+        [75, 70.32],
+      ].forEach(([x, y]) => {
+        ctx.beginPath();
+        ctx.arc(x, y, 1.92, 0, 2 * Math.PI);
+        ctx.fill();
+      });
+
+      // Bottom text
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.font = '600 7.5600000000000005px sans-serif';
+      ctx.fillText('OPTIONS', 60, 105.6);
+
+      // Save as PNG (manual process - this generates the canvas)
+      console.log('Generated 120x120 icon canvas');
+    </script>
+  </body>
 </html>

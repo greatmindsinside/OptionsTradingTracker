@@ -1,6 +1,8 @@
+/* Component-specific styles (uses global .card and .btn patterns) */
+
 .container {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background: rgb(var(--color-surface));
+  border: 1px solid rgb(var(--color-border));
   border-radius: var(--radius-lg);
   padding: var(--space-6);
   box-shadow: var(--shadow-sm);
@@ -42,21 +44,18 @@
 }
 
 .metricCard {
-  padding: var(--space-4);
-  background: var(--color-surface-secondary);
-  border-radius: var(--radius-md);
   transition: var(--transition-fast);
 }
 
 .metricCard:hover {
-  background: var(--color-surface);
+  background: rgb(var(--color-surface));
   box-shadow: var(--shadow-md);
-  border: 1px solid var(--color-primary-300);
+  border: 1px solid rgb(var(--color-primary-300));
 }
 
 .primary {
-  background: linear-gradient(135deg, var(--color-surface), var(--color-primary-100));
-  border-left: 4px solid var(--color-primary-500);
+  background: linear-gradient(135deg, rgb(var(--color-surface)), rgb(var(--color-primary-100)));
+  border-left: 4px solid rgb(var(--color-primary-500));
 }
 
 .metricLabel {
@@ -85,11 +84,11 @@
 }
 
 .positive {
-  color: var(--color-success-600);
+  color: rgb(var(--color-success-600));
 }
 
 .negative {
-  color: var(--color-error-600);
+  color: rgb(var(--color-error-600));
 }
 
 .neutral {
@@ -111,29 +110,7 @@
 
 .actionButton {
   flex: 1;
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-primary-500);
-  color: white;
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition: var(--transition-fast);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-}
-
-.actionButton:hover {
-  background: var(--color-primary-600);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-.actionButton:active {
-  transform: translateY(0);
+  /* Button styling from global .btn pattern */
 }
 
 .loading {

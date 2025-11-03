@@ -17,6 +17,7 @@ export function useWheelPhase(symbol: string): WheelPhase {
 
     if (!hasShares && !hasShortPuts && !hasShortCalls) return 'Sell Cash Secured Puts';
     if (!hasShares && hasShortPuts) return 'Sell Cash Secured Puts';
+    if (!hasShares && hasShortCalls) return 'Sell Covered Calls'; // Naked call position
     if (hasShares && !hasShortCalls) return 'Sell Covered Calls';
     if (hasShares && hasShortCalls) return 'Call Expires Worthless';
     return 'Repeat';

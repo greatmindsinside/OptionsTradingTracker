@@ -5,7 +5,7 @@ import { TradeTypeFilter } from './TradeTypeFilter';
 import { DateRangeFilter } from './DateRangeFilter';
 import { StatusFilter } from './StatusFilter';
 import { SummaryStats } from './SummaryStats';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/Button';
 
 /**
  * FilterBar
@@ -27,23 +27,23 @@ export const FilterBar: React.FC = () => {
   };
 
   return (
-    <div className="px-6 py-5 mb-6 rounded-2xl neon-panel">
+    <div className="neon-panel mb-6 rounded-2xl px-6 py-5">
       <div className="flex flex-col gap-3">
         {/* Section titles */}
         <div className="flex items-center justify-between">
-          <span className="text-xs tracking-wider uppercase text-zinc-400">Filters</span>
-          <span className="text-xs tracking-wider uppercase text-zinc-400">Totals</span>
+          <span className="text-xs tracking-wider text-zinc-400 uppercase">Filters</span>
+          <span className="text-xs tracking-wider text-zinc-400 uppercase">Totals</span>
         </div>
 
-        <div className="flex items-start gap-6 flex-wrap">
+        <div className="flex flex-wrap items-start gap-6">
           {/* Left: Filter controls */}
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 flex-1 min-w-0">
+          <div className="grid min-w-0 flex-1 grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
             <TradeTypeFilter />
             <DateRangeFilter />
             <StatusFilter />
             <div className="flex flex-col">
               <label
-                className="text-[11px] uppercase tracking-wide text-zinc-400/90 mb-1 ml-0.5 opacity-0 pointer-events-none"
+                className="pointer-events-none mb-1 ml-0.5 text-[11px] tracking-wide text-zinc-400/90 uppercase opacity-0"
                 aria-hidden="true"
               >
                 Actions
@@ -57,7 +57,7 @@ export const FilterBar: React.FC = () => {
           {/* Right: Summary stats */}
           <div className="flex flex-col">
             <label
-              className="text-[11px] uppercase tracking-wide text-zinc-400/90 mb-1 ml-0.5 opacity-0 pointer-events-none"
+              className="pointer-events-none mb-1 ml-0.5 text-[11px] tracking-wide text-zinc-400/90 uppercase opacity-0"
               aria-hidden="true"
             >
               Summary
