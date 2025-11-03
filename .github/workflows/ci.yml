@@ -129,7 +129,7 @@ jobs:
         run: yarn test:e2e
 
       - name: Upload Playwright test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v5
         if: failure()
         with:
           name: playwright-report
@@ -177,7 +177,7 @@ jobs:
         run: yarn test:a11y
 
       - name: Upload accessibility test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v5
         if: failure()
         with:
           name: accessibility-report
@@ -220,7 +220,7 @@ jobs:
         run: yarn build
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v5
         with:
           name: dist
           path: dist/
