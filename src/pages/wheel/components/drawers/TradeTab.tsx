@@ -247,7 +247,7 @@ export const TradeTab: React.FC = () => {
         <Button
           fullWidth
           variant="primary"
-          className="rounded-xl border-2 border-green-500/70 bg-green-500/20 px-4 py-3 text-green-200 hover:bg-green-500/30 focus-visible:ring-2 focus-visible:ring-green-500/40 focus-visible:ring-offset-1 focus-visible:ring-offset-black/80"
+          className="rounded-xl border-2 border-green-400/80 bg-green-500/20 px-4 py-3 text-green-100 shadow-[0_1px_2px_0_rgba(0,0,0,0.5)] ring-1 ring-green-500/20 hover:bg-green-500/30 focus-visible:ring-2 focus-visible:ring-green-500/40 focus-visible:ring-offset-1 focus-visible:ring-offset-black/80"
           onClick={handleAddTrade}
         >
           + Add Trade
