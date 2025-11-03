@@ -8,6 +8,7 @@ import { useWheelStore } from '@/stores/useWheelStore';
 import { fmt } from '@/utils/wheel-calculations';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
+import { Button } from '@/components/Button';
 
 export const TradeTab: React.FC = () => {
   const { form, submitTrade, resetForm } = useTradeComposer();
@@ -243,12 +244,14 @@ export const TradeTab: React.FC = () => {
           {fmt(Math.max(0, form.tradeEntry || 0), 2)} · DTE {Math.max(0, form.tradeDTE || 0)} · Fees
           ${fmt(Math.max(0, form.tradeFees || 0), 2)}
         </div>
-        <button
-          className="w-full rounded border border-green-500 bg-green-500/15 px-3 py-2 font-semibold text-green-400 transition-colors hover:bg-green-500/25"
+        <Button
+          fullWidth
+          variant="primary"
+          className="rounded-xl border-green-500/70 bg-green-500/20 px-4 py-3 text-green-200 hover:bg-green-500/30 focus-visible:ring-2 focus-visible:ring-green-500/40 focus-visible:ring-offset-1 focus-visible:ring-offset-black/80"
           onClick={handleAddTrade}
         >
           + Add Trade
-        </button>
+        </Button>
       </div>
     </div>
   );
