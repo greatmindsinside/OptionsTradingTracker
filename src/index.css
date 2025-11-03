@@ -1272,7 +1272,7 @@ img {
     @apply fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm;
   }
   .modal {
-    @apply relative mx-4 w-full max-w-lg rounded-2xl border border-green-500/20 bg-zinc-900 shadow-2xl shadow-green-500/20;
+    @apply relative mx-4 w-full max-w-lg rounded-2xl border border-green-500/15 bg-black/90 shadow-2xl shadow-green-500/20;
   }
   .modal-header {
     @apply flex items-center justify-between border-b border-green-500/20 px-6 py-4;
