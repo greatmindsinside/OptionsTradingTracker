@@ -49,7 +49,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/eslint-plugin-tailwindcss": "^3",
     "@types/jsdom": "^27",
-    "@types/node": "^24.8.1",
+    "@types/node": "^24.10.0",
     "@types/papaparse": "^5.3.16",
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
