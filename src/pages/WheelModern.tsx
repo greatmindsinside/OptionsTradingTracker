@@ -1,5 +1,8 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useWheelDatabase } from '../hooks/useWheelDatabase';
+import { useJournal } from '../store/journal';
+import { deriveWheelState } from '../store/deriveWheel';
 
 /**
  * MODERN WHEEL TRACKER PAGE
@@ -101,17 +104,28 @@ export default function WheelModern() {
   const [pos, setPos] = useState<Position[]>([]);
   const [earn, setEarn] = useState<Record<string, string>>({});
   const [ledger, setLedger] = useState<LedgerEvent[]>([]);
-  const [phaseOverrides, setPhaseOverrides] = useState<Record<string, WheelPhase>>({});
+  const [phaseOverrides] = useState<Record<string, WheelPhase>>({});
 
   // UI state
   const [q, setQ] = useState('');
   const [actionsOpen, setActionsOpen] = useState(false);
-  const [actionsTab, setActionsTab] = useState<'Import' | 'Manual' | 'Phase' | 'Data'>('Import');
+  const [actionsTab, setActionsTab] = useState<'Trade' | 'Import' | 'Data'>('Import');
   const [contextSymbol, setContextSymbol] = useState<string | null>(null);
   const [dataOpen, setDataOpen] = useState(false);
   const [importing, setImporting] = useState(false);
 
+  // Trade composer state (sticky within the drawer)
+  const [tradeSym, setTradeSym] = useState('');
+  const [tradeType, setTradeType] = useState<OptType>('P');
+  const [tradeSide, setTradeSide] = useState<Side>('S');
+  const [tradeQty, setTradeQty] = useState(1);
+  const [tradeDTE, setTradeDTE] = useState(7);
+  const [tradeStrike, setTradeStrike] = useState(0);
+  const [tradeEntry, setTradeEntry] = useState(0);
+  const [tradeFees, setTradeFees] = useState(0);
+
   const fileRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   // Debug logging
   useEffect(() => {
@@ -130,8 +144,22 @@ export default function WheelModern() {
     }
   }, [dbError]);
 
-  // Load data from database with error handling
+  // Journal -> Wheel projection (single source of truth when entries exist)
+  const { entries, add: addJournal } = useJournal();
   useEffect(() => {
+    if (!entries || entries.length === 0) return; // fall back to DB bootstrap when no journal yet
+    const d = deriveWheelState(entries);
+    setLots(d.lots as Lot[]);
+    setPos(d.positions as Position[]);
+    setEarn(d.earnings);
+    setLedger(
+      entries.map(e => ({ id: e.id, kind: e.kind, when: e.when, symbol: e.symbol, meta: e.meta }))
+    );
+  }, [entries]);
+
+  // Load data from database with error handling (skip if journal is active)
+  useEffect(() => {
+    if (entries && entries.length > 0) return; // journal is source of truth
     try {
       if (wheelData) {
         // Transform ShareLot[] to Lot[] - use correct property names from useWheelDatabase
@@ -164,7 +192,7 @@ export default function WheelModern() {
     } catch (e) {
       console.error('Error loading wheel data:', e);
     }
-  }, [wheelData]);
+  }, [wheelData, entries]);
 
   // Computed values - must be before any conditional returns
   const tickers = useMemo(
@@ -343,38 +371,7 @@ export default function WheelModern() {
     }
   };
 
-  // Manual data entry
-  function addSymbol(sym: string) {
-    if (!sym) return;
-    const S = sym.toUpperCase();
-    if (tickers.includes(S)) return alert('Already tracked');
-    setLots(v => [
-      { id: crypto.randomUUID(), ticker: S, qty: 0, cost: 0, opened: todayYMD() },
-      ...v,
-    ]);
-    setLedger(l => [
-      ...l,
-      { id: crypto.randomUUID(), kind: 'stock_added', when: new Date().toISOString(), symbol: S },
-    ]);
-  }
-
-  function addLot(sym: string, qty: number, cost: number, opened?: string) {
-    const S = sym.toUpperCase();
-    setLots(v => [
-      { id: crypto.randomUUID(), ticker: S, qty, cost, opened: opened || todayYMD() },
-      ...v,
-    ]);
-    setLedger(l => [
-      ...l,
-      {
-        id: crypto.randomUUID(),
-        kind: 'lot_added',
-        when: new Date().toISOString(),
-        symbol: S,
-        meta: { qty, cost },
-      },
-    ]);
-  }
+  // Manual data entry (replaced by Trade composer)
 
   function addOption(
     sym: string,
@@ -383,53 +380,36 @@ export default function WheelModern() {
     qty: number,
     strike: number,
     entry: number,
-    mark: number,
+    _mark: number,
     dte: number,
     opened?: string
   ) {
     const S = sym.toUpperCase();
-    setPos(p => [
-      {
-        id: crypto.randomUUID(),
-        ticker: S,
-        qty,
-        strike,
-        entry,
-        mark,
-        dte,
-        type,
-        side,
-        opened: opened || todayYMD(),
-      },
-      ...p,
-    ]);
-    setLedger(l => [
-      ...l,
-      {
-        id: crypto.randomUUID(),
-        kind: 'option_added',
-        when: new Date().toISOString(),
+    const whenIso = opened ? new Date(opened + 'T00:00:00').toISOString() : undefined;
+    if (side === 'S') {
+      addJournal({
+        kind: type === 'P' ? 'sell_put' : 'sell_call',
         symbol: S,
-        meta: { type, side, qty, strike, entry, dte },
-      },
-    ]);
+        contracts: qty,
+        strike,
+        premium: entry,
+        dte,
+        when: whenIso,
+      });
+    } else {
+      addJournal({
+        kind: 'buy_close',
+        symbol: S,
+        type,
+        contracts: qty,
+        strike,
+        premium: entry,
+        when: whenIso,
+      });
+    }
   }
 
-  function addEarnings(sym: string, ds: string) {
-    if (!sym || !ds) return;
-    const S = sym.toUpperCase();
-    setEarn(e => ({ ...e, [S]: ds }));
-    setLedger(l => [
-      ...l,
-      {
-        id: crypto.randomUUID(),
-        kind: 'earnings_upserted',
-        when: new Date().toISOString(),
-        symbol: S,
-        meta: { date: ds },
-      },
-    ]);
-  }
+  // addEarnings, addSymbol, addLot removed in favor of focused Trade composer UI
 
   function saveExpiration(row: ExpRow, newDate: string) {
     setPos(prev =>
@@ -709,16 +689,143 @@ export default function WheelModern() {
               </button>
             </div>
             <div className="flex gap-2 text-sm mb-4">
-              {(['Import', 'Manual', 'Phase', 'Data'] as const).map(t => (
+              {(['Trade', 'Import', 'Journal', 'Data'] as const).map(t => (
                 <button
                   key={t}
-                  onClick={() => setActionsTab(t)}
+                  onClick={() => {
+                    if (t === 'Journal') {
+                      navigate('/journal');
+                      setActionsOpen(false);
+                    } else {
+                      setActionsTab(t);
+                    }
+                  }}
                   className={`px-3 py-1 rounded border transition-all ${actionsTab === t ? 'border-green-400 bg-green-500/15 text-green-400 shadow-lg shadow-green-500/30' : 'border-zinc-700 hover:border-green-500/30 text-zinc-400'}`}
                 >
                   {t}
                 </button>
               ))}
             </div>
+            {actionsTab === 'Trade' && (
+              <div className="space-y-3" data-testid="drawer.trade">
+                <div className="text-sm text-zinc-400">Compose a single option trade.</div>
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs text-zinc-500">Symbol</label>
+                    <input
+                      value={tradeSym}
+                      onChange={e => setTradeSym(e.target.value.toUpperCase())}
+                      placeholder="e.g. AAPL"
+                      className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 w-full text-green-400"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs text-zinc-500">Type</label>
+                      <select
+                        value={tradeType}
+                        onChange={e => setTradeType(e.target.value as OptType)}
+                        className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
+                      >
+                        <option value="P">Put</option>
+                        <option value="C">Call</option>
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs text-zinc-500">Side</label>
+                      <select
+                        value={tradeSide}
+                        onChange={e => setTradeSide(e.target.value as Side)}
+                        className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
+                      >
+                        <option value="S">Sell</option>
+                        <option value="B">Buy</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs text-zinc-500">Qty</label>
+                      <input
+                        type="number"
+                        value={tradeQty}
+                        onChange={e => setTradeQty(parseInt(e.target.value || '1'))}
+                        className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs text-zinc-500">DTE</label>
+                      <input
+                        type="number"
+                        value={tradeDTE}
+                        onChange={e => setTradeDTE(parseInt(e.target.value || '0'))}
+                        className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs text-zinc-500">Strike</label>
+                      <input
+                        type="number"
+                        step=".01"
+                        value={tradeStrike}
+                        onChange={e => setTradeStrike(parseFloat(e.target.value || '0'))}
+                        className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs text-zinc-500">Premium</label>
+                      <input
+                        type="number"
+                        step=".01"
+                        value={tradeEntry}
+                        onChange={e => setTradeEntry(parseFloat(e.target.value || '0'))}
+                        className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs text-zinc-500">Fees (optional)</label>
+                    <input
+                      type="number"
+                      step=".01"
+                      value={tradeFees}
+                      onChange={e => setTradeFees(parseFloat(e.target.value || '0'))}
+                      className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 text-green-400 w-full"
+                    />
+                  </div>
+                  <div className="text-xs text-zinc-500">Preview</div>
+                  <div className="rounded-lg border border-green-500/20 bg-zinc-950/40 p-3 text-sm text-zinc-300">
+                    {tradeSide === 'S' ? 'Sell' : 'Buy'} {tradeQty} {tradeType} {tradeSym || '—'}{' '}
+                    {tradeStrike || 0} @ ${fmt(Math.max(0, tradeEntry || 0), 2)} · DTE{' '}
+                    {Math.max(0, tradeDTE || 0)} · Fees ${fmt(Math.max(0, tradeFees || 0), 2)}
+                  </div>
+                  <button
+                    className="w-full px-3 py-2 rounded border border-green-500 bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors font-semibold"
+                    onClick={() => {
+                      const S = tradeSym.trim().toUpperCase();
+                      if (!S) return alert('Symbol required');
+                      if (tradeQty <= 0) return alert('Qty must be > 0');
+                      if (tradeStrike <= 0) return alert('Strike must be > 0');
+                      if (tradeEntry < 0) return alert('Premium cannot be negative');
+                      addOption(
+                        S,
+                        tradeType,
+                        tradeSide,
+                        tradeQty,
+                        tradeStrike,
+                        tradeEntry,
+                        tradeEntry,
+                        Math.max(0, tradeDTE)
+                      );
+                    }}
+                  >
+                    + Add Trade
+                  </button>
+                </div>
+              </div>
+            )}
             {actionsTab === 'Import' && (
               <div className="space-y-3" data-testid="drawer.import">
                 <div className="text-sm text-zinc-400">
@@ -737,34 +844,7 @@ export default function WheelModern() {
                 </div>
               </div>
             )}
-            {actionsTab === 'Manual' && (
-              <ManualForms
-                onAddSymbol={addSymbol}
-                onAddEarnings={addEarnings}
-                onAddOption={addOption}
-                onAddLot={addLot}
-              />
-            )}
-            {actionsTab === 'Phase' && (
-              <PhaseOverride
-                tickers={tickers}
-                current={phaseFor}
-                onOpenSymbol={setContextSymbol}
-                onSave={(s, p) => {
-                  setPhaseOverrides(v => ({ ...v, [s]: p }));
-                  setLedger(l => [
-                    ...l,
-                    {
-                      id: crypto.randomUUID(),
-                      kind: 'phase_overridden',
-                      when: new Date().toISOString(),
-                      symbol: s,
-                      meta: { phase: p },
-                    },
-                  ]);
-                }}
-              />
-            )}
+
             {actionsTab === 'Data' && (
               <DataExplorer lots={lots} pos={pos} earn={earn} ledger={ledger} />
             )}
@@ -955,298 +1035,9 @@ const LotTable: React.FC<{ lots: Lot[]; pos: Position[]; onOpenSymbol: (s: strin
   );
 };
 
-const ManualForms: React.FC<{
-  onAddSymbol: (s: string) => void;
-  onAddEarnings: (s: string, d: string) => void;
-  onAddOption: (
-    s: string,
-    t: OptType,
-    side: Side,
-    q: number,
-    strike: number,
-    entry: number,
-    mark: number,
-    dte: number,
-    opened?: string
-  ) => void;
-  onAddLot: (s: string, q: number, c: number, opened?: string) => void;
-}> = ({ onAddSymbol, onAddEarnings, onAddOption, onAddLot }) => {
-  const [sym, setSym] = useState('');
-  const [esym, setEsym] = useState('');
-  const [edate, setEdate] = useState('');
-  return (
-    <div className="space-y-6" data-testid="drawer.manual">
-      <div>
-        <div className="text-sm mb-2">Add Stock</div>
-        <div className="flex gap-2">
-          <input
-            value={sym}
-            onChange={e => setSym(e.target.value.toUpperCase())}
-            placeholder="Symbol"
-            className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 w-40 text-green-400"
-          />
-          <button
-            className="px-3 py-2 rounded border border-green-500 bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
-            onClick={() => {
-              onAddSymbol(sym);
-              setSym('');
-            }}
-          >
-            Add
-          </button>
-        </div>
-      </div>
-      <div>
-        <div className="text-sm mb-2">Add Earnings</div>
-        <div className="flex gap-2 flex-wrap">
-          <input
-            value={esym}
-            onChange={e => setEsym(e.target.value.toUpperCase())}
-            placeholder="Symbol"
-            className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 w-32 text-green-400"
-          />
-          <input
-            type="date"
-            value={edate}
-            onChange={e => setEdate(e.target.value)}
-            className="px-3 py-2 rounded bg-zinc-950/60 border border-green-500/30 w-44 text-green-400"
-          />
-          <button
-            className="px-3 py-2 rounded border border-green-500 bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
-            onClick={() => {
-              onAddEarnings(esym, edate);
-              setEsym('');
-              setEdate('');
-            }}
-          >
-            Save
-          </button>
-        </div>
-      </div>
-      <div>
-        <div className="text-sm mb-2">Add Option Position</div>
-        <AddOptionInline
-          onAdd={o =>
-            onAddOption(o.sym, o.type, o.side, o.qty, o.strike, o.entry, o.mark, o.dte, o.opened)
-          }
-        />
-      </div>
-      <div>
-        <div className="text-sm mb-2">Add Shares Lot</div>
-        <AddLotInline onAdd={r => onAddLot(r.sym, r.qty, r.cost, r.opened)} />
-      </div>
-    </div>
-  );
-};
+// Removed ManualForms and inline add components after refactor to Trade tab
 
-const AddOptionInline: React.FC<{
-  onAdd: (o: {
-    sym: string;
-    type: OptType;
-    side: Side;
-    qty: number;
-    strike: number;
-    entry: number;
-    mark: number;
-    dte: number;
-    opened?: string;
-  }) => void;
-}> = ({ onAdd }) => {
-  const [sym, setSym] = useState('');
-  const [type, setType] = useState<OptType>('P');
-  const [side, setSide] = useState<Side>('S');
-  const [qty, setQty] = useState(1);
-  const [strike, setStrike] = useState(10);
-  const [entry, setEntry] = useState(0.2);
-  const [mark, setMark] = useState(0.1);
-  const [dte, setDte] = useState(7);
-  const [opened, setOpened] = useState('');
-  return (
-    <div className="flex flex-wrap gap-2 text-sm">
-      <input
-        value={sym}
-        onChange={e => setSym(e.target.value.toUpperCase())}
-        placeholder="Symbol"
-        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 w-24 text-green-400"
-      />
-      <select
-        value={type}
-        onChange={e => setType(e.target.value as OptType)}
-        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
-      >
-        <option value="P">P</option>
-        <option value="C">C</option>
-      </select>
-      <select
-        value={side}
-        onChange={e => setSide(e.target.value as Side)}
-        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
-      >
-        <option value="S">S</option>
-        <option value="B">B</option>
-      </select>
-      <input
-        type="number"
-        value={qty}
-        onChange={e => setQty(parseInt(e.target.value || '1'))}
-        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 w-20 text-green-400"
-        placeholder="Qty"
-      />
-      <input
-        type="number"
-        step=".01"
-        value={strike}
-        onChange={e => setStrike(parseFloat(e.target.value || '0'))}
-        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 w-24 text-green-400"
-        placeholder="Strike"
-      />
-      <input
-        type="number"
-        step=".01"
-        value={entry}
-        onChange={e => setEntry(parseFloat(e.target.value || '0'))}
-        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 w-24 text-green-400"
-        placeholder="Entry"
-      />
-      <input
-        type="number"
-        step=".01"
-        value={mark}
-        onChange={e => setMark(parseFloat(e.target.value || '0'))}
-        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 w-20 text-green-400"
-        placeholder="Mark"
-      />
-      <input
-        type="number"
-        value={dte}
-        onChange={e => setDte(parseInt(e.target.value || '0'))}
-        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 w-20 text-green-400"
-        placeholder="DTE"
-      />
-      <input
-        type="date"
-        value={opened}
-        onChange={e => setOpened(e.target.value)}
-        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
-      />
-      <button
-        className="px-3 py-1 rounded border border-green-500 bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
-        onClick={() => {
-          onAdd({ sym, type, side, qty, strike, entry, mark, dte, opened: opened || undefined });
-          setSym('');
-        }}
-      >
-        Add
-      </button>
-    </div>
-  );
-};
-
-const AddLotInline: React.FC<{
-  onAdd: (r: { sym: string; qty: number; cost: number; opened?: string }) => void;
-}> = ({ onAdd }) => {
-  const [sym, setSym] = useState('');
-  const [qty, setQty] = useState(100);
-  const [cost, setCost] = useState(10);
-  const [opened, setOpened] = useState('');
-  return (
-    <div className="flex flex-wrap gap-2 text-sm">
-      <input
-        value={sym}
-        onChange={e => setSym(e.target.value.toUpperCase())}
-        placeholder="Symbol"
-        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 w-24 text-green-400"
-      />
-      <input
-        type="number"
-        value={qty}
-        onChange={e => setQty(parseInt(e.target.value || '0'))}
-        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 w-24 text-green-400"
-        placeholder="Qty"
-      />
-      <input
-        type="number"
-        step=".01"
-        value={cost}
-        onChange={e => setCost(parseFloat(e.target.value || '0'))}
-        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 w-24 text-green-400"
-        placeholder="Cost"
-      />
-      <input
-        type="date"
-        value={opened}
-        onChange={e => setOpened(e.target.value)}
-        className="px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
-      />
-      <button
-        className="px-3 py-1 rounded border border-green-500 bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
-        onClick={() => {
-          onAdd({ sym, qty, cost, opened: opened || undefined });
-          setSym('');
-        }}
-      >
-        Add
-      </button>
-    </div>
-  );
-};
-
-const PhaseOverride: React.FC<{
-  tickers: string[];
-  current: (s: string) => WheelPhase;
-  onOpenSymbol: (s: string) => void;
-  onSave: (s: string, p: WheelPhase) => void;
-}> = ({ tickers, current, onOpenSymbol, onSave }) => (
-  <div className="space-y-2" data-testid="drawer.phase">
-    {tickers.map(t => (
-      <div
-        key={t}
-        className="flex items-center gap-3 rounded border border-green-500/20 bg-zinc-950/40 p-2"
-      >
-        <div className="font-semibold w-16 text-green-400">{t}</div>
-        <div className="text-xs px-2 py-1 rounded border border-green-500/30 bg-green-500/10 text-green-400">
-          {current(t)}
-        </div>
-        <button
-          className="text-xs px-2 py-1 rounded border border-green-500/30 hover:border-green-400/50 text-green-400 transition-colors"
-          onClick={() => onOpenSymbol(t)}
-        >
-          Open
-        </button>
-        <select
-          id={`phase-${t}`}
-          defaultValue={current(t)}
-          className="ml-auto text-xs px-2 py-1 rounded bg-zinc-950/60 border border-green-500/30 text-green-400"
-        >
-          {[
-            'Sell Cash Secured Puts',
-            'Put Expires Worthless',
-            'Buy At Strike',
-            'Sell Covered Calls',
-            'Call Expires Worthless',
-            'Call Exercised Sell Shares',
-            'Repeat',
-          ].map(p => (
-            <option key={p} value={p}>
-              {p}
-            </option>
-          ))}
-        </select>
-        <button
-          className="text-xs px-2 py-1 rounded border border-green-500 bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
-          onClick={() => {
-            const val = (document.getElementById(`phase-${t}`) as HTMLSelectElement)
-              .value as WheelPhase;
-            onSave(t, val);
-          }}
-        >
-          Save
-        </button>
-      </div>
-    ))}
-    {tickers.length === 0 && <div className="text-sm text-zinc-600">No symbols</div>}
-  </div>
-);
+// Removed PhaseOverride after refactor; phaseFor is still used for display
 
 const DataExplorer: React.FC<{
   lots: Lot[];

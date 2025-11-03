@@ -48,7 +48,8 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'yarn dev',
+    // Force Vite to use a fixed, strict port so baseURL stays consistent
+    command: 'yarn dev -- --port 5173 --strictPort',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
   },

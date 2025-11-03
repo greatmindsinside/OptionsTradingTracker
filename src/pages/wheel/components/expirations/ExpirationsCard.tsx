@@ -1,0 +1,38 @@
+import React, { useMemo } from 'react';
+import { useWheelStore } from '@/stores/useWheelStore';
+import type { ExpRow } from '@/types/wheel';
+import { useExpirationSort } from './useExpirationSort';
+import { ExpirationRow } from './ExpirationRow';
+import { ymd } from '@/utils/wheel-calculations';
+
+export const ExpirationsCard: React.FC = () => {
+  const positions = useWheelStore(s => s.positions);
+  const rows: ExpRow[] = useMemo(
+    () =>
+      positions.map(p => ({
+        id: p.id,
+        symbol: p.ticker,
+        type: p.type,
+        strike: p.strike,
+        expiration: ymd(new Date(new Date(p.opened).getTime() + p.dte * 864e5)),
+        side: p.side,
+        qty: p.qty,
+      })),
+    [positions]
+  );
+  const sorted = useExpirationSort(rows);
+
+  return (
+    <div className="rounded-2xl border border-green-500/20 bg-linear-to-br from-black/80 to-zinc-950/90 backdrop-blur-xl p-4 shadow-lg shadow-green-500/10">
+      <div className="text-green-400 font-semibold mb-2">⏳ Upcoming Expirations</div>
+      <div className="space-y-2">
+        {sorted.length === 0 && (
+          <div className="text-sm text-slate-500 text-center py-4">No upcoming expirations</div>
+        )}
+        {sorted.map(row => (
+          <ExpirationRow key={row.id} row={row} />
+        ))}
+      </div>
+    </div>
+  );
+};

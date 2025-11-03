@@ -6,8 +6,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { SQLiteDatabase } from '@/modules/db/sqlite';
 import { initDatabase } from '@/modules/db/sqlite';
-import { DAOFactory } from '@/modules/db/dao-index';
-import type { DatabaseTrade } from '@/modules/db/trade-dao';
+import { initDb, all } from '@/db/sql';
+import type { Entry } from '@/types/entry';
 
 // Types expected by the Wheel page
 export interface Position {
@@ -55,7 +55,7 @@ export function useWheelDatabase() {
   const [error, setError] = useState<string | null>(null);
   const [db, setDb] = useState<SQLiteDatabase | null>(null);
 
-  // Initialize database
+  // Initialize database (keeping for compatibility)
   useEffect(() => {
     let mounted = true;
 
@@ -86,49 +86,28 @@ export function useWheelDatabase() {
     };
   }, []);
 
-  // Load wheel data
+  // Load wheel data from journal table
   const loadWheelData = useCallback(async () => {
-    if (!db) return;
-
     try {
       setLoading(true);
       setError(null);
-      console.log('🔄 Loading wheel data from database...');
+      console.log('🔄 Loading wheel data from journal table...');
 
-      const daoFactory = new DAOFactory(db);
-      const tradeDAO = daoFactory.createTradeDAO();
-      const portfolioDAO = daoFactory.createPortfolioDAO();
+      // Initialize journal database
+      await initDb();
 
-      // Get default portfolio
-      const portfoliosResult = await portfolioDAO.findAll({ limit: 1 });
-      let portfolioId = 1;
+      // Query all entries from journal table
+      const entries = all<Entry>(`
+        SELECT id, ts, account_id, symbol, type, qty, amount, strike, expiration, underlying_price, notes, meta 
+        FROM journal 
+        ORDER BY datetime(ts) DESC
+      `);
 
-      if (portfoliosResult.success && portfoliosResult.data && portfoliosResult.data.length > 0) {
-        portfolioId = portfoliosResult.data[0].id!;
-      } else {
-        // Create default portfolio if none exists
-        const createResult = await portfolioDAO.create({
-          name: 'Default Portfolio',
-          broker: 'robinhood',
-          account_type: 'cash',
-          is_active: true,
-        });
+      console.log('📈 Loaded journal entries:', entries.length);
 
-        if (createResult.success && createResult.data) {
-          portfolioId = createResult.data.id!;
-        }
-      }
-
-      console.log('📊 Using portfolio ID:', portfolioId);
-
-      // Load trades for this portfolio
-      const trades = await tradeDAO.findByPortfolioId(portfolioId);
-      console.log('📈 Loaded trades:', trades.length);
-
-      // Transform trades into positions (simplified for now)
-      const positions = await transformTradesToPositions(trades, db);
-      const shareLots = await getShareLots(trades, db);
-      // Derive tickers from computed positions and share lots to avoid per-trade lookups
+      // Transform journal entries into positions
+      const positions = transformJournalToPositions(entries);
+      const shareLots = transformJournalToShareLots(entries);
       const tickers = Array.from(
         new Set([...positions.map(p => p.ticker), ...shareLots.map(l => l.ticker)])
       );
@@ -162,14 +141,12 @@ export function useWheelDatabase() {
     } finally {
       setLoading(false);
     }
-  }, [db]);
+  }, []);
 
-  // Load data when database is ready
+  // Load data on mount
   useEffect(() => {
-    if (db) {
-      loadWheelData();
-    }
-  }, [db, loadWheelData]);
+    loadWheelData();
+  }, [loadWheelData]);
 
   return {
     data,
@@ -180,55 +157,71 @@ export function useWheelDatabase() {
   };
 }
 
-// Helper functions to transform database data
+// Helper functions to transform journal entries into wheel data
 
-async function transformTradesToPositions(
-  trades: DatabaseTrade[],
-  db: SQLiteDatabase
-): Promise<Position[]> {
+function transformJournalToPositions(entries: Entry[]): Position[] {
   const positions: Position[] = [];
   const positionMap = new Map<string, Partial<Position>>();
 
-  for (const trade of trades) {
-    if (trade.instrument_type !== 'OPTION') continue;
+  // Group entries by position (symbol + strike + expiration)
+  for (const entry of entries) {
+    // Only process option-related entries
+    if (
+      entry.type !== 'sell_to_open' &&
+      entry.type !== 'option_premium' &&
+      entry.type !== 'buy_to_close'
+    ) {
+      continue;
+    }
 
-    const ticker = await getTickerFromTradeId(trade.symbol_id, db);
-    const key = `${ticker}_${trade.option_type}_${trade.strike_price}_${trade.expiration_date}`;
+    if (!entry.strike || !entry.expiration) {
+      continue; // Skip entries without strike/expiration
+    }
+
+    const key = `${entry.symbol}_${entry.strike}_${entry.expiration}`;
 
     if (!positionMap.has(key)) {
       positionMap.set(key, {
         id: key,
-        ticker,
-        type: trade.option_type === 'CALL' ? 'C' : 'P',
-        strike: trade.strike_price || 0,
+        ticker: entry.symbol,
+        strike: entry.strike,
         qty: 0,
         entry: 0,
-        mark: 0, // Would need live price data
-        dte: calculateDTE(trade.expiration_date || ''),
-        m: 0, // Moneyness calculation would need current price
+        mark: 0,
+        dte: calculateDTE(entry.expiration),
+        m: 0,
+        // Infer type from entry meta or default to P
+        type: 'P', // Will be updated based on entry data
+        side: 'S',
       });
     }
 
     const position = positionMap.get(key)!;
-    const isSell = trade.action.includes('SELL');
-    const qtyChange = isSell ? trade.quantity : -trade.quantity;
 
-    // Update position
-    position.qty = (position.qty || 0) + qtyChange;
-    position.side = position.qty! > 0 ? 'S' : 'B';
+    // Update quantity based on entry type
+    if (entry.type === 'sell_to_open' || entry.type === 'option_premium') {
+      const contracts = entry.qty || 1;
+      position.qty = (position.qty || 0) + contracts;
+      position.side = 'S'; // Selling
 
-    // Calculate weighted average entry price
-    if (position.qty !== 0) {
-      const currentValue = (position.entry || 0) * Math.abs(position.qty! - qtyChange);
-      const tradeValue = trade.price * Math.abs(qtyChange);
-      const totalQty = Math.abs(position.qty!);
-      position.entry = (currentValue + tradeValue) / totalQty;
+      // Update entry price (weighted average)
+      const premium = Math.abs(entry.amount) / contracts / 100;
+      if (position.entry === 0) {
+        position.entry = premium;
+      } else {
+        const totalQty = position.qty || 1;
+        const prevTotal = (position.entry || 0) * (totalQty - contracts);
+        position.entry = (prevTotal + premium * contracts) / totalQty;
+      }
+    } else if (entry.type === 'buy_to_close') {
+      const contracts = entry.qty || 1;
+      position.qty = (position.qty || 0) - contracts;
     }
   }
 
-  // Only return positions with non-zero quantity
+  // Only return open positions (non-zero quantity)
   positionMap.forEach(pos => {
-    if (pos.qty !== 0) {
+    if (pos.qty && pos.qty > 0) {
       positions.push(pos as Position);
     }
   });
@@ -236,28 +229,28 @@ async function transformTradesToPositions(
   return positions;
 }
 
-async function getShareLots(trades: DatabaseTrade[], db: SQLiteDatabase): Promise<ShareLot[]> {
+function transformJournalToShareLots(entries: Entry[]): ShareLot[] {
   const lots: ShareLot[] = [];
   const lotMap = new Map<string, { qty: number; totalCost: number }>();
 
-  for (const trade of trades) {
-    if (trade.instrument_type === 'OPTION') continue;
+  // Process assignment entries
+  for (const entry of entries) {
+    if (entry.type === 'assignment_shares') {
+      const ticker = entry.symbol;
+      const qty = Math.abs(entry.qty || 0);
+      const cost = Math.abs(entry.amount);
 
-    const ticker = await getTickerFromTradeId(trade.symbol_id, db);
+      if (!lotMap.has(ticker)) {
+        lotMap.set(ticker, { qty: 0, totalCost: 0 });
+      }
 
-    if (!lotMap.has(ticker)) {
-      lotMap.set(ticker, { qty: 0, totalCost: 0 });
+      const lot = lotMap.get(ticker)!;
+      lot.qty += qty;
+      lot.totalCost += cost;
     }
-
-    const lot = lotMap.get(ticker)!;
-    const isBuy = trade.action.includes('BUY');
-    const qtyChange = isBuy ? trade.quantity : -trade.quantity;
-    const costChange = isBuy ? trade.price * trade.quantity : -(trade.price * trade.quantity);
-
-    lot.qty += qtyChange;
-    lot.totalCost += costChange;
   }
 
+  // Convert map to array
   lotMap.forEach((lot, ticker) => {
     if (lot.qty > 0) {
       lots.push({
@@ -269,12 +262,6 @@ async function getShareLots(trades: DatabaseTrade[], db: SQLiteDatabase): Promis
   });
 
   return lots;
-}
-
-async function getTickerFromTradeId(symbolId: number, db: SQLiteDatabase): Promise<string> {
-  // Query the symbols table to get ticker
-  const result = db.query('SELECT symbol FROM symbols WHERE id = ?', [symbolId]);
-  return (result[0]?.symbol as string) || 'UNKNOWN';
 }
 
 // Note: We avoid a per-trade symbol lookup by computing tickers from positions/share lots above.

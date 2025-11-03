@@ -24,7 +24,10 @@
       "@/pages/*": ["src/pages/*"],
       "@/modules/*": ["src/modules/*"],
       "@/utils/*": ["src/utils/*"],
-      "@/workers/*": ["src/workers/*"]
+      "@/workers/*": ["src/workers/*"],
+      "@/stores/*": ["src/stores/*"],
+      "@/types/*": ["src/types/*"],
+      "@/hooks/*": ["src/hooks/*"]
     },
 
     /* Linting */

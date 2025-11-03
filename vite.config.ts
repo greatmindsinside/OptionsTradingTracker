@@ -31,6 +31,9 @@ export default defineConfig({
       '@/modules': '/src/modules',
       '@/utils': '/src/utils',
       '@/workers': '/src/workers',
+      '@/stores': '/src/stores',
+      '@/types': '/src/types',
+      '@/hooks': '/src/hooks',
     },
   },
   optimizeDeps: {
