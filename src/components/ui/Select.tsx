@@ -38,7 +38,7 @@ export const Select: React.FC<SelectProps> = ({
         )}
         <select
           id={selectId}
-          className={`w-full ${icon ? 'pl-9' : 'px-4'} appearance-none rounded-xl border border-green-500/60 bg-zinc-950/60 py-3 pr-10 text-zinc-200 shadow hover:border-green-400/70 hover:bg-zinc-900/60 focus:border-green-400/70 focus:ring-2 focus:ring-green-500/30 focus:outline-none disabled:cursor-not-allowed disabled:text-zinc-500 ${align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : 'text-left'} ${error ? 'border-red-500/50' : ''} ${className}`}
+          className={`w-full ${icon ? 'pl-9' : 'px-4'} appearance-none rounded-xl border border-green-500/70 bg-zinc-900 py-3 pr-10 text-zinc-200 shadow hover:border-green-400/80 hover:bg-zinc-800/70 focus:border-green-400/80 focus:ring-2 focus:ring-green-500/30 focus:ring-offset-1 focus:ring-offset-black/80 focus:outline-none disabled:cursor-not-allowed disabled:text-zinc-500 ${align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : 'text-left'} ${error ? 'border-red-500/50' : ''} ${className}`}
           {...props}
         >
           {options.map(option => (

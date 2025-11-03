@@ -42,9 +42,9 @@ export const Input: React.FC<InputProps> = ({
           id={inputId}
           type={type}
           className={cn(
-            'w-full rounded-xl border border-green-500/60 bg-zinc-950/60 text-zinc-200 shadow placeholder:text-zinc-200/70',
-            'transition-colors focus:border-green-400/70 focus:ring-2 focus:ring-green-500/30 focus:outline-none',
-            'hover:border-green-400/70 hover:bg-zinc-900/60',
+            'w-full rounded-xl border border-green-500/70 bg-zinc-900 text-zinc-200 shadow placeholder:text-zinc-200/70',
+            'transition-colors focus:border-green-400/80 focus:ring-2 focus:ring-green-500/30 focus:ring-offset-1 focus:ring-offset-black/80 focus:outline-none',
+            'hover:border-green-400/80 hover:bg-zinc-800/70',
             'disabled:cursor-not-allowed disabled:text-zinc-500 disabled:shadow-none',
             // Soft focus glow
             'focus:shadow-[0_0_0_4px_rgba(16,185,129,0.12)]',
