@@ -277,13 +277,13 @@ const JournalPage: React.FC = () => {
       <div className="pointer-events-none absolute -right-24 -bottom-32 aspect-square h-128 rounded-full bg-green-400/20 blur-3xl" />
 
       {/* Header */}
-      <header className="wheel-header">
-        <div className="wheel-header__inner">
-          <h1 className="wheel-header__brand">💼 Wheel Strategy Journal</h1>
-          <div className="wheel-header__search">
-            <div className="wheel-header__search-wrapper">
+      <header className="page-header">
+        <div className="page-header__inner">
+          <h1 className="page-header__brand">💼 Wheel Strategy Journal</h1>
+          <div className="page-header__search">
+            <div className="page-header__search-wrapper">
               <svg
-                className="wheel-header__search-icon"
+                className="page-header__search-icon"
                 viewBox="0 0 20 20"
                 fill="none"
                 stroke="currentColor"
@@ -307,13 +307,13 @@ const JournalPage: React.FC = () => {
                   filters.setFilters({ symbol: e.target.value });
                 }}
                 placeholder="Search symbol..."
-                className="wheel-header__search-input"
+                className="page-header__search-input"
               />
             </div>
           </div>
           <button
             onClick={() => setOpen(true)}
-            className="wheel-header__btn wheel-header__btn--primary"
+            className="page-header__btn page-header__btn--primary"
           >
             ✨ New Entry
           </button>
