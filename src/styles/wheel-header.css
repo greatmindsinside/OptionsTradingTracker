@@ -16,13 +16,13 @@
   z-index: 20;
   /* Deep black with neon green energy pulses */
   background: 
-    linear-gradient(90deg, 
+    linear-gradient(3deg, 
       rgba(0, 0, 0, 0.95) 0%, 
       rgba(5, 15, 5, 0.98) 20%,
       rgba(0, 0, 0, 0.95) 40%,
-      rgba(5, 15, 5, 0.98) 60%,
+      rgba(0, 15, 5, 0.98) 60%,
       rgba(0, 0, 0, 0.95) 80%,
-      rgba(5, 15, 5, 0.98) 100%
+      rgba(0, 0, 0, 0.98) 100%
     );
   background-size: 200% 100%;
   animation: energyPulse 8s ease infinite;
@@ -127,26 +127,29 @@
    ============================================ */
 
 /**
- * Brand logo - Professional gradient design
- * - Premium multi-color gradient (teal → emerald → gold)
- * - Refined typography with elegant spacing
- * - Sophisticated depth and glow effects
- * - Polished, corporate-ready aesthetic
+ * Brand logo - Red Chrome Sports Car Style
+ * - Candy apple red with chrome highlights
+ * - Metallic reflective gradient
+ * - High-gloss automotive finish
+ * - Dynamic light reflections
  */
 .page-header__brand,
 .wheel-header__brand {
-  font-size: 1.125rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   font-family: 'Orbitron', 'Rajdhani', 'Share Tech Mono', 'Courier New', monospace;
   background: linear-gradient(
-    135deg,
-    #06b6d4 0%,      /* Cyan */
-    #10b981 25%,     /* Emerald */
-    #059669 50%,     /* Deep emerald */
-    #10b981 75%,     /* Emerald */
-    #fbbf24 100%     /* Gold accent */
+    165deg,
+    #ffffff 0%,      /* Chrome highlight */
+    #ff1744 8%,      /* Bright red */
+    #dc143c 20%,     /* Crimson */
+    #8b0000 40%,     /* Dark red shadow */
+    #dc143c 60%,     /* Crimson */
+    #ff1744 80%,     /* Bright red */
+    #ffffff 92%,     /* Chrome highlight */
+    #e0e0e0 100%     /* Silver edge */
   );
   background-size: 200% auto;
   -webkit-background-clip: text;
@@ -154,51 +157,59 @@
   background-clip: text;
   position: relative;
   filter: 
-    drop-shadow(0 2px 4px rgba(16, 185, 129, 0.4))
-    drop-shadow(0 0 12px rgba(6, 182, 212, 0.2))
-    drop-shadow(0 0 24px rgba(251, 191, 36, 0.1));
-  animation: gradientShift 6s ease infinite, subtlePulse 3s ease-in-out infinite;
+    drop-shadow(0 3px 6px rgba(139, 0, 0, 0.6))
+    drop-shadow(0 0 15px rgba(255, 23, 68, 0.4))
+    drop-shadow(0 -1px 2px rgba(255, 255, 255, 0.3))
+    drop-shadow(0 0 30px rgba(220, 20, 60, 0.2));
+  animation: chromeShine 4s linear infinite, carReflection 2s ease-in-out infinite;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  text-shadow:
+    2px 2px 4px rgba(0, 0, 0, 0.8),
+    -1px -1px 2px rgba(255, 255, 255, 0.3);
 }
 
-/* Smooth gradient animation for premium feel */
-@keyframes gradientShift {
-  0%, 100% {
-    background-position: 0% 50%;
+/* Chrome shine - sweeping light reflection like on car paint */
+@keyframes chromeShine {
+  0% {
+    background-position: -200% center;
   }
-  50% {
-    background-position: 100% 50%;
+  100% {
+    background-position: 200% center;
   }
 }
 
-/* Subtle breathing pulse for life and depth */
-@keyframes subtlePulse {
+/* Dynamic reflection - mimics light moving across curved metal surface */
+@keyframes carReflection {
   0%, 100% {
     filter: 
-      drop-shadow(0 2px 4px rgba(16, 185, 129, 0.4))
-      drop-shadow(0 0 12px rgba(6, 182, 212, 0.2))
-      drop-shadow(0 0 24px rgba(251, 191, 36, 0.1));
+      drop-shadow(0 3px 6px rgba(139, 0, 0, 0.6))
+      drop-shadow(0 0 15px rgba(255, 23, 68, 0.4))
+      drop-shadow(0 -1px 2px rgba(255, 255, 255, 0.3))
+      drop-shadow(0 0 30px rgba(220, 20, 60, 0.2));
   }
   50% {
     filter: 
-      drop-shadow(0 2px 6px rgba(16, 185, 129, 0.5))
-      drop-shadow(0 0 16px rgba(6, 182, 212, 0.3))
-      drop-shadow(0 0 32px rgba(251, 191, 36, 0.15));
+      drop-shadow(0 3px 8px rgba(139, 0, 0, 0.7))
+      drop-shadow(0 0 20px rgba(255, 23, 68, 0.5))
+      drop-shadow(0 -2px 3px rgba(255, 255, 255, 0.4))
+      drop-shadow(0 0 40px rgba(220, 20, 60, 0.3));
   }
 }
 
 /**
- * Hover effect - Enhanced glow and scale
+ * Hover effect - Intense metallic gleam like sunlight hitting chrome
  */
 .page-header__brand:hover,
 .wheel-header__brand:hover {
-  transform: scale(1.02);
+  transform: scale(1.03);
   filter: 
-    drop-shadow(0 4px 8px rgba(16, 185, 129, 0.6))
-    drop-shadow(0 0 20px rgba(6, 182, 212, 0.4))
-    drop-shadow(0 0 40px rgba(251, 191, 36, 0.2));
+    drop-shadow(0 5px 12px rgba(139, 0, 0, 0.8))
+    drop-shadow(0 0 30px rgba(255, 23, 68, 0.7))
+    drop-shadow(0 -2px 4px rgba(255, 255, 255, 0.6))
+    drop-shadow(0 0 50px rgba(220, 20, 60, 0.4));
+  animation: chromeShine 2s linear infinite, carReflection 1s ease-in-out infinite;
   cursor: default;
 }
 
