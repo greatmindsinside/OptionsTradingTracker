@@ -127,11 +127,10 @@
    ============================================ */
 
 /**
- * Brand logo - Red Chrome Sports Car Style
- * - Candy apple red with chrome highlights
- * - Metallic reflective gradient
- * - High-gloss automotive finish
- * - Dynamic light reflections
+ * Brand logo - Minimal black with white shadow
+ * - Solid black lettering for maximum legibility
+ * - Clean white halo/shadow for contrast on dark backgrounds
+ * - No gradients or chrome effects for a professional, understated look
  */
 .page-header__brand,
 .wheel-header__brand {
@@ -140,34 +139,12 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-family: 'Orbitron', 'Rajdhani', 'Share Tech Mono', 'Courier New', monospace;
-  background: linear-gradient(
-    165deg,
-    #ffffff 0%,      /* Chrome highlight */
-    #ff1744 8%,      /* Bright red */
-    #dc143c 20%,     /* Crimson */
-    #8b0000 40%,     /* Dark red shadow */
-    #dc143c 60%,     /* Crimson */
-    #ff1744 80%,     /* Bright red */
-    #ffffff 92%,     /* Chrome highlight */
-    #e0e0e0 100%     /* Silver edge */
-  );
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #000;
   position: relative;
-  filter: 
-    drop-shadow(0 3px 6px rgba(139, 0, 0, 0.6))
-    drop-shadow(0 0 15px rgba(255, 23, 68, 0.4))
-    drop-shadow(0 -1px 2px rgba(255, 255, 255, 0.3))
-    drop-shadow(0 0 30px rgba(220, 20, 60, 0.2));
-  animation: chromeShine 4s linear infinite, carReflection 2s ease-in-out infinite;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.95);
+  transition: text-shadow 0.15s ease;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  text-shadow:
-    2px 2px 4px rgba(0, 0, 0, 0.8),
-    -1px -1px 2px rgba(255, 255, 255, 0.3);
 }
 
 /* Chrome shine - sweeping light reflection like on car paint */
@@ -199,17 +176,11 @@
 }
 
 /**
- * Hover effect - Intense metallic gleam like sunlight hitting chrome
+ * Hover effect - Slightly brighter white halo
  */
 .page-header__brand:hover,
 .wheel-header__brand:hover {
-  transform: scale(1.03);
-  filter: 
-    drop-shadow(0 5px 12px rgba(139, 0, 0, 0.8))
-    drop-shadow(0 0 30px rgba(255, 23, 68, 0.7))
-    drop-shadow(0 -2px 4px rgba(255, 255, 255, 0.6))
-    drop-shadow(0 0 50px rgba(220, 20, 60, 0.4));
-  animation: chromeShine 2s linear infinite, carReflection 1s ease-in-out infinite;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 1);
   cursor: default;
 }
 
