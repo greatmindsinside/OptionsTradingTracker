@@ -130,15 +130,15 @@
  * Brand text - Electric neon with glitch effect
  * - Sharp, edgy design with electric green glow
  * - Glitch distortion on hover
- * - Monospace-inspired futuristic look
+ * - Classic cyberpunk aesthetic with sharp edges
  */
 .page-header__brand,
 .wheel-header__brand {
   font-size: 1rem;
   font-weight: 900;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  font-family: 'Courier New', monospace;
+  font-family: 'Orbitron', 'Rajdhani', 'Share Tech Mono', 'Courier New', monospace;
   color: #10b981;
   text-shadow:
     0 0 5px rgba(16, 185, 129, 0.8),
@@ -265,8 +265,8 @@
   border-radius: 0.25rem;
   color: #10b981;
   font-size: 0.8125rem;
-  font-family: 'Courier New', monospace;
-  letter-spacing: 0.02em;
+  font-family: 'Rajdhani', 'Share Tech Mono', 'Courier New', monospace;
+  letter-spacing: 0.03em;
   outline: none;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 
@@ -336,8 +336,8 @@
   padding: 0.5rem 1rem;
   font-size: 0.75rem;
   font-weight: 700;
-  font-family: 'Courier New', monospace;
-  letter-spacing: 0.05em;
+  font-family: 'Rajdhani', 'Share Tech Mono', 'Courier New', monospace;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   border-radius: 0.25rem;
   cursor: pointer;
