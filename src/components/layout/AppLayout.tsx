@@ -11,7 +11,8 @@ export function AppLayout() {
   return (
     <div className="min-h-screen bg-black text-zinc-100">
       <AppHeader />
-      <main className="mx-auto w-full max-w-6xl px-4 py-6">
+      {/* Let each page control its own width/centering. Avoid constraining here. */}
+      <main className="w-full">
         <Outlet />
       </main>
     </div>
