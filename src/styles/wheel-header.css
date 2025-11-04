@@ -97,8 +97,8 @@
  */
 .page-header__brand,
 .wheel-header__brand {
-  font-size: 1.75rem;
-  font-weight: 800;
+  font-size: 1.125rem;
+  font-weight: 700;
   letter-spacing: -0.025em;
   background: linear-gradient(
     135deg,
@@ -194,14 +194,14 @@
 @media (max-width: 768px) {
   .page-header__brand,
   .wheel-header__brand {
-    font-size: 1.25rem;
+    font-size: 0.875rem;
   }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
   .page-header__brand,
   .wheel-header__brand {
-    font-size: 1.5rem;
+    font-size: 1rem;
   }
 }
 
@@ -219,13 +219,13 @@
 .page-header__search-input,
 .wheel-header__search-input {
   width: 100%;
-  padding: 0.625rem 1rem;
-  padding-left: 2.5rem;
+  padding: 0.5rem 0.875rem;
+  padding-left: 2.25rem;
   background: rgba(30, 41, 59, 0.6);
   border: 1px solid rgba(148, 163, 184, 0.2);
-  border-radius: 0.75rem;
+  border-radius: 0.625rem;
   color: #f1f5f9;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   outline: none;
   transition: all 0.2s ease;
 }
@@ -273,10 +273,10 @@
 
 .page-header__btn,
 .wheel-header__btn {
-  padding: 0.625rem 1.25rem;
-  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  border-radius: 0.625rem;
+  border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
