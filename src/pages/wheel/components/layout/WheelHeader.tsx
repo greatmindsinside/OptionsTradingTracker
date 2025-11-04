@@ -45,9 +45,22 @@ export const WheelHeader: React.FC = () => {
     <header className="page-header">
       {/* Centers content and constrains width */}
       <div className="page-header__inner">
-        {/* Brand/title for the page; test id consumed by E2E tests */}
+        {/* Brand/logo for the page; test id consumed by E2E tests */}
         <h1 className="page-header__brand" data-testid="wheel.title">
-          💰 Wheel To Tendies Pipeline
+          <img
+            src="/branding/wheel-to-tendies.png"
+            alt="Wheel to Tendies logo"
+            className="page-header__brand-image"
+            loading="eager"
+            decoding="sync"
+            onError={(e) => {
+              const img = e.currentTarget as HTMLImageElement;
+              // Prevent infinite loop then swap to a local fallback icon
+              img.onerror = null;
+              img.src = '/vite.svg';
+            }}
+          />
+          <span className="sr-only">Wheel To Tendies Pipeline</span>
         </h1>
 
         {/* Search section: ticker filter input */}
