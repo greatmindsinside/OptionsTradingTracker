@@ -142,6 +142,10 @@
   font-family: 'Helvetica Neue', Helvetica, Arial, 'Segoe UI', Roboto, Inter, system-ui, sans-serif;
   color: #000;
   position: relative;
+  margin: 0;           /* remove default h1 margins that add extra space */
+  line-height: 0;      /* collapse inline text line box so image sits flush */
+  display: flex;       /* ensure image aligns precisely with siblings */
+  align-items: center; /* vertically center content within brand container */
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.95);
   transition: text-shadow 0.15s ease;
   text-rendering: optimizeLegibility;
