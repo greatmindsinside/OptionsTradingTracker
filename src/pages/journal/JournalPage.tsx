@@ -279,7 +279,7 @@ const JournalPage: React.FC = () => {
       {/* Header */}
       <header className="page-header">
         <div className="page-header__inner">
-          <h1 className="page-header__brand">💼 Wheel Strategy Journal</h1>
+          <h1 className="page-header__brand page-header__brand--cyberpunk">💼 Wheel Strategy Journal</h1>
           <div className="page-header__search">
             <div className="page-header__search-wrapper">
               <svg

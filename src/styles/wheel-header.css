@@ -173,6 +173,40 @@
   border: 0;
 }
 
+/* Bombastic cyberpunk brand styling for Journal */
+.page-header__brand--cyberpunk {
+  /* Restore readable line-height for text variant */
+  line-height: 1.1;
+  display: block;
+  /* Futuristic font */
+  font-family: 'Orbitron', 'Rajdhani', 'Share Tech Mono', 'Courier New', monospace;
+  letter-spacing: 0.1em;
+  /* Neon emerald/cyan gradient text */
+  background: linear-gradient(
+    120deg,
+    #22d3ee 0%,   /* cyan */
+    #10b981 35%,  /* emerald */
+    #34d399 60%,  /* light emerald */
+    #a7f3d0 100%  /* mint glow */
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  /* Neon aura */
+  text-shadow:
+    0 0 6px rgba(34, 211, 238, 0.5),
+    0 0 14px rgba(16, 185, 129, 0.45),
+    0 0 24px rgba(16, 185, 129, 0.25);
+  /* Subtle animated sweep */
+  animation: journalGradient 8s ease-in-out infinite;
+}
+
+@keyframes journalGradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
 /* Chrome shine - sweeping light reflection like on car paint */
 @keyframes chromeShine {
   0% {
