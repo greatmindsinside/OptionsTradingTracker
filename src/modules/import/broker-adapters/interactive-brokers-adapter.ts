@@ -3,13 +3,13 @@
  * Handles Interactive Brokers Flex Query and Activity Statement formats
  */
 
-import { BaseBrokerAdapter, BrokerType } from './base-adapter';
 import type {
-  RawTradeData,
-  NormalizedTradeData,
   AdaptationResult,
   BrokerDetectionResult,
+  NormalizedTradeData,
+  RawTradeData,
 } from './base-adapter';
+import { BaseBrokerAdapter, BrokerType } from './base-adapter';
 
 export class InteractiveBrokersBrokerAdapter extends BaseBrokerAdapter {
   readonly brokerName: BrokerType = 'interactive_brokers';

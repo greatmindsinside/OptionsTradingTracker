@@ -1,25 +1,26 @@
 import { create } from 'zustand';
+
+import { buildWhere } from '@/db/queryBuilder';
 import {
-  initDb,
   all,
+  initDb,
   insertJournalRows,
+  restoreEntry as restoreEntryDb,
   saveDb,
   softDelete,
-  restoreEntry as restoreEntryDb,
 } from '@/db/sql';
-import { buildWhere } from '@/db/queryBuilder';
+import {
+  tmplCallAssigned,
+  tmplCorrection,
+  tmplDividend,
+  tmplFee,
+  tmplPutAssigned,
+  tmplSellCoveredCall,
+  tmplSellPut,
+} from '@/models/templates';
 import type { Entry, Totals } from '@/types/entry';
 import type { FilterState } from '@/types/entry';
 import type { TemplateKind, TemplatePayloads } from '@/types/templates';
-import {
-  tmplSellPut,
-  tmplPutAssigned,
-  tmplSellCoveredCall,
-  tmplCallAssigned,
-  tmplDividend,
-  tmplFee,
-  tmplCorrection,
-} from '@/models/templates';
 
 interface EntriesStore {
   ready: boolean;
@@ -162,13 +163,13 @@ export const useEntriesStore = create<EntriesStore>((set, get) => ({
           });
           break;
         case 'tmplFee':
+          rows = tmplFee({ ...base, amount: (payload as TemplatePayloads['tmplFee']).amount });
+          break;
         case 'tmplCorrection':
           {
             const p = payload as TemplatePayloads['tmplCorrection'];
             rows = tmplCorrection({ ...base, amount: p.amount, note: p.note });
           }
-          break;
-          rows = tmplFee({ ...base, amount: (payload as TemplatePayloads['tmplFee']).amount });
           break;
         default:
           rows = [];

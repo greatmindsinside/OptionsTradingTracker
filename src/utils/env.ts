@@ -5,6 +5,8 @@
  * and handles fallbacks for missing values.
  */
 
+import { z } from 'zod';
+
 interface EnvironmentConfig {
   // Application metadata
   app: {
@@ -24,6 +26,10 @@ interface EnvironmentConfig {
     debugMode: boolean;
     analytics: boolean;
     performanceMonitoring: boolean;
+    // New feature flags
+    journalEditDrawer?: boolean; // Slide-in editor for Journal entries
+    journalEditFlow?: boolean; // Enable full-field edit flow
+    tradeDTE?: boolean; // Trade drawer DTE UI (date picker + advanced input)
   };
 
   // Database configuration
@@ -98,6 +104,10 @@ export const env: EnvironmentConfig = {
     debugMode: parseBool(import.meta.env.VITE_ENABLE_DEBUG_MODE, import.meta.env.DEV),
     analytics: parseBool(import.meta.env.VITE_ENABLE_ANALYTICS, false),
     performanceMonitoring: parseBool(import.meta.env.VITE_ENABLE_PERFORMANCE_MONITORING, false),
+    journalEditDrawer: parseBool(import.meta.env.VITE_FEATURE_JOURNAL_EDIT_DRAWER, false),
+    journalEditFlow: parseBool(import.meta.env.VITE_FEATURE_JOURNAL_EDIT_FLOW, false),
+    // Trade DTE feature flag (drawer UI for expiration + advanced DTE)
+    tradeDTE: parseBool(import.meta.env.VITE_FEATURE_TRADE_DTE, false),
   },
 
   database: {
@@ -130,17 +140,50 @@ export const env: EnvironmentConfig = {
  * Validate required environment variables
  */
 export function validateEnvironment(): void {
-  const required = ['VITE_APP_TITLE', 'VITE_APP_VERSION'];
+  // Warn-only Zod validation of the resolved env config
+  const EnvSchema = z.object({
+    app: z.object({
+      title: z.string().min(1),
+      version: z.string().min(1),
+      description: z.string().min(1),
+    }),
+    api: z.object({
+      baseUrl: z.string().url().or(z.string().startsWith('http')),
+      timeout: z.number().int().positive(),
+    }),
+    features: z.object({
+      debugMode: z.boolean(),
+      analytics: z.boolean(),
+      performanceMonitoring: z.boolean(),
+      journalEditDrawer: z.boolean().optional(),
+      journalEditFlow: z.boolean().optional(),
+      tradeDTE: z.boolean().optional(),
+    }),
+    database: z.object({
+      name: z.string().min(1),
+      version: z.number().int().nonnegative(),
+    }),
+    csv: z.object({
+      maxFileSizeMB: z.number().int().positive(),
+      supportedBrokers: z.array(z.string().min(1)).min(1),
+    }),
+    chart: z.object({
+      theme: z.union([z.literal('light'), z.literal('dark')]),
+      animationDuration: z.number().int().nonnegative(),
+    }),
+    isDevelopment: z.boolean(),
+    isProduction: z.boolean(),
+    isTest: z.boolean(),
+  });
 
-  const missing = required.filter(key => !import.meta.env[key]);
-
-  if (missing.length > 0) {
-    console.warn('Missing environment variables:', missing);
+  const result = EnvSchema.safeParse(env);
+  if (!result.success) {
+    console.warn('[env] Validation warnings:', result.error.flatten());
   }
 
   // Log configuration in development
   if (env.features.debugMode) {
-    console.log('Environment configuration:', env);
+    console.log('[env] Resolved configuration:', env);
   }
 }
 

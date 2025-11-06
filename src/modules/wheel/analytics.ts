@@ -9,6 +9,7 @@
  */
 
 import type { WheelCycle, WheelEvent_Record as WheelEventRecord } from '@/modules/db/validation';
+
 import { WheelEvent, WheelState } from './lifecycle';
 
 export interface WheelLegMetrics {

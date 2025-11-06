@@ -1,7 +1,8 @@
 import { z } from 'zod';
-import type { SQLiteDatabase } from './sqlite';
+
 import { BaseDAO } from './dao-base';
-import { SymbolSchema, type Symbol } from './validation';
+import type { SQLiteDatabase } from './sqlite';
+import { type Symbol,SymbolSchema } from './validation';
 
 /**
  * Symbol Data Access Object

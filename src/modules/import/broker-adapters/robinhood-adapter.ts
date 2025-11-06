@@ -3,13 +3,13 @@
  * Handles Robinhood options transaction export format
  */
 
-import { BaseBrokerAdapter, BrokerType } from './base-adapter';
 import type {
-  RawTradeData,
-  NormalizedTradeData,
   AdaptationResult,
   BrokerDetectionResult,
+  NormalizedTradeData,
+  RawTradeData,
 } from './base-adapter';
+import { BaseBrokerAdapter, BrokerType } from './base-adapter';
 
 export class RobinhoodBrokerAdapter extends BaseBrokerAdapter {
   readonly brokerName: BrokerType = 'robinhood';

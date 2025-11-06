@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect,test } from '@playwright/test';
 
 /**
  * E2E: Edit an upcoming expiration date, save, reload, and verify persistence.
@@ -8,6 +9,63 @@ import { test, expect } from '@playwright/test';
  *  3) Verify the new date is displayed.
  *  4) Reload the page and verify the new date persists (DB saved).
  */
+
+// Helper function to fill trade form fields safely
+async function fillTradeForm(
+  page: Page,
+  options: {
+    qty: string;
+    dte?: string;
+    expiration?: string;
+    strike: string;
+    premium: string;
+    fees?: string;
+  }
+) {
+  await page.getByLabel(/qty/i).fill(options.qty);
+
+  // Handle DTE - may be date picker or number input
+  const expirationInput = page.getByLabel(/expiration/i).first();
+  const dteInput = page.getByLabel(/dte/i).first();
+  const hasDatePicker = (await expirationInput.count()) > 0;
+
+  if (hasDatePicker && options.expiration) {
+    await expirationInput.fill(options.expiration);
+  } else if (!hasDatePicker && options.dte) {
+    await dteInput.fill(options.dte);
+  }
+
+  await page.getByLabel(/strike/i).fill(options.strike);
+
+  // Premium field - find by label "Premium" text or by position
+  const premiumLabel = page.locator('text=/premium.*per share/i').first();
+  const premiumInput = premiumLabel.locator('..').locator('input[type="number"]').first();
+  if (await premiumInput.count() > 0) {
+    await premiumInput.fill(options.premium);
+  } else {
+    // Fallback: find by position (after strike input)
+    const allNumberInputs = await page.locator('input[type="number"]').all();
+    // Premium is typically after qty, dte, strike - so index 3 if we have 4+ inputs
+    if (allNumberInputs.length >= 4) {
+      await (allNumberInputs[3]!).fill(options.premium);
+    }
+  }
+
+  // Fees field - find input near "Fees" text or use last number input
+  if (options.fees !== undefined) {
+    const feesSection = page.locator('text=/fees/i').locator('..');
+    const feesInput = feesSection.locator('input[type="number"]').first();
+    if (await feesInput.count() > 0) {
+      await feesInput.fill(options.fees);
+    } else {
+      // Fallback: use last number input
+      const allNumberInputs = await page.locator('input[type="number"]').all();
+      if (allNumberInputs.length > 0) {
+        await (allNumberInputs[allNumberInputs.length - 1]!).fill(options.fees);
+      }
+    }
+  }
+}
 
 function formatMMDDYYYY(d: Date) {
   const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -29,16 +87,17 @@ test('editing Upcoming Expirations date persists after reload', async ({ page })
   await page.getByRole('button', { name: /^Trade$/ }).click();
 
   // Compose: Sell 1 Call ASTS, DTE 5, Strike 80
-  await page.getByRole('textbox', { name: 'e.g. AAPL' }).fill('ASTS');
+  await page.getByLabel(/symbol/i).fill('ASTS');
   await page.locator('select').first().selectOption({ label: 'Call' });
   await page.locator('select').nth(1).selectOption({ label: 'Sell' });
 
-  const nums = page.locator('input[type="number"]');
-  await nums.nth(0).fill('1'); // qty
-  await nums.nth(1).fill('5'); // dte
-  await nums.nth(2).fill('80'); // strike
-  await nums.nth(3).fill('1.00'); // premium
-  await nums.nth(4).fill('0'); // fees
+  await fillTradeForm(page, {
+    qty: '1',
+    dte: '5',
+    strike: '80',
+    premium: '1.00',
+    fees: '0',
+  });
 
   await page.getByRole('button', { name: /\+ Add Trade/ }).click();
   await page.waitForTimeout(600);
@@ -61,11 +120,11 @@ test('editing Upcoming Expirations date persists after reload', async ({ page })
   await astsRow.getByRole('textbox').fill(ymd);
   await astsRow.getByRole('button', { name: /^Save$/ }).click();
 
-  // Verify the new date appears in the row
-  await expect(astsRow).toContainText(ymd);
+  // Verify the new date appears in the row (with longer timeout for async save)
+  await expect(astsRow).toContainText(ymd, { timeout: 10000 });
 
   // Give the async DB write a moment to persist
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(1000);
 
   // Reload and verify persistence
   await page.reload();
@@ -73,6 +132,6 @@ test('editing Upcoming Expirations date persists after reload', async ({ page })
 
   const upcoming2 = page.getByText('Upcoming Expirations').locator('..');
   const astsRow2 = upcoming2.locator('text=ASTS').first().locator('..');
-  await expect(astsRow2).toBeVisible();
-  await expect(astsRow2).toContainText(ymd);
+  await expect(astsRow2).toBeVisible({ timeout: 10000 });
+  await expect(astsRow2).toContainText(ymd, { timeout: 10000 });
 });

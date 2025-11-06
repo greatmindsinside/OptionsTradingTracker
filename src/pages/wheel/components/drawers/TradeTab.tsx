@@ -1,14 +1,18 @@
-import React from 'react';
-import { useTradeComposer } from '@/pages/wheel/hooks/useTradeComposer';
-import type { OptType } from '@/types/wheel';
-import { useJournal } from '@/store/journal';
-import { useEntriesStore } from '@/stores/useEntriesStore';
-import { useWheelUIStore } from '@/stores/useWheelUIStore';
-import { useWheelStore } from '@/stores/useWheelStore';
-import { fmt } from '@/utils/wheel-calculations';
+import React, { useEffect, useMemo, useState } from 'react';
+
+import { Button } from '@/components/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-import { Button } from '@/components/Button';
+import { useTradeComposer } from '@/pages/wheel/hooks/useTradeComposer';
+import { useJournal } from '@/store/journal';
+import { useEntriesStore } from '@/stores/useEntriesStore';
+import { useWheelStore } from '@/stores/useWheelStore';
+import { useWheelUIStore } from '@/stores/useWheelUIStore';
+import type { OptType } from '@/types/wheel';
+import { calcDTE, dateFromDTE, isValidYmd } from '@/utils/dates';
+import { env } from '@/utils/env';
+import { track } from '@/utils/telemetry';
+import { fmt } from '@/utils/wheel-calculations';
 
 export const TradeTab: React.FC = () => {
   const { form, submitTrade, resetForm } = useTradeComposer();
@@ -16,6 +20,18 @@ export const TradeTab: React.FC = () => {
   const { addEntry } = useEntriesStore();
   const closeActions = useWheelUIStore(s => s.closeActions);
   const reloadFn = useWheelStore(s => s.reloadFn);
+
+  // Feature: DTE via date picker with advanced numeric input
+  const featureDteUi = env.features.tradeDTE;
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [expYmd, setExpYmd] = useState<string>(() => dateFromDTE(form.tradeDTE));
+  const dteFromExp = useMemo(() => calcDTE(expYmd), [expYmd]);
+
+  // Keep expiration and DTE in sync bi-directionally
+  useEffect(() => {
+    // If DTE changes (e.g., via Advanced input), recompute expiration
+    setExpYmd(dateFromDTE(form.tradeDTE));
+  }, [form.tradeDTE]);
 
   const handleAddTrade = async () => {
     try {
@@ -31,10 +47,22 @@ export const TradeTab: React.FC = () => {
     const todayDate = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
     const whenIso = new Date().toISOString();
 
-    // Calculate expiration date from DTE
-    const expirationDate = new Date();
-    expirationDate.setDate(expirationDate.getDate() + form.tradeDTE);
-    const expiration = expirationDate.toISOString().slice(0, 10);
+    // Calculate expiration date: prefer explicit date from UI when feature is enabled
+    const expiration = (() => {
+      if (featureDteUi && isValidYmd(expYmd)) return expYmd;
+      const fallback = new Date();
+      fallback.setDate(fallback.getDate() + form.tradeDTE);
+      return fallback.toISOString().slice(0, 10);
+    })();
+
+    // Warn if past date chosen
+    if (featureDteUi && dteFromExp < 0) {
+      track('trade_dte_past_date_warn', { exp: expYmd, dte: dteFromExp });
+      const ok = window.confirm(
+        'The selected expiration date is in the past. Do you want to continue?'
+      );
+      if (!ok) return;
+    }
 
     try {
       // Update in-memory journal (for WheelModern compatibility)
@@ -111,26 +139,42 @@ export const TradeTab: React.FC = () => {
       // Reload wheel data from database
       if (reloadFn) {
         await reloadFn();
-        alert(
-          `✅ Trade added: ${form.tradeSide === 'S' ? 'Sell' : 'Buy'} ${form.tradeQty} ${form.tradeType} ${S} $${form.tradeStrike}`
-        );
+        const msg = `✅ Trade added: ${form.tradeSide === 'S' ? 'Sell' : 'Buy'} ${form.tradeQty} ${form.tradeType} ${S} $${form.tradeStrike}`;
+        alert(msg);
+        track('trade_add_success', {
+          symbol: S,
+          side: form.tradeSide,
+          type: form.tradeType,
+          qty: form.tradeQty,
+          strike: form.tradeStrike,
+          dte: featureDteUi ? dteFromExp : form.tradeDTE,
+          expiration,
+        });
       } else {
         // Fallback to page reload if reload function not available
-        alert(
-          `✅ Trade added: ${form.tradeSide === 'S' ? 'Sell' : 'Buy'} ${form.tradeQty} ${form.tradeType} ${S} $${form.tradeStrike}`
-        );
+        const msg = `✅ Trade added: ${form.tradeSide === 'S' ? 'Sell' : 'Buy'} ${form.tradeQty} ${form.tradeType} ${S} $${form.tradeStrike}`;
+        alert(msg);
+        track('trade_add_success', {
+          symbol: S,
+          side: form.tradeSide,
+          type: form.tradeType,
+          qty: form.tradeQty,
+          strike: form.tradeStrike,
+          dte: featureDteUi ? dteFromExp : form.tradeDTE,
+          expiration,
+        });
         window.location.reload();
       }
     } catch (err) {
       console.error('Failed to add trade to database:', err);
       alert('❌ Failed to save trade to database. Check console for details.');
+      track('trade_add_error', { error: String(err) });
     }
   };
 
   return (
     <div className="space-y-3" data-testid="drawer.trade">
-      <div className="text-sm text-zinc-400">Compose a single option trade.</div>
-      <div className="grid grid-cols-1 gap-3">
+      <div className="mt-2 grid grid-cols-1 gap-3">
         <div className="flex flex-col gap-2">
           <Input
             label="Symbol"
@@ -172,14 +216,62 @@ export const TradeTab: React.FC = () => {
               onChange={e => form.setTradeQty(e.target.value === '' ? 0 : parseInt(e.target.value))}
             />
           </div>
-          <div className="flex flex-col gap-2">
-            <Input
-              label="DTE"
-              type="number"
-              value={form.tradeDTE || ''}
-              onChange={e => form.setTradeDTE(e.target.value === '' ? 0 : parseInt(e.target.value))}
-            />
-          </div>
+          {featureDteUi ? (
+            <div className="flex flex-col gap-2">
+              <Input
+                label="Expiration"
+                type="date"
+                value={expYmd}
+                onChange={e => {
+                  const ymd = e.target.value;
+                  setExpYmd(ymd);
+                  const next = calcDTE(ymd);
+                  form.setTradeDTE(next);
+                  track('trade_dte_date_change', { exp: ymd, dte: next });
+                }}
+              />
+              <div className="flex items-center justify-between text-xs text-zinc-500">
+                <div>
+                  DTE: <span className="font-medium text-zinc-300">{Math.max(0, dteFromExp)}</span>
+                  {dteFromExp < 0 && (
+                    <span className="ml-2 text-red-400">Past date selected</span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  className="text-emerald-400 hover:text-emerald-300"
+                  onClick={() => {
+                    const next = !showAdvanced;
+                    setShowAdvanced(next);
+                    track('trade_dte_toggle_advanced', { enabled: next });
+                  }}
+                >
+                  {showAdvanced ? 'Hide Advanced' : 'Advanced'}
+                </button>
+              </div>
+              {showAdvanced && (
+                <Input
+                  label="DTE (advanced)"
+                  type="number"
+                  value={form.tradeDTE || ''}
+                  onChange={e => {
+                    const v = e.target.value === '' ? 0 : parseInt(e.target.value);
+                    form.setTradeDTE(v);
+                    setExpYmd(dateFromDTE(v));
+                  }}
+                />
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <Input
+                label="DTE"
+                type="number"
+                value={form.tradeDTE || ''}
+                onChange={e => form.setTradeDTE(e.target.value === '' ? 0 : parseInt(e.target.value))}
+              />
+            </div>
+          )}
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-2">
@@ -241,7 +333,8 @@ export const TradeTab: React.FC = () => {
         <div className="rounded-lg border border-green-500/20 bg-zinc-950/40 p-3 text-sm text-zinc-300">
           {form.tradeSide === 'S' ? 'Sell' : 'Buy'} {form.tradeQty} {form.tradeType}{' '}
           {form.tradeSym || '—'} {form.tradeStrike || 0} @ $
-          {fmt(Math.max(0, form.tradeEntry || 0), 2)} · DTE {Math.max(0, form.tradeDTE || 0)} · Fees
+          {fmt(Math.max(0, form.tradeEntry || 0), 2)} · DTE {Math.max(0, featureDteUi ? dteFromExp : form.tradeDTE || 0)}
+          {featureDteUi && isValidYmd(expYmd) ? ` · Exp ${expYmd}` : ''} · Fees
           ${fmt(Math.max(0, form.tradeFees || 0), 2)}
         </div>
         <Button

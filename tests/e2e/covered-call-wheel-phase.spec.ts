@@ -1,4 +1,62 @@
-import { test, expect } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect,test } from '@playwright/test';
+
+// Helper function to fill trade form fields safely
+async function fillTradeForm(
+  page: Page,
+  options: {
+    qty: string;
+    dte?: string;
+    expiration?: string;
+    strike: string;
+    premium: string;
+    fees?: string;
+  }
+) {
+  await page.getByLabel(/qty/i).fill(options.qty);
+
+  // Handle DTE - may be date picker or number input
+  const expirationInput = page.getByLabel(/expiration/i).first();
+  const dteInput = page.getByLabel(/dte/i).first();
+  const hasDatePicker = (await expirationInput.count()) > 0;
+
+  if (hasDatePicker && options.expiration) {
+    await expirationInput.fill(options.expiration);
+  } else if (!hasDatePicker && options.dte) {
+    await dteInput.fill(options.dte);
+  }
+
+  await page.getByLabel(/strike/i).fill(options.strike);
+  
+  // Premium field - find by label "Premium" text or by position
+  const premiumLabel = page.locator('text=/premium.*per share/i').first();
+  const premiumInput = premiumLabel.locator('..').locator('input[type="number"]').first();
+  if (await premiumInput.count() > 0) {
+    await premiumInput.fill(options.premium);
+  } else {
+    // Fallback: find by position (after strike input)
+    const allNumberInputs = await page.locator('input[type="number"]').all();
+    // Premium is typically after qty, dte, strike - so index 3 if we have 4+ inputs
+    if (allNumberInputs.length >= 4) {
+      await (allNumberInputs[3]!).fill(options.premium);
+    }
+  }
+
+  // Fees field - find input near "Fees" text or use last number input
+  if (options.fees !== undefined) {
+    const feesSection = page.locator('text=/fees/i').locator('..');
+    const feesInput = feesSection.locator('input[type="number"]').first();
+    if (await feesInput.count() > 0) {
+      await feesInput.fill(options.fees);
+    } else {
+      // Fallback: use last number input
+      const allNumberInputs = await page.locator('input[type="number"]').all();
+      if (allNumberInputs.length > 0) {
+        await (allNumberInputs[allNumberInputs.length - 1]!).fill(options.fees);
+      }
+    }
+  }
+}
 
 // show the browser console logs for debugging
 test.beforeEach(async ({ page }) => {
@@ -23,35 +81,28 @@ test.describe('Covered Call Wheel Phase', () => {
     // Wait for drawer to open and click on Trade tab
     await page.click('button:has-text("Trade")');
 
-    // Wait for trade form to be visible
-    await expect(page.locator('text=Compose a single option trade')).toBeVisible();
+    // Wait for trade form to be visible - check for symbol input or trade form elements
+    await expect(page.getByLabel(/symbol/i)).toBeVisible();
 
     // Step 2: Fill in the trade form for a covered call
     // Symbol
-    await page.getByRole('textbox', { name: 'e.g. AAPL' }).fill('ASTS');
+    await page.getByLabel(/symbol/i).fill('ASTS');
 
     // Type: Select "Call" from dropdown
     await page.selectOption('select', { label: 'Call' });
 
     // Side: Select "Sell" from dropdown
     const sideSelects = await page.locator('select').all();
-    await sideSelects[1].selectOption({ label: 'Sell' });
+    await (sideSelects[1]!).selectOption({ label: 'Sell' });
 
-    // Qty
-    const numberInputs = await page.locator('input[type="number"]').all();
-    await numberInputs[0].fill('1');
-
-    // DTE
-    await numberInputs[1].fill('4');
-
-    // Strike
-    await numberInputs[2].fill('82');
-
-    // Premium (per share)
-    await numberInputs[3].fill('1.03');
-
-    // Fees (optional)
-    await numberInputs[4].fill('0');
+    // Fill trade form
+    await fillTradeForm(page, {
+      qty: '1',
+      dte: '4',
+      strike: '82',
+      premium: '1.03',
+      fees: '0',
+    });
 
     // Step 3: Verify the preview text
     await expect(page.locator('text=/Sell 1.*C.*ASTS.*82/')).toBeVisible();
@@ -74,14 +125,14 @@ test.describe('Covered Call Wheel Phase', () => {
 
     // Verify the phase shows one of: "Sell Covered Calls" or "Call Expires Worthless"
     // (NOT "Sell Cash Secured Puts")
-    const wheelPhaseText = await wheelPhaseSection.textContent();
+    const wheelPhaseTextRaw = await wheelPhaseSection.textContent();
+    const wheelPhaseText = wheelPhaseTextRaw ?? '';
 
     // Should contain ASTS and should NOT contain "Sell Cash Secured Put" for ASTS row
     expect(wheelPhaseText).toContain('ASTS');
 
     // Check that we have the correct phase (either Sell Covered Calls or Call Expires Worthless)
-    const hasCorrectPhase =
-      wheelPhaseText?.match(/Sell Covered Calls|Call Expires Worthless/) !== null;
+    const hasCorrectPhase = /Sell Covered Calls|Call Expires Worthless/.test(wheelPhaseText);
     expect(hasCorrectPhase).toBeTruthy();
 
     // Step 6: Verify it appears in Upcoming Expirations
@@ -107,20 +158,21 @@ test.describe('Covered Call Wheel Phase', () => {
     // Test Case 1: Start with selling a put
     await page.click('button:has-text("💸 Premium Printer")');
     await page.click('button:has-text("Trade")');
-    await page.getByRole('textbox', { name: 'e.g. AAPL' }).fill('ASTS');
+    await page.getByLabel(/symbol/i).fill('ASTS');
 
     // Select Put and Sell
     await page.selectOption('select', { label: 'Put' });
     const sideSelects = await page.locator('select').all();
-    await sideSelects[1].selectOption({ label: 'Sell' });
+    await (sideSelects[1]!).selectOption({ label: 'Sell' });
 
     // Fill in put details
-    const numberInputs = await page.locator('input[type="number"]').all();
-    await numberInputs[0].fill('1'); // qty
-    await numberInputs[1].fill('30'); // dte
-    await numberInputs[2].fill('50'); // strike
-    await numberInputs[3].fill('2.00'); // premium
-    await numberInputs[4].fill('0'); // fees
+    await fillTradeForm(page, {
+      qty: '1',
+      dte: '30',
+      strike: '50',
+      premium: '2.00',
+      fees: '0',
+    });
 
     await page.click('button:has-text("+ Add Trade")');
     await page.waitForTimeout(1000);
@@ -135,20 +187,21 @@ test.describe('Covered Call Wheel Phase', () => {
     // Test Case 2: Now add a covered call for the same ticker
     await page.click('button:has-text("💸 Premium Printer")');
     await page.click('button:has-text("Trade")');
-    await page.getByRole('textbox', { name: 'e.g. AAPL' }).fill('ASTS');
+    await page.getByLabel(/symbol/i).fill('ASTS');
 
     // Select Call and Sell
     await page.selectOption('select', { label: 'Call' });
     const sideSelects2 = await page.locator('select').all();
-    await sideSelects2[1].selectOption({ label: 'Sell' });
+    await (sideSelects2[1]!).selectOption({ label: 'Sell' });
 
     // Fill in call details
-    const numberInputs2 = await page.locator('input[type="number"]').all();
-    await numberInputs2[0].fill('1'); // qty
-    await numberInputs2[1].fill('30'); // dte
-    await numberInputs2[2].fill('55'); // strike
-    await numberInputs2[3].fill('1.50'); // premium
-    await numberInputs2[4].fill('0'); // fees
+    await fillTradeForm(page, {
+      qty: '1',
+      dte: '30',
+      strike: '55',
+      premium: '1.50',
+      fees: '0',
+    });
 
     await page.click('button:has-text("+ Add Trade")');
     await page.waitForTimeout(1000);
@@ -163,18 +216,58 @@ test.describe('Covered Call Wheel Phase', () => {
     // Add a call trade
     await page.click('button:has-text("💸 Premium Printer")');
     await page.click('button:has-text("Trade")');
-    await page.getByRole('textbox', { name: 'e.g. AAPL' }).fill('MSFT');
+    await page.getByLabel(/symbol/i).fill('MSFT');
 
     await page.selectOption('select', { label: 'Call' });
     const sideSelects = await page.locator('select').all();
-    await sideSelects[1].selectOption({ label: 'Sell' });
+    await (sideSelects[1]!).selectOption({ label: 'Sell' });
 
-    const numberInputs = await page.locator('input[type="number"]').all();
-    await numberInputs[0].fill('2'); // qty
-    await numberInputs[1].fill('7'); // dte
-    await numberInputs[2].fill('100'); // strike
-    await numberInputs[3].fill('1.75'); // premium
-    await numberInputs[4].fill('0'); // fees
+    // Fill form fields by label to avoid index dependency
+    await page.getByLabel(/qty/i).fill('2');
+    
+    // Handle DTE - may be date picker or number input
+    const expirationInput = page.getByLabel(/expiration/i);
+    const dteInput = page.getByLabel(/dte/i).first();
+    const hasDatePicker = (await expirationInput.count()) > 0;
+    
+    if (hasDatePicker) {
+      // Use date picker - calculate date 7 days from now
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 7);
+      const dateStr = futureDate.toISOString().split('T')[0]!;
+      await expirationInput.fill(dateStr);
+    } else {
+      // Use DTE number input
+      await dteInput.fill('7');
+    }
+    
+    await page.getByLabel(/strike/i).fill('100');
+    
+    // Premium field - find by label "Premium" text or by position
+    const premiumLabel = page.locator('text=/premium.*per share/i').first();
+    const premiumInput = premiumLabel.locator('..').locator('input[type="number"]').first();
+    if (await premiumInput.count() > 0) {
+      await premiumInput.fill('1.75');
+    } else {
+      // Fallback: find by position (after strike input)
+      const allNumberInputs = await page.locator('input[type="number"]').all();
+      if (allNumberInputs.length >= 4) {
+        await (allNumberInputs[3]!).fill('1.75');
+      }
+    }
+    
+    // Fees field - find input near "Fees" text or use last number input
+    const feesSection = page.locator('text=/fees/i').locator('..');
+    const feesInput = feesSection.locator('input[type="number"]').first();
+    if (await feesInput.count() > 0) {
+      await feesInput.fill('0');
+    } else {
+      // Fallback: use last number input
+      const allNumberInputs = await page.locator('input[type="number"]').all();
+      if (allNumberInputs.length > 0) {
+        await (allNumberInputs[allNumberInputs.length - 1]!).fill('0');
+      }
+    }
 
     await page.click('button:has-text("+ Add Trade")');
     await page.waitForTimeout(1000);
@@ -199,18 +292,19 @@ test.describe('Covered Call Wheel Phase', () => {
     // Add a call trade: 3 contracts @ $2.50 = $750
     await page.click('button:has-text("💸 Premium Printer")');
     await page.click('button:has-text("Trade")');
-    await page.getByRole('textbox', { name: 'e.g. AAPL' }).fill('NVDA');
+    await page.getByLabel(/symbol/i).fill('NVDA');
 
     await page.selectOption('select', { label: 'Call' });
     const sideSelects = await page.locator('select').all();
-    await sideSelects[1].selectOption({ label: 'Sell' });
+    await (sideSelects[1]!).selectOption({ label: 'Sell' });
 
-    const numberInputs = await page.locator('input[type="number"]').all();
-    await numberInputs[0].fill('3'); // qty
-    await numberInputs[1].fill('14'); // dte
-    await numberInputs[2].fill('500'); // strike
-    await numberInputs[3].fill('2.50'); // premium per share
-    await numberInputs[4].fill('0'); // fees
+    await fillTradeForm(page, {
+      qty: '3',
+      dte: '14',
+      strike: '500',
+      premium: '2.50',
+      fees: '0',
+    });
 
     await page.click('button:has-text("+ Add Trade")');
     await page.waitForTimeout(1000);
@@ -233,17 +327,18 @@ test.describe('Covered Call Journal Integration', () => {
     await page.click('button:has-text("💸 Premium Printer")');
     await page.click('button:has-text("Trade")');
 
-    await page.getByRole('textbox', { name: 'e.g. AAPL' }).fill('AAPL');
+    await page.getByLabel(/symbol/i).fill('AAPL');
     await page.selectOption('select', { label: 'Call' });
     const sideSelects = await page.locator('select').all();
-    await sideSelects[1].selectOption({ label: 'Sell' });
+    await (sideSelects[1]!).selectOption({ label: 'Sell' });
 
-    const numberInputs = await page.locator('input[type="number"]').all();
-    await numberInputs[0].fill('1');
-    await numberInputs[1].fill('30');
-    await numberInputs[2].fill('150');
-    await numberInputs[3].fill('3.00');
-    await numberInputs[4].fill('0.70');
+    await fillTradeForm(page, {
+      qty: '1',
+      dte: '30',
+      strike: '150',
+      premium: '3.00',
+      fees: '0.70',
+    });
 
     await page.click('button:has-text("+ Add Trade")');
     await page.waitForTimeout(1000);

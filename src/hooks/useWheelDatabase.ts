@@ -3,11 +3,13 @@
  * Connects the wheel page to the SQLite database
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback,useEffect, useState } from 'react';
+
+import { all,initDb } from '@/db/sql';
 import type { SQLiteDatabase } from '@/modules/db/sqlite';
 import { initDatabase } from '@/modules/db/sqlite';
-import { initDb, all } from '@/db/sql';
 import type { Entry } from '@/types/entry';
+import { calcDTE } from '@/utils/dates';
 
 // Types expected by the Wheel page
 export interface Position {
@@ -119,8 +121,8 @@ export function useWheelDatabase() {
       const earningsCalendar: Record<string, string> = {};
       tickers.forEach(ticker => {
         // Add some sample earnings dates
-        if (ticker === 'ASTS') earningsCalendar[ticker] = '2025-11-06';
-        if (ticker === 'LUMN') earningsCalendar[ticker] = '2025-11-05';
+        if (ticker === 'IDOI') earningsCalendar[ticker] = '2025-11-06';
+        if (ticker === 'HAMM') earningsCalendar[ticker] = '2025-11-05';
       });
 
       const wheelData: WheelData = {
@@ -274,10 +276,14 @@ function transformJournalToShareLots(entries: Entry[]): ShareLot[] {
   const lots: ShareLot[] = [];
   const lotMap = new Map<string, { qty: number; totalCost: number }>();
 
-  // Process assignment entries
+  // Process assignment entries (add shares) and share_sale entries (subtract shares)
   for (const entry of entries) {
+    if (!entry.symbol) continue;
+
+    const ticker = entry.symbol;
+
     if (entry.type === 'assignment_shares') {
-      const ticker = entry.symbol;
+      // Put assignment - bought shares
       const qty = Math.abs(entry.qty || 0);
       const cost = Math.abs(entry.amount);
 
@@ -288,6 +294,17 @@ function transformJournalToShareLots(entries: Entry[]): ShareLot[] {
       const lot = lotMap.get(ticker)!;
       lot.qty += qty;
       lot.totalCost += cost;
+    } else if (entry.type === 'share_sale') {
+      // Call assignment - shares called away (subtract shares)
+      const qty = Math.abs(entry.qty || 0);
+      if (lotMap.has(ticker)) {
+        const lot = lotMap.get(ticker)!;
+        // Calculate average cost per share before reducing
+        const avgCostPerShare = lot.qty > 0 ? lot.totalCost / lot.qty : 0;
+        lot.qty = Math.max(0, lot.qty - qty);
+        // Adjust total cost proportionally
+        lot.totalCost = lot.qty * avgCostPerShare;
+      }
     }
   }
 
@@ -302,20 +319,22 @@ function transformJournalToShareLots(entries: Entry[]): ShareLot[] {
     }
   });
 
+  // Debug logging
+  console.log('🔍 transformJournalToShareLots:', {
+    totalEntries: entries.length,
+    assignmentEntries: entries.filter(e => e.type === 'assignment_shares').length,
+    shareSaleEntries: entries.filter(e => e.type === 'share_sale').length,
+    lots: lots.map(l => ({ ticker: l.ticker, qty: l.qty, costPerShare: l.costPerShare })),
+  });
+
   return lots;
 }
 
 // Note: We avoid a per-trade symbol lookup by computing tickers from positions/share lots above.
 
 function calculateDTE(expirationDate: string): number {
-  if (!expirationDate) return 0;
-
-  const expiry = new Date(expirationDate);
-  const now = new Date();
-  const diffTime = expiry.getTime() - now.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-  return Math.max(0, diffDays);
+  // Use shared DTE util to avoid drift between pages
+  return calcDTE(expirationDate);
 }
 
 function generateAlertsFromData(positions: Position[], tickers: string[]): Alert[] {

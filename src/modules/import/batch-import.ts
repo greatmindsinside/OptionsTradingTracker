@@ -7,39 +7,39 @@
  * and progress tracking) are fully implemented in their respective modules.
  */
 
-import type { SQLiteDatabase } from '../db/sqlite';
 import { PortfolioDAO } from '../db/portfolio-dao';
-import { TradeDAO, type DatabaseTrade } from '../db/trade-dao';
+import type { SQLiteDatabase } from '../db/sqlite';
 import { SymbolDAO } from '../db/symbol-dao';
-import { CSVParser, type CSVParseResult } from './csv-parser';
+import { type DatabaseTrade,TradeDAO } from '../db/trade-dao';
+import type { Portfolio } from '../db/validation';
 import {
+  type BrokerDetectionResult,
+  type BrokerType,
   detectBrokerFromHeaders,
   getBrokerAdapter,
-  type BrokerType,
-  type BrokerDetectionResult,
 } from './broker-adapters';
-import type { Portfolio } from '../db/validation';
 import type {
-  NormalizedTradeData,
   BaseBrokerAdapter,
+  NormalizedTradeData,
   RawTradeData,
 } from './broker-adapters/base-adapter';
+import { CSVParser, type CSVParseResult } from './csv-parser';
 import {
-  ImportValidationService,
-  type ValidationOptions,
-  type BatchValidationResult,
-  type TradeValidationResult,
-} from './validation-service';
-import {
-  SymbolNormalizationService,
-  type SymbolNormalizationOptions,
-  type BatchSymbolResult,
-} from './symbol-service';
-import {
-  ImportProgressTracker,
   ImportProgressFactory,
+  ImportProgressTracker,
   type ProgressCallback,
 } from './progress-tracker';
+import {
+  type BatchSymbolResult,
+  type SymbolNormalizationOptions,
+  SymbolNormalizationService,
+} from './symbol-service';
+import {
+  type BatchValidationResult,
+  ImportValidationService,
+  type TradeValidationResult,
+  type ValidationOptions,
+} from './validation-service';
 
 /**
  * Import configuration

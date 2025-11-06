@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { fmtMoney } from '@/lib/format';
 import type { Totals } from '@/types/entry';
 

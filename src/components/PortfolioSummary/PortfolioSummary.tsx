@@ -4,6 +4,7 @@
  */
 
 import clsx from 'clsx';
+
 import styles from './PortfolioSummary.module.css';
 
 interface PortfolioMetrics {
@@ -82,7 +83,7 @@ export function PortfolioSummary({
     return `${percent >= 0 ? '+' : ''}${percent.toFixed(2)}%`;
   };
 
-  const getChangeClass = (value: number): string => {
+  const getChangeClass = (value: number): string | undefined => {
     if (value > 0) return styles.positive;
     if (value < 0) return styles.negative;
     return styles.neutral;
@@ -90,31 +91,31 @@ export function PortfolioSummary({
 
   if (isLoading) {
     return (
-      <div className={`${styles.container} ${className}`}>
-        <div className={styles.header}>
-          <h2 className={styles.title}>Portfolio Summary</h2>
+      <div className={clsx(styles.container, className)}>
+        <div className={clsx(styles.header)}>
+          <h2 className={clsx(styles.title)}>Portfolio Summary</h2>
         </div>
-        <div className={styles.loading}>
-          <div className={styles.skeleton}></div>
-          <div className={styles.skeleton}></div>
-          <div className={styles.skeleton}></div>
+        <div className={clsx(styles.loading)}>
+          <div className={clsx(styles.skeleton)}></div>
+          <div className={clsx(styles.skeleton)}></div>
+          <div className={clsx(styles.skeleton)}></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`${styles.container} ${className}`}>
-      <div className={styles.header}>
-        <h2 className={styles.title}>Portfolio Summary</h2>
-        <div className={styles.lastUpdated}>Last updated: {new Date().toLocaleTimeString()}</div>
+    <div className={clsx(styles.container, className)}>
+      <div className={clsx(styles.header)}>
+        <h2 className={clsx(styles.title)}>Portfolio Summary</h2>
+        <div className={clsx(styles.lastUpdated)}>Last updated: {new Date().toLocaleTimeString()}</div>
       </div>
 
-      <div className={styles.metricsGrid}>
+      <div className={clsx(styles.metricsGrid)}>
         {/* Total Portfolio Value */}
         <div className={clsx('card', styles.metricCard, styles.primary)}>
-          <div className={styles.metricLabel}>Total Portfolio Value</div>
-          <div className={styles.metricValue}>{formatCurrency(metrics.totalValue)}</div>
+          <div className={clsx(styles.metricLabel)}>Total Portfolio Value</div>
+          <div className={clsx(styles.metricValue)}>{formatCurrency(metrics.totalValue)}</div>
           <div className={clsx(styles.metricChange, getChangeClass(metrics.dayChange))}>
             {formatCurrency(metrics.dayChange)} ({formatPercent(metrics.dayChangePercent)}) today
           </div>
@@ -122,7 +123,7 @@ export function PortfolioSummary({
 
         {/* Total P&L */}
         <div className={clsx('card', styles.metricCard)}>
-          <div className={styles.metricLabel}>Total P&L</div>
+          <div className={clsx(styles.metricLabel)}>Total P&L</div>
           <div className={clsx(styles.metricValue, getChangeClass(metrics.totalPnL))}>
             {formatCurrency(metrics.totalPnL)}
           </div>
@@ -133,20 +134,20 @@ export function PortfolioSummary({
 
         {/* Active Positions */}
         <div className={clsx('card', styles.metricCard)}>
-          <div className={styles.metricLabel}>Active Positions</div>
-          <div className={styles.metricValue}>{metrics.activePositions}</div>
-          <div className={styles.metricSubtext}>positions open</div>
+          <div className={clsx(styles.metricLabel)}>Active Positions</div>
+          <div className={clsx(styles.metricValue)}>{metrics.activePositions}</div>
+          <div className={clsx(styles.metricSubtext)}>positions open</div>
         </div>
 
         {/* Cash Available */}
         <div className={clsx('card', styles.metricCard)}>
-          <div className={styles.metricLabel}>Cash Available</div>
-          <div className={styles.metricValue}>{formatCurrency(metrics.cashAvailable)}</div>
-          <div className={styles.metricSubtext}>buying power</div>
+          <div className={clsx(styles.metricLabel)}>Cash Available</div>
+          <div className={clsx(styles.metricValue)}>{formatCurrency(metrics.cashAvailable)}</div>
+          <div className={clsx(styles.metricSubtext)}>buying power</div>
         </div>
       </div>
 
-      <div className={styles.quickActions}>
+      <div className={clsx(styles.quickActions)}>
         <button
           className={clsx('btn btn-primary', styles.actionButton)}
           onClick={handleViewDetails}

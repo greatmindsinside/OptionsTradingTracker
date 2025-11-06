@@ -3,13 +3,13 @@
  * Handles TD Ameritrade transaction export format
  */
 
-import { BaseBrokerAdapter, BrokerType } from './base-adapter';
 import type {
-  RawTradeData,
-  NormalizedTradeData,
   AdaptationResult,
   BrokerDetectionResult,
+  NormalizedTradeData,
+  RawTradeData,
 } from './base-adapter';
+import { BaseBrokerAdapter, BrokerType } from './base-adapter';
 
 export class TDAmeritradeBrokerAdapter extends BaseBrokerAdapter {
   readonly brokerName: BrokerType = 'td_ameritrade';

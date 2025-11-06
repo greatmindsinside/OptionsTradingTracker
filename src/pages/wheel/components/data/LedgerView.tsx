@@ -1,4 +1,5 @@
 import React from 'react';
+
 import type { LedgerEvent } from '@/types/wheel';
 
 export const LedgerView: React.FC<{ ledger: LedgerEvent[] }> = ({ ledger }) => (

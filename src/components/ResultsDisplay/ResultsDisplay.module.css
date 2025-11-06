@@ -49,9 +49,7 @@
   color: var(--color-text);
 }
 
-.greeksSection {
-  /* Card styling from global .card pattern */
-}
+/* .greeksSection uses global .card pattern */
 
 .greeksGrid {
   display: grid;
@@ -81,9 +79,7 @@
   font-family: var(--font-family-mono);
 }
 
-.riskSection {
-  /* Card styling from global .card pattern */
-}
+/* .riskSection uses global .card pattern */
 
 .riskList {
   display: flex;

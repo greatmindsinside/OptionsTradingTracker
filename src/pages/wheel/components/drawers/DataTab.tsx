@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { useWheelUIStore } from '@/stores/useWheelUIStore';
 
 export const DataTab: React.FC = () => {

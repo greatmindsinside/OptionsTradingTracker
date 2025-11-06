@@ -1,6 +1,7 @@
 import { z } from 'zod';
-import type { SQLiteDatabase } from './sqlite';
+
 import { BaseDAO } from './dao-base';
+import type { SQLiteDatabase } from './sqlite';
 
 /**
  * Symbol Event Schema

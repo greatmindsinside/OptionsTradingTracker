@@ -8,56 +8,50 @@
 // =============================================================================
 
 export {
-  // Interfaces
-  type RiskFlag,
-  type ChartDataPoint,
-  type RiskThresholds,
-
-  // Constants
-  DEFAULT_RISK_THRESHOLDS,
-
-  // Utility Functions
-  daysBetween,
+  analyzeRisks,
   annualizeReturn,
-  formatCurrency,
-  formatPercent,
-  roundTo,
-  clamp,
-  generatePriceRange,
-
   // Greeks Approximations
   approximateDelta,
-  approximateTheta,
   approximateGamma,
-
+  approximateTheta,
+  type ChartDataPoint,
+  checkPriceRisk,
   // Risk Analysis
   checkReturnRisk,
   checkTimeRisk,
-  checkPriceRisk,
-  analyzeRisks,
+  clamp,
+  // Utility Functions
+  daysBetween,
+  // Constants
+  DEFAULT_RISK_THRESHOLDS,
+  formatCurrency,
+  formatPercent,
+  generatePriceRange,
+  // Interfaces
+  type RiskFlag,
+  type RiskThresholds,
+  roundTo,
 } from './common.js';
 
 // =============================================================================
 // STRATEGY CLASSES
 // =============================================================================
 
-export { CoveredCall } from './coveredCall.js';
-export type { CoveredCallInputs, CoveredCallMetrics } from './coveredCall.js';
-
-export { CashSecuredPut } from './cashSecuredPut.js';
 export type { CashSecuredPutInputs, CashSecuredPutMetrics } from './cashSecuredPut.js';
-
-export { LongCall } from './longCall.js';
+export { CashSecuredPut } from './cashSecuredPut.js';
+export type { CoveredCallInputs, CoveredCallMetrics } from './coveredCall.js';
+export { CoveredCall } from './coveredCall.js';
 export type { LongCallInputs, LongCallMetrics } from './longCall.js';
+export { LongCall } from './longCall.js';
 
 // =============================================================================
 // CONVENIENCE FACTORY FUNCTIONS
 // =============================================================================
 
-import { CoveredCall, type CoveredCallInputs } from './coveredCall.js';
 import { CashSecuredPut, type CashSecuredPutInputs } from './cashSecuredPut.js';
-import { LongCall, type LongCallInputs } from './longCall.js';
 import { type RiskFlag, roundTo } from './common.js';
+import { CoveredCall, type CoveredCallInputs } from './coveredCall.js';
+import { LongCall, type LongCallInputs } from './longCall.js';
 
 /**
  * Create a new Covered Call position with validation

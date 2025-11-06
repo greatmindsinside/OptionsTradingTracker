@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
+
 import { useWheelStore } from '@/stores/useWheelStore';
-import { pctMaxShortCall, daysTo } from '@/utils/wheel-calculations';
+import { daysTo,pctMaxShortCall } from '@/utils/wheel-calculations';
 
 export function useAlertGeneration() {
   const positions = useWheelStore(s => s.positions);

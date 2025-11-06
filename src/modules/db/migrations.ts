@@ -4,8 +4,8 @@
  * Handles database schema initialization and upgrades
  */
 
+import { type DatabaseSchema,generateSchemaSQL, SCHEMA_V1 } from './schema';
 import type { SQLiteDatabase } from './sqlite';
-import { SCHEMA_V1, generateSchemaSQL, type DatabaseSchema } from './schema';
 
 export interface Migration {
   version: number;

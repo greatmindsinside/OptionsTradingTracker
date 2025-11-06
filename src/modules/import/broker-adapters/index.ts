@@ -3,13 +3,13 @@
  * Central registry and factory for all broker adapters
  */
 
-import { BaseBrokerAdapter, BrokerType } from './base-adapter';
 import type { BrokerDetectionResult } from './base-adapter';
-import { TDAmeritradeBrokerAdapter } from './td-ameritrade-adapter';
-import { SchwabBrokerAdapter } from './schwab-adapter';
-import { RobinhoodBrokerAdapter } from './robinhood-adapter';
+import { BaseBrokerAdapter, BrokerType } from './base-adapter';
 import { EtradeBrokerAdapter } from './etrade-adapter';
 import { InteractiveBrokersBrokerAdapter } from './interactive-brokers-adapter';
+import { RobinhoodBrokerAdapter } from './robinhood-adapter';
+import { SchwabBrokerAdapter } from './schwab-adapter';
+import { TDAmeritradeBrokerAdapter } from './td-ameritrade-adapter';
 
 /**
  * Registry of all available broker adapters
@@ -147,11 +147,11 @@ export function getAllSupportedBrokers(): BrokerType[] {
  * Export adapter types for convenience
  */
 export {
-  TDAmeritradeBrokerAdapter,
-  SchwabBrokerAdapter,
-  RobinhoodBrokerAdapter,
   EtradeBrokerAdapter,
   InteractiveBrokersBrokerAdapter,
+  RobinhoodBrokerAdapter,
+  SchwabBrokerAdapter,
+  TDAmeritradeBrokerAdapter,
 };
 
-export type { BaseBrokerAdapter, BrokerType, BrokerDetectionResult } from './base-adapter';
+export type { BaseBrokerAdapter, BrokerDetectionResult,BrokerType } from './base-adapter';

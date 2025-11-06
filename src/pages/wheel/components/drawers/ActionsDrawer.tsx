@@ -1,8 +1,10 @@
 import React from 'react';
+
 import { useWheelUIStore } from '@/stores/useWheelUIStore';
-import { TradeTab } from './TradeTab';
-import { ImportTab } from './ImportTab';
+
 import { DataTab } from './DataTab';
+import { ImportTab } from './ImportTab';
+import { TradeTab } from './TradeTab';
 
 export const ActionsDrawer: React.FC = () => {
   const open = useWheelUIStore(s => s.actionsOpen);

@@ -1,5 +1,23 @@
-import { useState, useCallback } from 'react';
+import { useCallback,useState } from 'react';
+import { z } from 'zod';
+
 import type { OptType, Side } from '@/types/wheel';
+
+/**
+ * Zod schema for trade form validation
+ */
+export const TradeFormSchema = z.object({
+  tradeSym: z.string().min(1, 'Symbol is required').max(20, 'Symbol must be 20 characters or less').trim().toUpperCase(),
+  tradeType: z.enum(['P', 'C'], { message: 'Type must be Put (P) or Call (C)' }),
+  tradeSide: z.enum(['B', 'S'], { message: 'Side must be Buy (B) or Sell (S)' }),
+  tradeQty: z.number().int('Quantity must be a whole number').positive('Quantity must be greater than 0'),
+  tradeDTE: z.number().int('DTE must be a whole number').nonnegative('DTE cannot be negative'),
+  tradeStrike: z.number().positive('Strike must be greater than 0'),
+  tradeEntry: z.number().nonnegative('Premium cannot be negative'),
+  tradeFees: z.number().nonnegative('Fees cannot be negative'),
+});
+
+export type TradeFormData = z.infer<typeof TradeFormSchema>;
 
 export function useTradeComposer() {
   const [tradeSym, setTradeSym] = useState('');
@@ -25,11 +43,25 @@ export function useTradeComposer() {
   const submitTrade = useCallback(() => {
     // Validation and submission logic can call into useJournal or useWheelStore
     // This stays UI-focused; persistence handled upstream
-    if (!tradeSym) throw new Error('Symbol required');
-    if (tradeQty <= 0) throw new Error('Qty must be > 0');
-    if (tradeStrike <= 0) throw new Error('Strike must be > 0');
-    if (tradeEntry < 0) throw new Error('Premium cannot be negative');
-  }, [tradeSym, tradeQty, tradeStrike, tradeEntry]);
+    const formData: TradeFormData = {
+      tradeSym,
+      tradeType,
+      tradeSide,
+      tradeQty,
+      tradeDTE,
+      tradeStrike,
+      tradeEntry,
+      tradeFees,
+    };
+
+    const result = TradeFormSchema.safeParse(formData);
+
+    if (!result.success) {
+      // Get the first validation error message for backward compatibility
+      const firstError = result.error.issues[0];
+      throw new Error(firstError?.message || 'Invalid form data');
+    }
+  }, [tradeSym, tradeType, tradeSide, tradeQty, tradeDTE, tradeStrike, tradeEntry, tradeFees]);
 
   return {
     form: {

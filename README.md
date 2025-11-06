@@ -252,6 +252,9 @@ VITE_DB_VERSION="1"
 VITE_ENABLE_DEBUG_MODE="true"
 VITE_ENABLE_ANALYTICS="false"
 VITE_ENABLE_PERFORMANCE_MONITORING="false"
+VITE_FEATURE_JOURNAL_EDIT_DRAWER="false"
+VITE_FEATURE_JOURNAL_EDIT_FLOW="false"
+VITE_FEATURE_TRADE_DTE="false"
 
 # CSV Import Limits
 VITE_MAX_FILE_SIZE_MB="50"
@@ -292,9 +295,20 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
+## 📚 Documentation
+
+Comprehensive documentation is available in the `docs/` folder:
+
+- **[docs/FEATURES.md](docs/FEATURES.md)** - Complete feature guide and user documentation
+- **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)** - Development guide, workflows, and standards
+- **[docs/DATA_ARCHITECTURE.md](docs/DATA_ARCHITECTURE.md)** - Technical architecture and data flow
+- **[docs/PROJECT_ORGANIZATION.md](docs/PROJECT_ORGANIZATION.md)** - File structure reference
+- **[docs/CHANGELOG.md](docs/CHANGELOG.md)** - Version history and recent changes
+- **[docs/README.md](docs/README.md)** - Documentation index and navigation
+
 ## 🆘 Support
 
-- **Documentation**: Check our [Wiki](https://github.com/greatmindsinside/OptionsTradingTracker/wiki)
+- **Documentation**: See `docs/` folder for comprehensive guides
 - **Issues**: [GitHub Issues](https://github.com/greatmindsinside/OptionsTradingTracker/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/greatmindsinside/OptionsTradingTracker/discussions)
 

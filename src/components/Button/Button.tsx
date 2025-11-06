@@ -3,9 +3,9 @@
  * Reusable button with variant and size using global .btn patterns
  */
 
-import React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import clsx from 'clsx';
+import React from 'react';
 
 const buttonStyles = cva('btn', {
   variants: {

@@ -1,7 +1,8 @@
 import { create } from 'zustand';
-import type { Lot, Position, LedgerEvent } from '@/types/wheel';
-import { daysBetween, ymd } from '@/utils/wheel-calculations';
+
 import { updateExpirationForPosition } from '@/db/sql';
+import type { LedgerEvent,Lot, Position } from '@/types/wheel';
+import { daysBetween, ymd } from '@/utils/wheel-calculations';
 
 interface WheelState {
   lots: Lot[];
@@ -29,7 +30,7 @@ interface WheelState {
     opened?: string;
   }) => void;
 
-  updateExpiration: (rowId: string, newDate: string) => void;
+  updateExpiration: (rowId: string, newDate: string, oldDate?: string) => void;
 }
 
 export const useWheelStore = create<WheelState>((set, get) => ({
@@ -53,12 +54,14 @@ export const useWheelStore = create<WheelState>((set, get) => ({
     // You can extend this to optimistically update positions if desired.
   },
 
-  updateExpiration: (rowId, newDate) => {
-    // Compute the old expiration BEFORE mutating state
+  updateExpiration: (rowId, newDate, oldDate) => {
+    // Use provided old expiration date (already in YMD format), or compute from position if not provided
     const current = get().positions.find(p => p.id === rowId);
-    const oldExpiration = current
-      ? ymd(new Date(new Date(current.opened).getTime() + current.dte * 864e5))
-      : undefined;
+    const oldExpiration = oldDate
+      ? oldDate // oldDate is already in YMD format from ExpRow.expiration
+      : current
+        ? ymd(new Date(new Date(current.opened).getTime() + current.dte * 864e5))
+        : undefined;
 
     // Optimistic UI update (adjust DTE in store)
     set(s => ({

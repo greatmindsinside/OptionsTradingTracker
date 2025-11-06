@@ -58,6 +58,11 @@
 - **Husky 9.1.7** - Git hooks for pre-commit checks
 - **lint-staged 16.2.4** - Run linters on staged files only
 
+**Feature Flags:**
+
+- `VITE_FEATURE_JOURNAL_EDIT_DRAWER` and `VITE_FEATURE_JOURNAL_EDIT_FLOW` toggle the new Journal edit drawer (see `src/utils/env.ts`). Defaults are off; enabled in development and tests.
+- `VITE_FEATURE_TRADE_DTE` enables the enhanced Trade drawer with expiration date picker, DTE chip, and Advanced numeric input. When disabled, uses the original numeric DTE field. Default: off.
+
 ### Architecture Patterns
 
 **Design Patterns Used:**
@@ -149,19 +154,22 @@ CREATE TABLE accounts (
 );
 ```
 
-**Transaction Types:**
+**Transaction Types (source: `src/types/entry.ts`):**
 
 - `sell_to_open` - Opening option position (short)
-- `buy_to_open` - Opening option position (long)
-- `sell_to_close` - Closing option position (taking profit/loss)
 - `buy_to_close` - Closing option position (buying back)
-- `option_premium` - Premium collected/paid
+- `expiration` - Option expired worthless (also used to close option legs with zero amount)
 - `assignment_shares` - Put assignment (bought shares)
 - `share_sale` - Call assignment (shares called away)
 - `dividend` - Dividend payment
-- `fee` - Trading fees, commissions
-- `expiration` - Option expired worthless
+- `fee` - Trading fees, commissions, and temporary placeholder for some debits
+- `transfer` - Cash/security transfers
 - `correction` - Manual adjustment entry
+- `option_premium` - Premium cashflow (present in types; not currently emitted by templates)
+
+Notes:
+- Manual buy-to-close actions from the Wheel trade drawer are currently recorded as `fee` entries (negative amount) rather than `buy_to_close`. A dedicated template is planned.
+- Templates emit `sell_to_open` (credit) rather than a separate `option_premium` row.
 
 ---
 
@@ -189,12 +197,13 @@ CREATE TABLE accounts (
            ▼                                                 ▼
     ┌──────────────────┐                          ┌──────────────────┐
     │ BatchImportService│                          │ useEntriesStore() │
-    │ + Templates       │                          │ addEntry()        │
+    │ (DAO → trades)    │                          │ addEntry()        │
     └──────┬────────────┘                          └─────────┬─────────┘
-           │                                                 │
-           │         Both use same templates                 │
-           │         Both write to journal table             │
-           └──────────────────┬──────────────────────────────┘
+      │                                                 │
+      │         Import writes normalized trades         │
+      │         Manual entry writes journal via         │
+      │         templates                               │
+      └──────────────────┬──────────────────────────────┘
                               │
                               ▼
                 ┌──────────────────────────────┐
@@ -234,13 +243,14 @@ CREATE TABLE accounts (
 
 **Architecture:**
 
-- **Multi-layer validation** - CSV parsing → broker detection → trade validation → template mapping
-- **Broker adapters** - Pluggable adapters for Robinhood, TD Ameritrade, Schwab, E\*TRADE
-- **Template-based writes** - Uses same templates as manual entry for consistency
+- **Multi-layer validation** - CSV parsing → broker detection → trade validation → normalization
+- **Broker adapters** - Pluggable adapters for Robinhood, TD Ameritrade, Schwab, E\*TRADE, Interactive Brokers
+- **DAO-based writes (current)** - Writes to normalized `trades` table via `TradeDAO`
+- **Template-based journal writes (planned)** - Future: map normalized trades to templates to generate journal rows
 - **Batch processing** - Handles large files efficiently with progress tracking
 - **Error handling** - Continues on errors, provides detailed feedback
 
-**Import Flow:**
+**Import Flow (current):**
 
 ```typescript
 // 1. User selects CSV file
@@ -248,21 +258,19 @@ CREATE TABLE accounts (
 
 // 2. Click "Import Trades" button triggers import
 async function handleImport() {
-  // 3. Initialize import service
+  // 3. Initialize import service (normalized DB)
+  const db = await initDatabase();
   const importService = new BatchImportService(db);
 
   // 4. Import with configuration
   const results = await importService.importFromFile(file, {
-    accountId: 'acct-1',         // Target account
+    portfolioId: 1,              // Target portfolio in normalized DB
     autoDetectBroker: true,      // Auto-detect format
     stopOnError: false,          // Continue on errors
     skipInvalidRecords: true,    // Skip bad rows
   });
 
-  // 5. Persist to database
-  await db.persist();
-
-  // 6. Show results
+  // 5. Show results
   console.log(`✅ Imported ${results.successfulRecords} trades`);
 }
 ```
@@ -294,39 +302,11 @@ if (detection.broker === 'robinhood' && detection.confidence > 0.7) {
 - `TDAmeritradeBrokerAdapter` - TD Ameritrade CSV format
 - `SchwabBrokerAdapter` - Charles Schwab format
 - `ETradeAdapter` - E\*TRADE format
+- `InteractiveBrokersAdapter` - Interactive Brokers format
 
-**Template Mapping:**
+**Template Mapping (planned):**
 
-```typescript
-// Import maps normalized trades to templates (same as manual entry)
-for (const normalizedTrade of validTrades) {
-  const templateName = mapActionToTemplate(normalizedTrade.action);
-
-  // Use existing template system
-  await addEntry(templateName, {
-    accountId: config.accountId,
-    symbol: normalizedTrade.symbol,
-    date: normalizedTrade.tradeDate,
-    contracts: normalizedTrade.quantity,
-    premiumPerContract: normalizedTrade.price,
-    strike: normalizedTrade.strikePrice,
-    expiration: normalizedTrade.expirationDate,
-    fee: normalizedTrade.fees,
-    // Add import metadata
-    meta: {
-      import_batch_id: importId,
-      import_source: 'csv_file',
-      broker: detectedBroker,
-    },
-  });
-}
-
-// mapActionToTemplate examples:
-// SELL_TO_OPEN + PUT → 'tmplSellPut'
-// SELL_TO_OPEN + CALL → 'tmplSellCoveredCall'
-// BUY_TO_CLOSE → 'tmplFee' (with negative amount)
-// ASSIGNMENT → 'tmplPutAssigned' or 'tmplCallAssigned'
-```
+The import system will map normalized trades to the same templates used by manual entry to generate journal rows. Today it writes to the normalized `trades` table; template-based journal writes are a tracked enhancement.
 
 ### 2. TradeTab Component (`src/pages/wheel/components/drawers/TradeTab.tsx`)
 
@@ -334,10 +314,17 @@ for (const normalizedTrade of validTrades) {
 
 **Key responsibilities:**
 
-- Collects trade data (symbol, type, side, qty, strike, premium, DTE, fees)
+- Collects trade data (symbol, type, side, qty, strike, premium, expiration/DTE, fees)
 - Validates input
 - Persists trade to database
 - Updates both pages
+
+**Feature: Trade DTE UI** (controlled by `VITE_FEATURE_TRADE_DTE`):
+- When enabled: Shows expiration date picker, DTE chip (calculated), and Advanced toggle for direct DTE input
+- When disabled: Shows original numeric DTE field
+- DTE calculation uses shared `calcDTE()` utility from `src/utils/dates.ts` for consistency with Wheel page
+- Past-date warning: Displays inline indicator and requires confirmation before save
+- Telemetry events: Tracks date changes, advanced toggle, save success/error
 
 **Data flow in `handleAddTrade()`:**
 
@@ -367,6 +354,16 @@ await addEntry('tmplSellPut', {
 // Step 4: Reload wheel data and close drawer
 await reloadFn();
 closeActions();
+```
+
+Current limitation:
+
+```typescript
+// Buy to close is currently recorded via the Fee template (debit)
+await addEntry('tmplFee', {
+  ...base,
+  amount: -(contracts * premiumPerContract * 100) - fee,
+});
 ```
 
 ---
@@ -403,6 +400,12 @@ useEffect(() => {
 - Each row = one journal entry
 - Shows: Date, Symbol, Action, Contracts, Strike, Premium, Fees, Status
 - Calculates totals: Total Premium, Total Fees, Net P&L
+
+Edit flow (feature-flagged drawer):
+
+- When `VITE_FEATURE_JOURNAL_EDIT_DRAWER=true`, edits open a slide-in drawer (`JournalDrawer.tsx`).
+- Saving an edit soft-deletes the original row (sets `deleted_at` and `edit_reason`) and inserts a corrected row. Currently, `edited_by` and `original_entry_id` are not populated.
+- Amount auto-calculation in the drawer: for `assignment_shares` and `share_sale`, amount = strike × shares (qty represents shares, not contracts).
 
 ---
 
@@ -444,7 +447,7 @@ function transformJournalToPositions(entries: Entry[]): Position[] {
         qty: 0,
         entry: 0,
         mark: 0, // Will be populated by market data
-        dte: calculateDTE(entry.expiration),
+        dte: calculateDTE(entry.expiration), // Uses shared calcDTE() from utils/dates
         m: 0, // Moneyness
         type: entry.type.includes('call') ? 'C' : 'P',
         side: 'S',
@@ -485,13 +488,8 @@ function transformJournalToShareLots(entries: Entry[]): ShareLot[] {
       lot.qty += entry.qty || 0;
       lot.totalCost += Math.abs(entry.amount);
       lotMap.set(entry.symbol, lot);
-    } else if (entry.type === 'share_sale') {
-      // Call assignment - sold shares
-      const lot = lotMap.get(entry.symbol);
-      if (lot) {
-        lot.qty -= entry.qty || 0;
-      }
     }
+    // TODO: subtract share_sale to reduce lots when shares are called away
   }
 
   return Array.from(lotMap.entries())
@@ -535,13 +533,13 @@ await addEntry('tmplSellPut', {
 
 **Templates available:**
 
-- `tmplSellPut` - Sell cash-secured put
-- `tmplSellCoveredCall` - Sell covered call
-- `tmplPutAssigned` - Put assignment (receive shares)
-- `tmplCallAssigned` - Call assignment (shares called away)
-- `tmplDividend` - Dividend payment
-- `tmplFee` - Generic fee entry (used for buy-to-close)
-- `tmplCorrection` - Manual correction entry
+- `tmplSellPut` - Sell cash-secured put (emits `sell_to_open` (+), optional `fee` (-), plus a zero-amount `expiration` to close later)
+- `tmplSellCoveredCall` - Sell covered call (emits `sell_to_open` (+), optional `fee` (-), plus a zero-amount `expiration`)
+- `tmplPutAssigned` - Put assignment (emits `expiration` (0) and `assignment_shares` (- cash, + shares))
+- `tmplCallAssigned` - Call assignment (emits `expiration` (0) and `share_sale` (+ cash, - shares))
+- `tmplDividend` - Dividend payment (+)
+- `tmplFee` - Generic fee/debit entry (-) (used for buy-to-close for now)
+- `tmplCorrection` - Manual correction entry (±)
 
 **What happens:**
 
@@ -751,7 +749,7 @@ t=500ms   Reload Wheel/Journal pages
 t=550ms   Show success message ✓
 ```
 
-**Key Benefit:** Import uses the **same template system** as manual entry, ensuring consistency. Both CSV import and manual trade entry write to the same journal table using the same templates.
+**Key Benefit (planned):** Import will use the **same template system** as manual entry, ensuring consistency. Today, CSV import writes to the normalized `trades` table; manual entry writes to the `journal` table via templates. Aligning import to templates is a roadmap item.
 
 ---
 
@@ -1060,13 +1058,13 @@ await reloadFn(); // Queries DB, transforms, updates cache
 ```
 src/
 ├── db/
-│   ├── sql.ts                    # Legacy SQLite wrapper (journal table)
-│   ├── schema.sql                # Legacy journal table schema
+│   ├── sql.ts                    # SQLite wrapper for journal table
+│   ├── schema.sql                # Journal-first schema (with audit columns & views)
 │   └── queryBuilder.ts           # SQL WHERE clause builder for filters
 │
 ├── modules/
 │   ├── db/
-│   │   ├── sqlite.ts             # New SQLite wrapper (async, typed)
+│   │   ├── sqlite.ts             # SQLite wrapper for normalized DB (import system)
 │   │   ├── schema.ts             # New normalized schema definitions
 │   │   ├── migrations.ts         # Database migrations
 │   │   ├── validation.ts         # Zod schemas for data validation
@@ -1075,7 +1073,7 @@ src/
 │   │   └── symbol-dao.ts         # Symbol CRUD operations
 │   │
 │   └── import/
-│       ├── batch-import.ts       # Main import orchestrator
+│       ├── batch-import.ts       # Main import orchestrator (writes normalized trades today)
 │       ├── csv-parser.ts         # CSV parsing (papaparse wrapper)
 │       ├── validation-service.ts # Trade validation
 │       ├── symbol-service.ts     # Symbol normalization/resolution
@@ -1086,7 +1084,8 @@ src/
 │           ├── robinhood-adapter.ts
 │           ├── td-ameritrade-adapter.ts
 │           ├── schwab-adapter.ts
-│           └── etrade-adapter.ts
+│           ├── etrade-adapter.ts
+│           └── interactive-brokers-adapter.ts
 │
 ├── stores/
 │   ├── useEntriesStore.ts        # Journal data store (journal table)
@@ -1113,7 +1112,10 @@ src/
 │   └── wheel.ts                  # Wheel-specific types (Position, Lot, etc.)
 │
 └── utils/
-    └── data-events.ts            # Event emitter for data updates
+    ├── data-events.ts            # Event emitter for data updates
+    ├── dates.ts                  # DTE calculation utilities (calcDTE, dateFromDTE)
+    ├── env.ts                    # Environment config & feature flags
+    └── telemetry.ts              # Telemetry event tracking
 ```
 
 ---
@@ -1290,10 +1292,10 @@ const wheelStats = await analyzeWheelStrategy({
 **Key Takeaways:**
 
 1. **Single Source of Truth** - Journal table is the only authoritative data store
-2. **Template-Based Writes** - All writes (manual & import) use templates to generate journal entries
-3. **CSV Import Pipeline** - Multi-stage import with broker detection, normalization, template mapping
+2. **Template-Based Writes (manual)** - Manual entry uses templates to generate journal entries; import template mapping is planned
+3. **CSV Import Pipeline** - Multi-stage import with broker detection and normalization; currently writes normalized trades via DAO (template mapping to journal planned)
 4. **Broker Adapters** - Pluggable adapters handle different CSV formats from various brokers
-5. **Derived Positions** - Wheel page transforms journal entries into current positions
+5. **Derived Positions** - Wheel page transforms journal entries into current positions; see current limitations on buy-to-close and share_sale handling
 6. **Zustand for Caching** - Stores cache data to minimize database queries
 7. **Event-Driven Updates** - Data update events synchronize different parts of the application
 
@@ -1308,18 +1310,18 @@ const wheelStats = await analyzeWheelStrategy({
           │                                                │
           ▼                                                ▼
   BatchImportService                              useEntriesStore
-  (broker adapters)                               (TradeTab form)
+  (broker adapters, DAO)                          (TradeTab form)
           │                                                │
           ▼                                                ▼
-   Normalize trades                                 Get template
-   Map to templates ──────────┬────────────────────► (tmplSellPut)
+  Normalize trades                                 Get template
+  (DAO writes normalized) ───┬────────────────────► (tmplSellPut)
           │                   │                           │
           │                   │                           │
           └───────────────────┴───────────────────────────┘
                               │
                               ▼
-                    Generate journal entries
-                    (multiple per trade)
+              Generate journal entries (manual)
+              (multiple per trade via templates)
                               │
                               ▼
                        journal table
@@ -1343,7 +1345,7 @@ const wheelStats = await analyzeWheelStrategy({
 
 ### Trade doesn't appear on Wheel page after import
 
-**Root Cause:** Import currently writes to `trades` table, but Wheel page reads from `journal` table.
+**Root Cause:** Import currently writes to a normalized `trades` table (via DAO), but Wheel page reads from the `journal` table.
 
 **Temporary Workaround:**
 
@@ -1352,7 +1354,7 @@ const wheelStats = await analyzeWheelStrategy({
 **Proper Fix (TODO):**
 
 1. Update `BatchImportService` to use templates instead of `TradeDAO`
-2. Map normalized trades → appropriate templates (`tmplSellPut`, `tmplBuyToClose`, etc.)
+2. Map normalized trades → appropriate templates (`tmplSellPut`, `tmplBuyToClose` (new), etc.)
 3. Generate journal entries via templates
 4. Remove `trades` table writes from import flow
 
@@ -1628,4 +1630,4 @@ await importService.importFromFile(file2, {
 
 ---
 
-_Last updated: November 3, 2025_
+_Last updated: November 4, 2025_

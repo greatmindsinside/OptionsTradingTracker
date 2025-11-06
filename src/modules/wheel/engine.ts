@@ -5,19 +5,19 @@
  * Provides basic CRUD operations and lifecycle management.
  */
 
-import { SQLiteDatabase } from '@/modules/db/sqlite';
 import { QueryHelper } from '@/modules/db/query-helpers';
+import { SQLiteDatabase } from '@/modules/db/sqlite';
 import {
   type WheelCycle,
-  type WheelEvent_Record as WheelEventRecord,
   WheelCycleSchema,
+  type WheelEvent_Record as WheelEventRecord,
   WheelEventSchema,
 } from '@/modules/db/validation';
 import {
-  WheelState,
-  WheelEvent,
-  validateStateTransition,
   generateLifecycleId,
+  validateStateTransition,
+  WheelEvent,
+  WheelState,
 } from '@/modules/wheel/lifecycle';
 
 export interface CycleCreationData {

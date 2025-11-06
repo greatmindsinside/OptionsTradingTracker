@@ -4,8 +4,10 @@
  */
 
 import clsx from 'clsx';
-import styles from './ResultsDisplay.module.css';
+
 import type { RiskFlag } from '@/modules/calc/index';
+
+import styles from './ResultsDisplay.module.css';
 
 interface Metric {
   label: string;
@@ -49,7 +51,7 @@ export function ResultsDisplay({
     }
   };
 
-  const getRiskSeverityClass = (severity: string): string => {
+  const getRiskSeverityClass = (severity: string): string | undefined => {
     switch (severity) {
       case 'low':
         return styles.riskLow;
@@ -60,19 +62,19 @@ export function ResultsDisplay({
       case 'critical':
         return styles.riskCritical;
       default:
-        return '';
+        return undefined;
     }
   };
 
   return (
-    <div className={`${styles.container} ${className}`}>
+    <div className={clsx(styles.container, className)}>
       {/* Metrics Grid */}
-      <div className={styles.metricsGrid}>
+      <div className={clsx(styles.metricsGrid)}>
         {metrics.map((metric, index) => (
           <div key={index} className={clsx('card', styles.metricCard)}>
-            <div className={styles.metricLabel}>{metric.label}</div>
-            <div className={styles.metricValue}>{formatValue(metric.value, metric.format)}</div>
-            {metric.subtitle && <div className={styles.metricSubtitle}>{metric.subtitle}</div>}
+            <div className={clsx(styles.metricLabel)}>{metric.label}</div>
+            <div className={clsx(styles.metricValue)}>{formatValue(metric.value, metric.format)}</div>
+            {metric.subtitle && <div className={clsx(styles.metricSubtitle)}>{metric.subtitle}</div>}
           </div>
         ))}
       </div>
@@ -80,24 +82,24 @@ export function ResultsDisplay({
       {/* Greeks Section */}
       {greeks && (
         <div className={clsx('card', styles.greeksSection)}>
-          <h4 className={styles.sectionTitle}>Greeks (Educational)</h4>
-          <div className={styles.greeksGrid}>
+          <h4 className={clsx(styles.sectionTitle)}>Greeks (Educational)</h4>
+          <div className={clsx(styles.greeksGrid)}>
             {greeks.delta !== undefined && (
-              <div className={styles.greekItem}>
-                <span className={styles.greekLabel}>Delta:</span>
-                <span className={styles.greekValue}>{greeks.delta.toFixed(3)}</span>
+              <div className={clsx(styles.greekItem)}>
+                <span className={clsx(styles.greekLabel)}>Delta:</span>
+                <span className={clsx(styles.greekValue)}>{greeks.delta.toFixed(3)}</span>
               </div>
             )}
             {greeks.theta !== undefined && (
-              <div className={styles.greekItem}>
-                <span className={styles.greekLabel}>Theta:</span>
-                <span className={styles.greekValue}>${greeks.theta.toFixed(2)}/day</span>
+              <div className={clsx(styles.greekItem)}>
+                <span className={clsx(styles.greekLabel)}>Theta:</span>
+                <span className={clsx(styles.greekValue)}>${greeks.theta.toFixed(2)}/day</span>
               </div>
             )}
             {greeks.gamma !== undefined && (
-              <div className={styles.greekItem}>
-                <span className={styles.greekLabel}>Gamma:</span>
-                <span className={styles.greekValue}>{greeks.gamma.toFixed(4)}</span>
+              <div className={clsx(styles.greekItem)}>
+                <span className={clsx(styles.greekLabel)}>Gamma:</span>
+                <span className={clsx(styles.greekValue)}>{greeks.gamma.toFixed(4)}</span>
               </div>
             )}
           </div>

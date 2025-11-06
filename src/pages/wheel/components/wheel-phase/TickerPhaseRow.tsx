@@ -1,10 +1,12 @@
 import React from 'react';
-import { usePhaseCalculation } from './usePhaseCalculation';
+
+import { all } from '@/db/sql';
+import { useEntriesStore } from '@/stores/useEntriesStore';
 import { useWheelStore } from '@/stores/useWheelStore';
 import { useWheelUIStore } from '@/stores/useWheelUIStore';
-import { useEntriesStore } from '@/stores/useEntriesStore';
-import { all } from '@/db/sql';
 import type { Entry } from '@/types/entry';
+
+import { usePhaseCalculation } from './usePhaseCalculation';
 
 export const TickerPhaseRow: React.FC<{ ticker: string }> = ({ ticker }) => {
   const { phase } = usePhaseCalculation(ticker);
@@ -69,26 +71,26 @@ export const TickerPhaseRow: React.FC<{ ticker: string }> = ({ ticker }) => {
   };
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-green-500/20 bg-zinc-950/60 p-3 transition-colors hover:border-green-400/40">
+    <div className="flex items-center gap-4 rounded-xl border border-emerald-400/40 bg-zinc-900/90 p-4 shadow-sm shadow-black/30 transition-all hover:-translate-y-0.5 hover:border-emerald-400/70 hover:shadow-black/40">
       <div
-        className="cursor-pointer text-lg font-semibold text-green-400 transition-colors hover:text-green-300"
+        className="cursor-pointer text-xl font-semibold tracking-wide text-emerald-400 transition-colors hover:text-emerald-300"
         onClick={() => openContext(ticker)}
       >
         {ticker}
       </div>
-      <span className="rounded border border-green-500/40 bg-green-500/15 px-2 py-1 text-xs text-green-400">
+      <span className="rounded border border-emerald-400/50 bg-emerald-500/20 px-2.5 py-1 text-xs font-medium text-emerald-400">
         {phase}
       </span>
-      <div className="ml-auto text-xs text-zinc-500">Earnings {earnings[ticker] || 'TBD'}</div>
+      <div className="ml-auto text-xs text-zinc-300">Earnings {earnings[ticker] || 'TBD'}</div>
       <button
         onClick={() => openContext(ticker)}
-        className="rounded border border-green-500/40 bg-green-500/10 px-2 py-1 text-xs text-green-400 transition-all hover:border-green-400/60 hover:bg-green-500/20"
+        className="rounded border border-emerald-400/60 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-400 transition-all hover:border-emerald-400/80 hover:bg-emerald-500/20"
       >
         Open
       </button>
       <button
         onClick={handleClosePosition}
-        className="rounded border border-red-500/40 bg-red-500/10 px-2 py-1 text-xs text-red-400 transition-all hover:border-red-400/60 hover:bg-red-500/20"
+        className="rounded border border-red-500/60 bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-200 transition-all hover:border-red-400/80 hover:bg-red-500/20"
         title="Close all positions for this ticker"
       >
         ✕ Close

@@ -1,5 +1,6 @@
-import { MetricCard } from './MetricCard';
 import { useWheelMetrics } from '@/pages/wheel/hooks/useWheelMetrics';
+
+import { MetricCard } from './MetricCard';
 
 export function SummaryMetrics() {
   const { premiumThisWeek, capitalInPuts, sharesForCalls } = useWheelMetrics();

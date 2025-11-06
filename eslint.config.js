@@ -3,6 +3,7 @@ import globals from 'globals';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import tseslint from 'typescript-eslint';
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
@@ -18,6 +19,14 @@ export default defineConfig([
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
+    },
+    plugins: {
+      'simple-import-sort': simpleImportSort,
+    },
+    rules: {
+      // Enforce consistent, grouped, and sorted imports/exports with autofix
+      'simple-import-sort/imports': 'error',
+      'simple-import-sort/exports': 'error',
     },
     // Note: Tailwind CSS ESLint plugin is temporarily disabled due to Tailwind v4 breaking changes.
     // We'll re-enable once the plugin updates to support Tailwind v4's exports.

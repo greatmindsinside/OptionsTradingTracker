@@ -1,8 +1,10 @@
 import React from 'react';
+
+import { useWheelStore } from '@/stores/useWheelStore';
 import type { ExpRow } from '@/types/wheel';
 import { daysTo } from '@/utils/wheel-calculations';
+
 import { InlineDateEdit } from './InlineDateEdit';
-import { useWheelStore } from '@/stores/useWheelStore';
 
 export const ExpirationRow: React.FC<{ row: ExpRow }> = ({ row }) => {
   const updateExpiration = useWheelStore(s => s.updateExpiration);
@@ -27,7 +29,7 @@ export const ExpirationRow: React.FC<{ row: ExpRow }> = ({ row }) => {
         {row.expiration} · DTE {d}
       </div>
       <div className="ml-auto flex items-center gap-2">
-        <InlineDateEdit date={row.expiration} onSave={ymd => updateExpiration(row.id, ymd)} />
+        <InlineDateEdit date={row.expiration} onSave={ymd => updateExpiration(row.id, ymd, row.expiration)} />
         <button className="rounded border border-green-500/40 bg-green-500/10 px-2 py-1 text-xs text-green-400 transition-all hover:border-green-400/60 hover:bg-green-500/20">
           Plan Roll
         </button>

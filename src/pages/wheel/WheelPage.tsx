@@ -1,16 +1,33 @@
-import { useEffect } from 'react';
+import { lazy, Suspense,useEffect } from 'react';
+
+import { useWheelDatabase } from '@/hooks/useWheelDatabase';
+import { AlertsCard } from '@/pages/wheel/components/alerts/AlertsCard';
+import { ActionsDrawer } from '@/pages/wheel/components/drawers/ActionsDrawer';
+import { ExpirationsCard } from '@/pages/wheel/components/expirations/ExpirationsCard';
 import { WheelContainer } from '@/pages/wheel/components/layout/WheelContainer';
 import { WheelHeader } from '@/pages/wheel/components/layout/WheelHeader';
 import { SummaryMetrics } from '@/pages/wheel/components/metrics/SummaryMetrics';
-import { useWheelDatabase } from '@/hooks/useWheelDatabase';
-import { useWheelStore } from '@/stores/useWheelStore';
-import { WheelPhaseCard } from '@/pages/wheel/components/wheel-phase/WheelPhaseCard';
-import { ExpirationsCard } from '@/pages/wheel/components/expirations/ExpirationsCard';
-import { AlertsCard } from '@/pages/wheel/components/alerts/AlertsCard';
 import { SharesCard } from '@/pages/wheel/components/shares/SharesCard';
-import { ActionsDrawer } from '@/pages/wheel/components/drawers/ActionsDrawer';
-import { TickerDrawer } from '@/pages/wheel/components/drawers/TickerDrawer';
-import { DataExplorerModal } from '@/pages/wheel/components/data/DataExplorerModal';
+import { WheelPhaseCard } from '@/pages/wheel/components/wheel-phase/WheelPhaseCard';
+import { useWheelStore } from '@/stores/useWheelStore';
+import { interceptConsoleLog } from '@/utils/debug-logger';
+
+// Lazy-load heavy components that are not immediately visible
+const TickerDrawer = lazy(() =>
+  import('@/pages/wheel/components/drawers/TickerDrawer').then(module => ({
+    default: module.TickerDrawer,
+  }))
+);
+const DataExplorerModal = lazy(() =>
+  import('@/pages/wheel/components/data/DataExplorerModal').then(module => ({
+    default: module.DataExplorerModal,
+  }))
+);
+const ObserverTerminal = lazy(() =>
+  import('@/components/debug/ObserverTerminal').then(module => ({
+    default: module.ObserverTerminal,
+  }))
+);
 
 export default function WheelPage() {
   const { data, error, loading, reload } = useWheelDatabase();
@@ -24,6 +41,11 @@ export default function WheelPage() {
     setReloadFn(reload);
     return () => setReloadFn(null);
   }, [reload, setReloadFn]);
+
+  // Intercept console.log for terminal
+  useEffect(() => {
+    interceptConsoleLog();
+  }, []);
 
   // Load data into store on mount
   useEffect(() => {
@@ -116,8 +138,11 @@ export default function WheelPage() {
         </main>
       </div>
       <ActionsDrawer />
-      <TickerDrawer />
-      <DataExplorerModal />
+      <Suspense fallback={null}>
+        <TickerDrawer />
+        <DataExplorerModal />
+        <ObserverTerminal />
+      </Suspense>
     </WheelContainer>
   );
 }

@@ -6,11 +6,11 @@
  */
 
 import type { SQLiteDatabase } from '../db/sqlite';
-import { CSVParser } from './csv-parser';
 import { detectBrokerFromHeaders, getBrokerAdapter } from './broker-adapters';
-import { ImportValidationService } from './validation-service';
-import { SymbolNormalizationService } from './symbol-service';
+import { CSVParser } from './csv-parser';
 import { ImportProgressTracker } from './progress-tracker';
+import { SymbolNormalizationService } from './symbol-service';
+import { ImportValidationService } from './validation-service';
 
 /**
  * Example: Complete CSV Import Workflow

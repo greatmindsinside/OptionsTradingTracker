@@ -2,7 +2,7 @@
 
 This document provides a complete, up-to-date view of the repository layout and what each folder is responsible for. Use it as a quick orientation guide when navigating the codebase.
 
-Last updated: 2025-11-03 18:30
+Last updated: 2025-11-04
 
 ---
 
@@ -37,15 +37,15 @@ Last updated: 2025-11-03 18:30
 
 ```
 docs/
-├─ CSS_ARCHITECTURE_IMPLEMENTATION.md   # CSS design system & progress
-├─ DATA_ARCHITECTURE.md                 # Data model & storage plan
-├─ CLEANUP_COMPLETION_REPORT.md         # Code cleanup completion summary
-├─ PROJECT_ORGANIZATION.md              # (this file) full project tree
-├─ reports/                             # Point-in-time technical reports
-│  ├─ MODAL_TABLE_PATTERN_MIGRATION.md
-│  └─ PHASE_3_COMPONENT_MIGRATIONS.md
-├─ troubleshooting/                     # Known issues & fixes
-└─ complete/                            # Archived docs (finished streams)
+├─ README.md → (root)                   # Project overview & quick start
+├─ DATA_ARCHITECTURE.md                 # Technical architecture & data flow
+├─ FEATURES.md                          # Feature documentation & user guide
+├─ DEVELOPMENT.md                       # Development guide & standards
+├─ CHANGELOG.md                         # Version history & releases
+├─ PROJECT_ORGANIZATION.md              # (this file) file structure reference
+├─ reports/                             # Historical technical reports (archived)
+├─ troubleshooting/                     # Known issues & solutions
+└─ complete/                            # Completed work (archived)
 ```
 
 ---
@@ -104,6 +104,9 @@ src/
 │  └─ wheel-header.css  # Complex header animations (kept separate)
 ├─ types/               # Shared TypeScript types
 ├─ utils/               # Utilities (formatting, helpers)
+│  ├─ dates.ts          # DTE calculation utilities (calcDTE, dateFromDTE)
+│  ├─ env.ts            # Environment config & feature flags
+│  └─ telemetry.ts      # Telemetry event tracking
 └─ workers/             # Web workers (if/when used)
 ```
 

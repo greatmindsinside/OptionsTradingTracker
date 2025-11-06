@@ -1,5 +1,5 @@
+import { type ClassValue,clsx } from 'clsx';
 import React from 'react';
-import { clsx, type ClassValue } from 'clsx';
 
 // Define cn inline to avoid path resolution issues
 function cn(...inputs: ClassValue[]) {

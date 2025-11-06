@@ -1,1 +1,1 @@
-yarn lint-staged && yarn test:run
+yarn lint-staged && yarn typecheck && yarn test:run

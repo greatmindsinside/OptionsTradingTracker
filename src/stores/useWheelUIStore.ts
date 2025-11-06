@@ -21,13 +21,13 @@ interface WheelUIState {
 export const useWheelUIStore = create<WheelUIState>(set => ({
   searchQuery: '',
   actionsOpen: false,
-  actionsTab: 'Import',
+  actionsTab: 'Trade',
   contextSymbol: null,
   dataOpen: false,
   importing: false,
 
   setSearchQuery: q => set({ searchQuery: q }),
-  openActions: tab => set({ actionsOpen: true, actionsTab: tab ?? 'Import' }),
+  openActions: tab => set({ actionsOpen: true, actionsTab: tab ?? 'Trade' }),
   closeActions: () => set({ actionsOpen: false }),
   setActionsTab: tab => set({ actionsTab: tab }),
   openContext: symbol => set({ contextSymbol: symbol }),

@@ -3,8 +3,9 @@
  * A reusable form input with label, validation, and styling
  */
 
-import { forwardRef } from 'react';
 import { clsx } from 'clsx';
+import { forwardRef } from 'react';
+
 import styles from './InputGroup.module.css';
 
 interface InputGroupProps {

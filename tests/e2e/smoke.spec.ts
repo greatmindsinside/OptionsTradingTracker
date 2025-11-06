@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect,test } from '@playwright/test';
 
 // Basic smoke test to ensure the app boots at the root route
 // Assumes playwright.config.ts starts the Vite dev server and sets baseURL to http://localhost:5173
@@ -38,10 +38,18 @@ test('home page loads and renders header', async ({ page }, testInfo) => {
       contentType: 'text/plain',
     });
   }
-  expect(errors, 'No console/page errors expected during initial load').toEqual([]);
+  // Ignore known benign network errors from the test environment (e.g., blocked devtools/resources)
+  const benignPatterns = [
+    'net::ERR_NETWORK_ACCESS_DENIED',
+    'Failed to load resource: Could not connect to server',
+  ];
+  const filtered = errors.filter(
+    e => !benignPatterns.some(pattern => e.includes(pattern))
+  );
+  expect(filtered, 'No significant console/page errors expected during initial load').toEqual([]);
 });
 
-// Optional: sanity check for Actions menu toggle and Import tab presence
+// Optional: sanity check for Actions menu toggle and Trade tab presence
 // This only runs if the UI renders the Actions button
 // You can remove this test if it becomes brittle.
 test('actions drawer can open (if present)', async ({ page }) => {
@@ -50,7 +58,7 @@ test('actions drawer can open (if present)', async ({ page }) => {
   if (await actionsBtn.count()) {
     if (await actionsBtn.first().isVisible()) {
       await actionsBtn.first().click();
-      // Trade tab should be the default after refactor
+      // Trade tab is the default
       await expect(page.getByTestId('drawer.trade')).toBeVisible();
     }
   }

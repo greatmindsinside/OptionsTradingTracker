@@ -1,6 +1,8 @@
 import React from 'react';
-import { useAlertGeneration } from './useAlertGeneration';
+
 import { useWheelUIStore } from '@/stores/useWheelUIStore';
+
+import { useAlertGeneration } from './useAlertGeneration';
 
 export const AlertsCard: React.FC = () => {
   const alerts = useAlertGeneration();

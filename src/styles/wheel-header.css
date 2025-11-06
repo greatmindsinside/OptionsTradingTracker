@@ -111,7 +111,8 @@
 
 .page-header__inner,
 .wheel-header__inner {
-  max-width: 80rem;
+  /* Match Wheel page main container (max-w-6xl = 72rem) for perfect edge alignment */
+  max-width: 72rem;
   margin: 0 auto;
   padding: 0.875rem 1.5rem;
   display: flex;
@@ -171,6 +172,28 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* Right-aligned tools group (search + buttons) */
+.page-header__tools {
+  margin-left: auto; /* push group to the far right */
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; /* 12px */
+}
+
+/* Center region that holds the search input */
+.page-header__center {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* center the search horizontally */
+}
+
+/* Constrain search width and prevent stretching in center area */
+.page-header__center .page-header__search {
+  flex: 0 1 auto;
+  width: clamp(260px, 28vw, 420px);
 }
 
 /* Bombastic cyberpunk brand styling for Journal */
@@ -288,6 +311,8 @@
   .page-header__brand-image {
     height: 64px;
   }
+  .page-header__tools { gap: 0.5rem; }
+  .page-header__center .page-header__search { width: clamp(200px, 50vw, 320px); }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {

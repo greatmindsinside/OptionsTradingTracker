@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { SharesTable } from './SharesTable';
 
 export const SharesCard: React.FC = () => (

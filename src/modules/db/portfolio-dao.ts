@@ -1,7 +1,8 @@
 import { z } from 'zod';
-import type { SQLiteDatabase } from './sqlite';
+
 import { BaseDAO } from './dao-base';
-import { PortfolioSchema, type Portfolio } from './validation';
+import type { SQLiteDatabase } from './sqlite';
+import { type Portfolio,PortfolioSchema } from './validation';
 
 /**
  * Portfolio Data Access Object

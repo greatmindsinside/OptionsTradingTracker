@@ -5,8 +5,8 @@
  */
 
 // Lifecycle management
-export * from './lifecycle';
 export * from './engine';
+export * from './lifecycle';
 
 // Analytics and performance
 export * from './analytics';

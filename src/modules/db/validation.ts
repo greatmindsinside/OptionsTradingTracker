@@ -3,8 +3,8 @@
  * Provides comprehensive validation for all database entities
  */
 
-import { z } from 'zod';
 import type { ZodIssue } from 'zod';
+import { z } from 'zod';
 
 // Common validation patterns
 const idSchema = z.number().int().positive();

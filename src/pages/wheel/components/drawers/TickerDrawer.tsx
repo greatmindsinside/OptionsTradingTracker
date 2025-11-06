@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
-import { useWheelUIStore } from '@/stores/useWheelUIStore';
+
 import { useWheelStore } from '@/stores/useWheelStore';
+import { useWheelUIStore } from '@/stores/useWheelUIStore';
 
 export const TickerDrawer: React.FC = () => {
   const sym = useWheelUIStore(s => s.contextSymbol);

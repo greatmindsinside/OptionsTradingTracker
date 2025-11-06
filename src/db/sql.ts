@@ -1,5 +1,6 @@
 // Types from sql.js
 import type { Database, SqlJsStatic } from 'sql.js';
+
 import schemaSql from '@/db/schema.sql?raw';
 import type { JournalRow } from '@/models/journal';
 // In Vite, import the wasm asset as a URL so sql.js can locate it at runtime

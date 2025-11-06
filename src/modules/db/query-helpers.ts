@@ -3,9 +3,10 @@
  * Provides type-safe database operations with error handling
  */
 
+import type { z } from 'zod';
+
 import type { SQLiteDatabase, SqlValue, TransactionQuery } from './sqlite';
 import { validateData } from './validation';
-import type { z } from 'zod';
 
 // Generic query result types
 export interface QueryResult<T> {

@@ -6,7 +6,9 @@
  */
 
 import type { Database, SqlJsStatic } from 'sql.js';
+
 import { env } from '@/utils/env';
+
 import { MigrationManager } from './migrations';
 
 /**

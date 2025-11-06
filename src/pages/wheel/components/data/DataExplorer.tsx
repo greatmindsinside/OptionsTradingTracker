@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+
+import { useWheelStore } from '@/stores/useWheelStore';
+
 import { MiniTable } from './MiniTable';
 import { StatCard } from './StatCard';
-import { useWheelStore } from '@/stores/useWheelStore';
 
 export const DataExplorer: React.FC = () => {
   const lots = useWheelStore(s => s.lots);

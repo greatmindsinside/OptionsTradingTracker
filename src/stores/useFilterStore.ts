@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+
 import type { FilterState } from '@/types/entry';
 
 interface FilterStore extends FilterState {

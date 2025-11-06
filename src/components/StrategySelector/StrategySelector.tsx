@@ -4,6 +4,7 @@
  */
 
 import clsx from 'clsx';
+
 import styles from './StrategySelector.module.css';
 
 export type StrategyType = 'covered-call' | 'cash-secured-put' | 'long-call';

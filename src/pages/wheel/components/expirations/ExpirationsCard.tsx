@@ -1,9 +1,11 @@
 import React, { useMemo } from 'react';
+
 import { useWheelStore } from '@/stores/useWheelStore';
 import type { ExpRow } from '@/types/wheel';
-import { useExpirationSort } from './useExpirationSort';
-import { ExpirationRow } from './ExpirationRow';
 import { ymd } from '@/utils/wheel-calculations';
+
+import { ExpirationRow } from './ExpirationRow';
+import { useExpirationSort } from './useExpirationSort';
 
 export const ExpirationsCard: React.FC = () => {
   const positions = useWheelStore(s => s.positions);

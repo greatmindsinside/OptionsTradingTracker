@@ -6,10 +6,10 @@
  */
 
 import type { SQLiteDatabase } from '@/modules/db/sqlite';
+import { SymbolDAO } from '@/modules/db/symbol-dao';
+import { TradeDAO } from '@/modules/db/trade-dao';
 import { WheelDAO } from '@/modules/db/wheel-dao';
 import { WheelState } from '@/modules/wheel/lifecycle';
-import { TradeDAO } from '@/modules/db/trade-dao';
-import { SymbolDAO } from '@/modules/db/symbol-dao';
 
 export interface MockWheelResult {
   cyclesCreated: number;

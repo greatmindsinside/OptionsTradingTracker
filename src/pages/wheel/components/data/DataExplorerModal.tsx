@@ -1,5 +1,7 @@
 import React from 'react';
+
 import { useWheelUIStore } from '@/stores/useWheelUIStore';
+
 import { DataExplorer } from './DataExplorer';
 
 export const DataExplorerModal: React.FC = () => {

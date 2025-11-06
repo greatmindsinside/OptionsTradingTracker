@@ -1,6 +1,7 @@
 import React from 'react';
-import { Modal } from '@/components/ui/Modal';
+
 import { Input } from '@/components/ui/Input';
+import { Modal } from '@/components/ui/Modal';
 import { Select } from '@/components/ui/Select';
 
 const InputDemoPage: React.FC = () => {

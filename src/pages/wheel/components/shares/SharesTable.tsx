@@ -1,6 +1,8 @@
 import React from 'react';
-import { useSharesCalculation } from './useSharesCalculation';
+
 import { useWheelUIStore } from '@/stores/useWheelUIStore';
+
+import { useSharesCalculation } from './useSharesCalculation';
 
 export const SharesTable: React.FC = () => {
   const rows = useSharesCalculation();

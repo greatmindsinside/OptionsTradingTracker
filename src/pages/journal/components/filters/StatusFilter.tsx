@@ -1,7 +1,8 @@
-import React from 'react';
-import { useFilterStore } from '@/stores/useFilterStore';
-import { Select } from '@/components/ui/Select';
 import { CheckCircle } from 'lucide-react';
+import React from 'react';
+
+import { Select } from '@/components/ui/Select';
+import { useFilterStore } from '@/stores/useFilterStore';
 
 /**
  * StatusFilter

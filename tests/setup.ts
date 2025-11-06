@@ -1,10 +1,17 @@
 import '@testing-library/jest-dom';
-import { beforeEach, vi } from 'vitest';
+
+import { cleanup } from '@testing-library/react';
+import { afterEach, beforeEach, vi } from 'vitest';
 
 // Global test setup
 beforeEach(() => {
   // Reset any global state before each test
   vi.clearAllMocks();
+});
+
+// Ensure React trees are unmounted between tests to avoid cross-test leakage
+afterEach(() => {
+  cleanup();
 });
 
 // Mock localStorage
