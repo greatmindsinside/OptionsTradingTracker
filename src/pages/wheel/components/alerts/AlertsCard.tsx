@@ -34,7 +34,7 @@ const AlertsCardComponent: React.FC = () => {
         <span className="text-xs text-slate-500">auto from data</span>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {alerts.length === 0 && <div className="text-sm text-slate-500">All quiet ✨</div>}
 
         {alerts.map(alert => {
@@ -43,86 +43,27 @@ const AlertsCardComponent: React.FC = () => {
           return (
             <div
               key={alert.id}
-              className="rounded-lg p-3 transition-all hover:scale-[1.01]"
+              onClick={() => openContext(alert.ticker)}
+              className="cursor-pointer rounded-lg px-2.5 py-1.5 transition-all hover:scale-[1.01]"
               style={{
                 border: `1px solid ${config.borderColor}`,
                 backgroundColor: config.bgColor,
                 boxShadow: `0 2px 8px ${config.bgColor}`,
               }}
             >
-              {/* Priority Badge + Title */}
-              <div className="mb-2 flex items-start gap-2">
-                <span className="text-sm" title={config.label}>
+              {/* Compact single/two-line layout */}
+              <div className="flex items-start gap-2">
+                <span className="mt-0.5 shrink-0 text-xs" title={config.label}>
                   {config.icon}
                 </span>
-                <div className="flex-1">
-                  <div className="flex items-start justify-between gap-2">
-                    <h4
-                      className="text-sm leading-tight font-semibold"
-                      style={{ color: config.color }}
-                    >
-                      {alert.title}
-                    </h4>
-                    <button
-                      onClick={() => openContext(alert.ticker)}
-                      className="shrink-0 text-xs font-medium transition-colors"
-                      style={{
-                        color: config.color,
-                        opacity: 0.7,
-                      }}
-                      onMouseEnter={e => {
-                        e.currentTarget.style.opacity = '1';
-                      }}
-                      onMouseLeave={e => {
-                        e.currentTarget.style.opacity = '0.7';
-                      }}
-                    >
-                      View →
-                    </button>
-                  </div>
-                  <p className="mt-1 text-xs leading-relaxed text-slate-300">{alert.message}</p>
+                <div className="min-w-0 flex-1">
+                  <span className="text-xs font-semibold" style={{ color: config.color }}>
+                    {alert.title}
+                  </span>
+                  <span className="mx-1.5 text-xs text-slate-500">·</span>
+                  <span className="text-xs text-slate-300">{alert.message}</span>
                 </div>
               </div>
-
-              {/* Action Buttons */}
-              {alert.actions && alert.actions.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {alert.actions.map((action, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => {
-                        if (action.callback) {
-                          action.callback();
-                        } else if (action.action === 'view') {
-                          openContext(alert.ticker);
-                        }
-                      }}
-                      className="rounded px-2 py-1 text-xs font-medium transition-all"
-                      style={{
-                        border: `1px solid ${config.borderColor}`,
-                        backgroundColor:
-                          action.action === 'close' || action.action === 'roll'
-                            ? config.bgColor
-                            : 'rgba(0, 0, 0, 0.3)',
-                        color: config.color,
-                      }}
-                      onMouseEnter={e => {
-                        e.currentTarget.style.backgroundColor = config.bgColor;
-                        e.currentTarget.style.borderColor = config.color;
-                      }}
-                      onMouseLeave={e => {
-                        e.currentTarget.style.backgroundColor =
-                          action.action === 'close' || action.action === 'roll'
-                            ? config.bgColor
-                            : 'rgba(0, 0, 0, 0.3)';
-                        e.currentTarget.style.borderColor = config.borderColor;
-                      }}
-                    >
-                      {action.label}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
           );
         })}
