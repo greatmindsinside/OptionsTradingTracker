@@ -63,12 +63,12 @@ export function useWheelDatabase() {
 
     const initDB = async () => {
       try {
-        console.log('🔄 Initializing wheel database connection...');
+        // console.log('🔄 Initializing wheel database connection...');
         const database = await initDatabase();
 
         if (mounted) {
           setDb(database);
-          console.log('💾 Database initialized successfully');
+          // console.log('💾 Database initialized successfully');
         }
       } catch (err) {
         console.error('❌ Failed to initialize database:', err);
@@ -93,7 +93,7 @@ export function useWheelDatabase() {
     try {
       setLoading(true);
       setError(null);
-      console.log('🔄 Loading wheel data from journal table...');
+      // console.log('🔄 Loading wheel data from journal table...');
 
       // Initialize journal database
       await initDb();
@@ -105,7 +105,7 @@ export function useWheelDatabase() {
         ORDER BY datetime(ts) DESC
       `);
 
-      console.log('📈 Loaded journal entries:', entries.length);
+      // console.log('📈 Loaded journal entries:', entries.length);
 
       // Transform journal entries into positions
       const positions = transformJournalToPositions(entries);
@@ -137,7 +137,7 @@ export function useWheelDatabase() {
       };
 
       setData(wheelData);
-      console.log('✅ Wheel data loaded successfully');
+      // console.log('✅ Wheel data loaded successfully');
     } catch (err) {
       console.error('❌ Failed to load wheel data:', err);
       setError(

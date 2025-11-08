@@ -52,7 +52,7 @@ export function saveDteOverride(
 
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides));
-    console.log('✅ Saved DTE override:', positionId, overrideDte);
+    // console.log('✅ Saved DTE override:', positionId, overrideDte);
   } catch (error) {
     console.error('Failed to save DTE override:', error);
   }
@@ -75,7 +75,7 @@ export function removeDteOverride(positionId: string): void {
 
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides));
-    console.log('✅ Removed DTE override:', positionId);
+    // console.log('✅ Removed DTE override:', positionId);
   } catch (error) {
     console.error('Failed to remove DTE override:', error);
   }
@@ -86,7 +86,7 @@ export function removeDteOverride(positionId: string): void {
  */
 export function clearAllDteOverrides(): void {
   localStorage.removeItem(STORAGE_KEY);
-  console.log('✅ Cleared all DTE overrides');
+  // console.log('✅ Cleared all DTE overrides');
 }
 
 /**
@@ -98,7 +98,7 @@ export function applyDteOverrides<T extends { id: string; dte: number }>(positio
   return positions.map(position => {
     const override = overrides[position.id];
     if (override) {
-      console.log('📅 Applying DTE override:', position.id, override.overrideDte);
+      // console.log('📅 Applying DTE override:', position.id, override.overrideDte);
       return {
         ...position,
         dte: override.overrideDte,

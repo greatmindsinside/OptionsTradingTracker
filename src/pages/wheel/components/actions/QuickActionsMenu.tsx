@@ -88,7 +88,7 @@ export const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({ isOpen, onCl
   return (
     <div
       ref={menuRef}
-      className="fixed right-6 bottom-24 z-[101] w-72 overflow-hidden rounded-xl border border-[rgba(245,179,66,0.3)] bg-[rgba(11,15,14,0.95)] shadow-[0_0_60px_-20px_rgba(245,179,66,0.125),0_24px_72px_rgba(0,0,0,0.95)] backdrop-blur-[32px]"
+      className="fixed right-6 bottom-24 z-101 w-72 overflow-hidden rounded-xl border border-[rgba(245,179,66,0.3)] bg-[rgba(11,15,14,0.95)] shadow-[0_0_60px_-20px_rgba(245,179,66,0.125),0_24px_72px_rgba(0,0,0,0.95)] backdrop-blur-[32px]"
       style={{
         animation: 'fadeInUp 0.2s ease-out',
       }}
@@ -107,7 +107,7 @@ export const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({ isOpen, onCl
             onClick={() => handleMenuItemClick(item.id)}
             className="group flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-[rgba(245,179,66,0.08)] hover:shadow-[0_0_5px_rgba(245,179,66,0.075)]"
           >
-            <Icon icon={item.icon} className={`h-5 w-5 ${item.color} flex-shrink-0`} />
+            <Icon icon={item.icon} className={`h-5 w-5 ${item.color} shrink-0`} />
             <div className="flex-1 overflow-hidden">
               <div className="text-sm font-medium text-[rgba(245,179,66,0.9)] group-hover:text-[#F5B342]">
                 {item.label}
