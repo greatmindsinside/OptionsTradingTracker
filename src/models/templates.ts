@@ -1,4 +1,4 @@
-import { toIso,uid } from '@/lib/format';
+import { toIso, uid } from '@/lib/format';
 import { type JournalRow } from '@/models/journal';
 
 // Multiplier for options (shares per contract)
@@ -168,4 +168,38 @@ export function tmplFee(p: Common & { amount: number }): JournalRow[] {
 
 export function tmplCorrection(p: Common & { amount: number; note?: string }): JournalRow[] {
   return [baseRow(p, 'correction', p.amount, { meta: { note: p.note } })];
+}
+
+export function tmplBuyShares(
+  p: Common & { shares: number; pricePerShare: number; fee?: number }
+): JournalRow[] {
+  const rows: JournalRow[] = [
+    // Purchase shares (cash out)
+    baseRow(p, 'assignment_shares', -(p.pricePerShare * p.shares), {
+      qty: p.shares,
+      strike: p.pricePerShare,
+      meta: { from: 'direct_purchase', template: 'tmplBuyShares' },
+    }),
+  ];
+  if (p.fee && p.fee !== 0) {
+    rows.push(baseRow(p, 'fee', -Math.abs(p.fee), { meta: { template: 'tmplBuyShares' } }));
+  }
+  return rows;
+}
+
+export function tmplSellShares(
+  p: Common & { shares: number; pricePerShare: number; fee?: number }
+): JournalRow[] {
+  const rows: JournalRow[] = [
+    // Sell shares (cash in)
+    baseRow(p, 'share_sale', p.pricePerShare * p.shares, {
+      qty: p.shares,
+      strike: p.pricePerShare,
+      meta: { from: 'direct_sale', template: 'tmplSellShares' },
+    }),
+  ];
+  if (p.fee && p.fee !== 0) {
+    rows.push(baseRow(p, 'fee', -Math.abs(p.fee), { meta: { template: 'tmplSellShares' } }));
+  }
+  return rows;
 }

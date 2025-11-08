@@ -1272,16 +1272,33 @@ img {
     @apply fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm;
   }
   .modal {
-    @apply relative mx-4 w-full max-w-lg rounded-2xl border border-green-500/15 bg-black/90 shadow-2xl shadow-green-500/20;
+    position: relative;
+    margin: 0 1rem;
+    width: 100%;
+    max-width: 32rem;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, rgba(11, 15, 14, 0.85), rgba(15, 25, 22, 0.88));
+    backdrop-filter: blur(32px) saturate(105%);
+    border: 1px solid rgba(245, 179, 66, 0.3);
+    box-shadow:
+      0 24px 72px rgba(0, 0, 0, 0.95),
+      0 0 60px -20px rgba(245, 179, 66, 0.125),
+      inset 0 1px 0 rgba(245, 179, 66, 0.075);
   }
   .modal-header {
-    @apply flex items-center justify-between border-b border-green-500/20 px-6 py-4;
+    @apply flex items-center justify-between border-b px-6 py-4;
+    border-bottom-color: rgba(245, 179, 66, 0.2);
   }
   .modal-title {
-    @apply text-lg font-semibold text-green-400;
+    @apply text-lg font-semibold;
+    color: #f5b342;
   }
   .modal-close {
-    @apply text-zinc-400 transition-colors hover:text-zinc-200;
+    @apply transition-colors;
+    color: rgba(245, 179, 66, 0.7);
+  }
+  .modal-close:hover {
+    color: #f5b342;
   }
   .modal-content {
     @apply max-h-[calc(100vh-200px)] overflow-y-auto px-6 py-4;
@@ -1296,10 +1313,10 @@ img {
     @apply w-full border-collapse text-sm;
   }
   .table thead {
-    @apply bg-zinc-800/60 sticky top-0 z-10;
+    @apply sticky top-0 z-10 bg-zinc-800/60;
   }
   .table th {
-    @apply border-b border-zinc-700/60 px-4 py-3 text-left text-xs font-semibold tracking-wider text-zinc-400 uppercase bg-zinc-800/95 backdrop-blur-sm;
+    @apply border-b border-zinc-700/60 bg-zinc-800/95 px-4 py-3 text-left text-xs font-semibold tracking-wider text-zinc-400 uppercase backdrop-blur-sm;
   }
   .table td {
     @apply border-b border-zinc-800/60 px-4 py-3 text-zinc-300;
@@ -1332,15 +1349,18 @@ img {
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
   }
-  
+
   @media (max-width: 768px) {
-    button, .page-header__btn {
+    button,
+    .page-header__btn {
       min-width: 44px;
       min-height: 44px;
       padding: 0.75rem 1rem;
     }
-    
-    input, select, textarea {
+
+    input,
+    select,
+    textarea {
       min-height: 44px;
       font-size: 16px; /* Prevents zoom on iOS */
     }
@@ -1352,28 +1372,28 @@ img {
       background: white;
       color: black;
     }
-    
+
     .no-print {
       display: none !important;
     }
-    
+
     .table-container {
       overflow: visible;
       max-height: none;
       border: 1px solid #000;
     }
-    
+
     .table thead {
       position: static;
     }
-    
+
     .table th,
     .table td {
       border: 1px solid #000;
       padding: 8px;
       font-size: 10pt;
     }
-    
+
     .table tbody tr {
       page-break-inside: avoid;
     }
@@ -1449,4 +1469,375 @@ img {
     0 8px 32px 0 rgba(0, 0, 0, 0.37),
     inset 0 1px 1px 0 rgba(255, 255, 255, 0.1),
     0 0 60px -10px rgba(34, 197, 94, 0.2);
+}
+
+/* ===== GLASSMORPHISM ENHANCEMENTS ===== */
+
+/* Main dark glass panel with deep space abyss */
+.glass-panel-dark {
+  position: relative;
+  background:
+    radial-gradient(ellipse at 50% 100%, rgba(0, 227, 159, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 100% 0%, rgba(245, 179, 66, 0.04) 0%, transparent 50%),
+    linear-gradient(
+      135deg,
+      rgba(11, 15, 14, 0.85) 0%,
+      rgba(15, 25, 22, 0.88) 50%,
+      rgba(11, 15, 14, 0.92) 100%
+    );
+  backdrop-filter: blur(32px) saturate(105%);
+  -webkit-backdrop-filter: blur(32px) saturate(105%);
+  border: 1px solid rgba(245, 179, 66, 0.3);
+  box-shadow:
+    0 24px 72px 0 rgba(0, 0, 0, 0.95),
+    inset 0 1px 0 rgba(245, 179, 66, 0.075),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(245, 179, 66, 0.04),
+    0 0 60px -20px rgba(245, 179, 66, 0.125);
+  overflow: hidden;
+}
+
+/* Gold glow bands at top and bottom edges - reduced intensity */
+.glass-panel-dark::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(245, 179, 66, 0.075) 0%, transparent 10%),
+    linear-gradient(to top, rgba(245, 179, 66, 0.075) 0%, transparent 10%),
+    radial-gradient(ellipse at 0% 50%, rgba(0, 227, 159, 0.02) 0%, transparent 40%),
+    radial-gradient(ellipse at 100% 50%, rgba(0, 227, 159, 0.02) 0%, transparent 40%);
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 0;
+}
+
+/* Enhanced grid pattern with circuit board feel */
+.glass-panel-dark::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(245, 179, 66, 0.015) 0px,
+      transparent 1px,
+      transparent 24px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(245, 179, 66, 0.015) 0px,
+      transparent 1px,
+      transparent 24px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.012) 0px,
+      transparent 1px,
+      transparent 48px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.012) 0px,
+      transparent 1px,
+      transparent 48px
+    );
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0.9;
+}
+
+/* Ensure main panel content stays on top */
+.glass-panel-dark > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Glass card styling for individual components - Deep space abyss */
+.glass-card {
+  position: relative;
+  background:
+    radial-gradient(ellipse at 80% 70%, rgba(16, 185, 129, 0.04) 0%, transparent 40%),
+    linear-gradient(135deg, rgba(2, 3, 5, 0.95) 0%, rgba(4, 6, 8, 0.92) 100%);
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  border: 1px solid rgba(16, 185, 129, 0.12);
+  box-shadow:
+    0 4px 20px 0 rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(16, 185, 129, 0.03),
+    0 0 0 1px rgba(255, 255, 255, 0.01);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+/* Starfield effect for glass cards - crisp distant stars */
+.glass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    radial-gradient(0.5px 0.5px at 20% 30%, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(0.5px 0.5px at 60% 70%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(0.5px 0.5px at 50% 50%, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(0.5px 0.5px at 80% 10%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(0.5px 0.5px at 90% 60%, rgba(255, 255, 255, 0.75), transparent),
+    radial-gradient(0.5px 0.5px at 33% 50%, rgba(255, 255, 255, 0.65), transparent),
+    radial-gradient(0.5px 0.5px at 52% 30%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(0.5px 0.5px at 78% 88%, rgba(255, 255, 255, 0.8), transparent);
+  background-size: 200% 200%;
+  background-position: 0% 0%;
+  opacity: 0.2;
+  pointer-events: none;
+  border-radius: inherit;
+  animation: starfield-drift 120s linear infinite;
+}
+
+/* Ensure card content stays on top */
+.glass-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes starfield-drift {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
+.glass-card:hover {
+  border-color: rgba(16, 185, 129, 0.25);
+  box-shadow:
+    0 8px 32px 0 rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(16, 185, 129, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.03),
+    0 0 40px -8px rgba(16, 185, 129, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Light refraction effect using radial gradients */
+.light-refraction {
+  position: relative;
+  overflow: hidden;
+}
+
+.light-refraction::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle at center,
+    rgba(6, 182, 212, 0.25) 0%,
+    rgba(34, 211, 238, 0.15) 25%,
+    rgba(103, 232, 249, 0.05) 50%,
+    transparent 70%
+  );
+  pointer-events: none;
+  opacity: 0.6;
+  animation: refraction-pulse 8s ease-in-out infinite;
+}
+
+@keyframes refraction-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translate(-10%, 10%) scale(1.1);
+  }
+}
+
+/* Animated border glow effect */
+.glass-border-glow {
+  position: relative;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+.glass-border-glow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(94, 234, 212, 0.4),
+    rgba(16, 185, 129, 0.3),
+    rgba(6, 182, 212, 0.2),
+    rgba(13, 148, 136, 0.3)
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: border-glow-rotate 4s linear infinite;
+}
+
+@keyframes border-glow-rotate {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    filter: hue-rotate(360deg);
+  }
+}
+
+/* Animated shimmer light sweep effect */
+.shimmer-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-effect::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(94, 234, 212, 0.1) 25%,
+    rgba(6, 182, 212, 0.2) 50%,
+    rgba(94, 234, 212, 0.1) 75%,
+    transparent 100%
+  );
+  pointer-events: none;
+  animation: shimmer-sweep 8s ease-in-out infinite;
+}
+
+@keyframes shimmer-sweep {
+  0% {
+    left: -100%;
+  }
+  50%,
+  100% {
+    left: 200%;
+  }
+}
+
+/* Glass panel with deeper background for cards - Deep abyss variant */
+.glass-card-deep {
+  position: relative;
+  background:
+    radial-gradient(ellipse at 70% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 35%),
+    linear-gradient(135deg, rgba(1, 2, 3, 0.98) 0%, rgba(3, 4, 6, 0.96) 100%);
+  backdrop-filter: blur(18px) saturate(115%);
+  -webkit-backdrop-filter: blur(18px) saturate(115%);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  box-shadow:
+    0 8px 32px 0 rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(16, 185, 129, 0.04),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.008),
+    0 0 50px -15px rgba(16, 185, 129, 0.08);
+  overflow: hidden;
+}
+
+/* Starfield effect for deep cards - sharp pinpoints */
+.glass-card-deep::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    radial-gradient(0.5px 0.5px at 15% 25%, rgba(255, 255, 255, 0.85), transparent),
+    radial-gradient(0.5px 0.5px at 55% 65%, rgba(255, 255, 255, 0.75), transparent),
+    radial-gradient(0.5px 0.5px at 45% 45%, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(0.5px 0.5px at 75% 15%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(0.5px 0.5px at 85% 55%, rgba(255, 255, 255, 0.65), transparent),
+    radial-gradient(0.5px 0.5px at 25% 75%, rgba(255, 255, 255, 0.75), transparent),
+    radial-gradient(0.5px 0.5px at 65% 35%, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(0.5px 0.5px at 88% 85%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(0.5px 0.5px at 10% 60%, rgba(255, 255, 255, 0.65), transparent),
+    radial-gradient(0.5px 0.5px at 40% 90%, rgba(255, 255, 255, 0.75), transparent);
+  background-size: 250% 250%;
+  background-position: 0% 0%;
+  opacity: 0.25;
+  pointer-events: none;
+  border-radius: inherit;
+  animation: starfield-drift 100s linear infinite;
+}
+
+/* Ensure deep card content stays on top */
+.glass-card-deep > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Emerald accent variant for glass cards - Deep abyss metrics */
+.glass-card-teal {
+  position: relative;
+  background:
+    radial-gradient(ellipse at 25% 35%, rgba(16, 185, 129, 0.06) 0%, transparent 35%),
+    linear-gradient(135deg, rgba(2, 4, 6, 0.94) 0%, rgba(3, 5, 8, 0.91) 100%);
+  backdrop-filter: blur(16px) saturate(118%);
+  -webkit-backdrop-filter: blur(16px) saturate(118%);
+  border: 1px solid rgba(16, 185, 129, 0.14);
+  box-shadow:
+    0 4px 24px 0 rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(16, 185, 129, 0.05),
+    0 0 0 1px rgba(255, 255, 255, 0.012),
+    0 0 35px -8px rgba(16, 185, 129, 0.08);
+  overflow: hidden;
+}
+
+/* Starfield effect for metric cards - distant points */
+.glass-card-teal::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    radial-gradient(0.5px 0.5px at 18% 22%, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(0.5px 0.5px at 58% 68%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(0.5px 0.5px at 48% 48%, rgba(255, 255, 255, 0.75), transparent),
+    radial-gradient(0.5px 0.5px at 82% 18%, rgba(255, 255, 255, 0.65), transparent),
+    radial-gradient(0.5px 0.5px at 92% 58%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(0.5px 0.5px at 28% 72%, rgba(255, 255, 255, 0.75), transparent);
+  background-size: 180% 180%;
+  background-position: 0% 0%;
+  opacity: 0.22;
+  pointer-events: none;
+  border-radius: inherit;
+  animation: starfield-drift 90s linear infinite;
+}
+
+/* Ensure metric card content stays on top */
+.glass-card-teal > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Light ray accent for backgrounds */
+.light-ray-accent {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.3;
+  animation: light-ray-float 10s ease-in-out infinite;
+}
+
+@keyframes light-ray-float {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translateY(-20px) translateX(10px) rotate(5deg);
+    opacity: 0.4;
+  }
 }

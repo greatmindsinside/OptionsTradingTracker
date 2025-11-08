@@ -32,6 +32,7 @@ interface EntriesStore {
   // Actions
   loadEntries: (filters?: FilterState) => Promise<void>;
   addEntry: <K extends TemplateKind>(kind: K, payload: TemplatePayloads[K]) => Promise<void>;
+  addRawEntries: (rows: Entry[]) => Promise<void>;
   refreshTotals: (filters?: FilterState) => Promise<void>;
   deleteEntry: (entryId: string, reason?: string) => Promise<void>;
   restoreEntry: (entryId: string) => Promise<void>;
@@ -193,6 +194,33 @@ export const useEntriesStore = create<EntriesStore>((set, get) => ({
     }
   },
 
+  addRawEntries: async (rows: Entry[]) => {
+    set({ loading: true, error: null });
+
+    try {
+      if (!get().ready) {
+        await initDb();
+        set({ ready: true });
+      }
+
+      if (rows.length === 0) {
+        set({ loading: false });
+        return;
+      }
+
+      await insertJournalRows(rows);
+      await saveDb();
+
+      // Reload entries
+      await get().loadEntries();
+
+      set({ loading: false });
+    } catch (error) {
+      set({ error: (error as Error).message, loading: false });
+      throw error;
+    }
+  },
+
   deleteEntry: async (entryId: string, reason?: string) => {
     set({ loading: true, error: null });
 
@@ -209,7 +237,7 @@ export const useEntriesStore = create<EntriesStore>((set, get) => ({
       // Reload entries to reflect changes
       await get().loadEntries();
 
-      console.log(`✅ Entry ${entryId} soft deleted`);
+      // console.log(`✅ Entry ${entryId} soft deleted`);
       set({ loading: false });
     } catch (error) {
       set({ error: (error as Error).message, loading: false });
@@ -230,7 +258,7 @@ export const useEntriesStore = create<EntriesStore>((set, get) => ({
       await saveDb();
       await get().loadEntries();
 
-      console.log(`✅ Entry ${entryId} restored`);
+      // console.log(`✅ Entry ${entryId} restored`);
       set({ loading: false });
     } catch (error) {
       set({ error: (error as Error).message, loading: false });
@@ -274,9 +302,9 @@ export const useEntriesStore = create<EntriesStore>((set, get) => ({
       // Reload
       await get().loadEntries();
 
-      console.log(
-        `✅ Entry ${entryId} edited (original soft-deleted, new entry ${corrected.id} created)`
-      );
+      // console.log(
+      //   `✅ Entry ${entryId} edited (original soft-deleted, new entry ${corrected.id} created)`
+      // );
       set({ loading: false });
     } catch (error) {
       set({ error: (error as Error).message, loading: false });

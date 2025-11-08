@@ -18,6 +18,20 @@ export default {
           900: 'rgb(var(--color-primary-900) / <alpha-value>)',
           DEFAULT: 'rgb(var(--color-primary-500) / <alpha-value>)',
         },
+        // Teal colors for glassmorphism theme
+        teal: {
+          300: 'rgb(94 234 212 / <alpha-value>)',
+          400: 'rgb(45 212 191 / <alpha-value>)',
+          500: 'rgb(20 184 166 / <alpha-value>)',
+          600: 'rgb(13 148 136 / <alpha-value>)',
+        },
+        // Cyan colors for light refraction
+        cyan: {
+          300: 'rgb(103 232 249 / <alpha-value>)',
+          400: 'rgb(34 211 238 / <alpha-value>)',
+          500: 'rgb(6 182 212 / <alpha-value>)',
+          600: 'rgb(8 145 178 / <alpha-value>)',
+        },
         success: {
           50: 'rgb(var(--color-success-50) / <alpha-value>)',
           100: 'rgb(var(--color-success-100) / <alpha-value>)',

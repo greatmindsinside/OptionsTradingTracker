@@ -1,12 +1,20 @@
+import { Icon } from '@iconify/react';
 import React from 'react';
 
 import { SharesTable } from './SharesTable';
 
 export const SharesCard: React.FC = () => (
-  <div className="rounded-2xl border border-green-500/20 bg-linear-to-br from-black/80 to-zinc-950/90 p-4 shadow-lg shadow-green-500/10 backdrop-blur-xl">
+  <div className="glass-card rounded-2xl p-4">
     <div className="mb-2 flex items-center justify-between">
-      <div className="font-semibold text-green-400">📦 Shares</div>
-      <button className="text-xs underline">Show</button>
+      <div className="flex items-center gap-2 font-semibold text-slate-100">
+        <Icon
+          icon="fluent:box-multiple-24-filled"
+          className="h-4 w-4"
+          style={{ color: '#F5B342' }}
+        />
+        Shares
+      </div>
+      <button className="text-xs text-emerald-400 underline hover:text-emerald-300">Show</button>
     </div>
     <SharesTable />
   </div>

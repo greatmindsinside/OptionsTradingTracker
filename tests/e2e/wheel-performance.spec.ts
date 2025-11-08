@@ -1,4 +1,4 @@
-import { expect,test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 /**
  * E2E Performance Tests for Wheel Page
@@ -16,40 +16,25 @@ test.describe('Wheel Page Performance', () => {
   });
 
   test('should lazy-load non-critical components', async ({ page }) => {
-    // Get all script sources after initial load
-    const initialScripts = await page.evaluate(() =>
-      Array.from(document.querySelectorAll('script[src]')).map(s => s.src)
-    );
-
     // Check that lazy-loaded component chunks are not in initial bundle
     // Lazy components should be in separate chunks (e.g., chunk names contain component names or are numeric)
-    const lazyComponentMarkers = ['DataExplorer', 'ObserverTerminal', 'TickerDrawer'];
-    
     // In production builds, lazy chunks are typically numbered or named
-    // We verify that these specific component names are not in the initial scripts
-    // (or if they are, they're in a separate chunk that wasn't eagerly loaded)
-    const hasLazyComponentsInInitial = initialScripts.some(src =>
-      lazyComponentMarkers.some(marker => src.toLowerCase().includes(marker.toLowerCase()))
-    );
-
-    // If lazy components are in initial scripts, they might be in a separate chunk
-    // that's still loaded. Let's check if the components themselves are actually rendered
+    // We verify that components are not visible/rendered initially (unless they're conditionally rendered)
     const dataExplorerVisible = await page.locator('[data-testid*="data-explorer"]').count();
     const observerTerminalVisible = await page.locator('.observer-terminal.open').count();
-    const tickerDrawerVisible = await page.locator('[data-testid*="ticker-drawer"]').isVisible().catch(() => false);
 
     // Components should not be visible/rendered initially (unless they're conditionally rendered)
     // This is a heuristic - the actual verification is that chunks are split
     expect(dataExplorerVisible).toBe(0);
     expect(observerTerminalVisible).toBe(0);
-    
+
     // Verify components can be loaded on demand
     // Try to trigger ObserverTerminal (if unlocked)
     // This would load the lazy chunk if it wasn't already loaded
-    const terminalUnlocked = await page.evaluate(() => 
-      localStorage.getItem('observer-terminal-unlocked') === 'true'
+    const terminalUnlocked = await page.evaluate(
+      () => localStorage.getItem('observer-terminal-unlocked') === 'true'
     );
-    
+
     if (terminalUnlocked) {
       // Try to open terminal - this should trigger lazy loading
       await page.keyboard.press('Escape');
@@ -63,7 +48,7 @@ test.describe('Wheel Page Performance', () => {
 
   test('should preload critical fonts', async ({ page }) => {
     await page.goto('/wheel');
-    
+
     // Check for font preload links
     const preloads = await page.evaluate(() =>
       Array.from(document.querySelectorAll('link[rel="preload"]'))
@@ -77,10 +62,10 @@ test.describe('Wheel Page Performance', () => {
 
     // Should have at least one font preload
     expect(preloads.length).toBeGreaterThan(0);
-    
+
     // Verify preload links are for fonts (woff2)
-    const fontPreloads = preloads.filter(p => 
-      p.href?.includes('.woff2') || p.type === 'font/woff2'
+    const fontPreloads = preloads.filter(
+      p => p.href?.includes('.woff2') || p.type === 'font/woff2'
     );
     expect(fontPreloads.length).toBeGreaterThan(0);
 
@@ -98,15 +83,15 @@ test.describe('Wheel Page Performance', () => {
 
   test('should have reasonable initial load performance', async ({ page }) => {
     const startTime = Date.now();
-    
+
     await page.goto('/wheel', { waitUntil: 'networkidle' });
-    
+
     const loadTime = Date.now() - startTime;
-    
+
     // Initial load should be under 5 seconds (reasonable for dev environment)
     // In production with optimizations, this should be much faster
     expect(loadTime).toBeLessThan(5000);
-    
+
     // Verify page is interactive (key elements are visible)
     // Check for any visible wheel page content (header, metrics, or cards)
     const hasWheelContent = await page.evaluate(() => {
@@ -124,23 +109,23 @@ test.describe('Wheel Page Performance', () => {
     // Try to open DataExplorer (if there's a button/trigger)
     // This would trigger lazy loading of the component
     // Note: This test might need adjustment based on actual UI implementation
-    
+
     // Verify ObserverTerminal can be loaded
-    const terminalUnlocked = await page.evaluate(() => 
-      localStorage.getItem('observer-terminal-unlocked') === 'true'
+    const terminalUnlocked = await page.evaluate(
+      () => localStorage.getItem('observer-terminal-unlocked') === 'true'
     );
-    
+
     if (!terminalUnlocked) {
       // Unlock terminal for testing
       await page.evaluate(() => {
         localStorage.setItem('observer-terminal-unlocked', 'true');
       });
     }
-    
+
     // Terminal should be available but not visible initially
     const terminalBefore = await page.locator('.observer-terminal.open').count();
     expect(terminalBefore).toBe(0);
-    
+
     // Verify font-display: swap is set
     // Google Fonts includes display=swap in the URL, so we verify that
     const googleFontsInfo = await page.evaluate(() => {
@@ -155,15 +140,11 @@ test.describe('Wheel Page Performance', () => {
 
     // Should have Google Fonts link
     expect(googleFontsInfo.hasLink).toBe(true);
-    
+
     // Font-display: swap should be set in the Google Fonts URL (check for display=swap or display%3Dswap)
     // Note: The URL may have display=swap encoded or as a parameter
     if (googleFontsInfo.href) {
       // Check if display=swap is in the URL (could be at end, as parameter, or encoded)
-      const hasSwap = googleFontsInfo.href.includes('display=swap') || 
-                      googleFontsInfo.href.includes('display%3Dswap') ||
-                      googleFontsInfo.href.includes('&display=swap') ||
-                      googleFontsInfo.href.endsWith('display=swap');
       // If Google Fonts URL doesn't have display=swap explicitly, it's still valid
       // as Google Fonts may apply it by default. Just verify the link exists.
       expect(googleFontsInfo.hasLink).toBe(true);

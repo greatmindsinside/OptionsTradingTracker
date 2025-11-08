@@ -1,8 +1,7 @@
 import { create } from 'zustand';
 
-import { updateExpirationForPosition } from '@/db/sql';
-import type { LedgerEvent,Lot, Position } from '@/types/wheel';
-import { daysBetween, ymd } from '@/utils/wheel-calculations';
+import type { LedgerEvent, Lot, Position } from '@/types/wheel';
+import { daysBetween } from '@/utils/wheel-calculations';
 
 interface WheelState {
   lots: Lot[];
@@ -54,42 +53,46 @@ export const useWheelStore = create<WheelState>((set, get) => ({
     // You can extend this to optimistically update positions if desired.
   },
 
-  updateExpiration: (rowId, newDate, oldDate) => {
-    // Use provided old expiration date (already in YMD format), or compute from position if not provided
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  updateExpiration: (rowId, newDate, _oldDate) => {
     const current = get().positions.find(p => p.id === rowId);
-    const oldExpiration = oldDate
-      ? oldDate // oldDate is already in YMD format from ExpRow.expiration
-      : current
-        ? ymd(new Date(new Date(current.opened).getTime() + current.dte * 864e5))
-        : undefined;
+    if (!current) {
+      // console.warn('⚠️ Position not found:', rowId);
+      return;
+    }
 
-    // Optimistic UI update (adjust DTE in store)
+    const newDte = daysBetween(current.opened, newDate);
+    const oldDte = current.dte;
+
+    // console.log('📅 updateExpiration called:', {
+    //   rowId,
+    //   ticker: current.ticker,
+    //   strike: current.strike,
+    //   oldDate,
+    //   newDate,
+    //   oldDte,
+    //   newDte,
+    // });
+
+    // Save override to localStorage
+    import('@/utils/dteOverrides').then(({ saveDteOverride }) => {
+      saveDteOverride(rowId, current.ticker, current.strike, oldDte, newDte, newDate);
+    });
+
+    // Optimistic UI update
     set(s => ({
-      positions: s.positions.map(p =>
-        p.id === rowId ? { ...p, dte: Math.max(0, daysBetween(p.opened, newDate)) } : p
-      ),
+      positions: s.positions.map(p => (p.id === rowId ? { ...p, dte: Math.max(0, newDte) } : p)),
       ledger: [
         ...s.ledger,
         {
           id: crypto.randomUUID(),
           kind: 'expiration_updated',
           when: new Date().toISOString(),
-          meta: { rowId, to: newDate },
+          meta: { rowId, oldDte, newDte, newDate },
         },
       ],
     }));
 
-    // Persist to DB in the background
-    (async () => {
-      try {
-        const pos = current || get().positions.find(p => p.id === rowId);
-        if (!pos || !oldExpiration) return;
-        await updateExpirationForPosition(pos.ticker, pos.strike, oldExpiration, newDate);
-        const reload = get().reloadFn;
-        if (reload) await reload();
-      } catch (e) {
-        console.error('Failed to persist expiration update:', e);
-      }
-    })();
+    // console.log('✅ Expiration updated (DTE override saved to localStorage)');
   },
 }));

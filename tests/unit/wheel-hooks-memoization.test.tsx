@@ -1,5 +1,5 @@
-import { act,renderHook } from '@testing-library/react';
-import { beforeEach,describe, expect, it, vi } from 'vitest';
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { useFilteredTickers } from '@/pages/wheel/hooks/useFilteredTickers';
 import { useWheelMetrics } from '@/pages/wheel/hooks/useWheelMetrics';
@@ -101,7 +101,7 @@ describe('Wheel Hooks Memoization', () => {
 
       // Premium should be 2 contracts * 2.0 premium * 100 multiplier = 400
       expect(result.current.premiumThisWeek).toBe(400);
-      
+
       // Capital in puts should be 2 contracts * 100 strike * 100 multiplier = 20,000
       expect(result.current.capitalInPuts).toBe(20000);
     });
@@ -294,7 +294,3 @@ describe('Wheel Hooks Memoization', () => {
     });
   });
 });
-
-
-
-

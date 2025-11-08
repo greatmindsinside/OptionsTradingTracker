@@ -25,33 +25,42 @@ export const FilterBar: React.FC = () => {
   const totals = useEntriesStore(state => state.totals);
   const setFilters = useFilterStore(state => state.setFilters);
   const filters = useFilterStore(state => state);
-  
+
   // Amount range filter state
   const { minAmount, maxAmount, setAmountRange, clearAmountRange } = useClientFilterStore();
   const [minAmountInput, setMinAmountInput] = React.useState<string>('');
   const [maxAmountInput, setMaxAmountInput] = React.useState<string>('');
-  
+  const [isCollapsed, setIsCollapsed] = React.useState<boolean>(() => {
+    const saved = localStorage.getItem('journal_filter_collapsed');
+    return saved === 'true';
+  });
+
   // Sync input with store
   React.useEffect(() => {
     setMinAmountInput(minAmount !== null ? minAmount.toString() : '');
     setMaxAmountInput(maxAmount !== null ? maxAmount.toString() : '');
   }, [minAmount, maxAmount]);
-  
+
   // Debounce amount range updates
   React.useEffect(() => {
     const timer = setTimeout(() => {
       const min = minAmountInput === '' ? null : Number(minAmountInput);
       const max = maxAmountInput === '' ? null : Number(maxAmountInput);
       if (!isNaN(min as number) || !isNaN(max as number)) {
-        setAmountRange(min === '' || isNaN(min as number) ? null : min, max === '' || isNaN(max as number) ? null : max);
+        setAmountRange(
+          min === null || isNaN(min) ? null : min,
+          max === null || isNaN(max) ? null : max
+        );
       }
     }, 300);
-    
+
     return () => clearTimeout(timer);
   }, [minAmountInput, maxAmountInput, setAmountRange]);
-  
+
   // Filter presets state
-  const [filterPresets, setFilterPresets] = React.useState<Array<{ name: string; filters: typeof filters }>>(() => {
+  const [filterPresets, setFilterPresets] = React.useState<
+    Array<{ name: string; filters: typeof filters }>
+  >(() => {
     const saved = localStorage.getItem('journal_filter_presets');
     if (saved) {
       try {
@@ -62,26 +71,26 @@ export const FilterBar: React.FC = () => {
     }
     return [];
   });
-  
+
   const [showPresetMenu, setShowPresetMenu] = React.useState(false);
-  
+
   // Save filter preset
   const savePreset = () => {
     const name = window.prompt('Enter a name for this filter preset:');
     if (!name) return;
-    
+
     const preset = { name, filters: { ...filters } };
     const updated = [...filterPresets, preset];
     setFilterPresets(updated);
     localStorage.setItem('journal_filter_presets', JSON.stringify(updated));
   };
-  
+
   // Load filter preset
   const loadPreset = (preset: { name: string; filters: typeof filters }) => {
     setFilters(preset.filters);
     setShowPresetMenu(false);
   };
-  
+
   // Delete filter preset
   const deletePreset = (index: number) => {
     const updated = filterPresets.filter((_, i) => i !== index);
@@ -97,6 +106,23 @@ export const FilterBar: React.FC = () => {
     // This will trigger a reload in the parent via the filter store
   };
 
+  // Calculate active filter count
+  const activeFilterCount = React.useMemo(() => {
+    let count = 0;
+    if (filters.symbol) count++;
+    if (filters.type) count++;
+    if (filters.from) count++;
+    if (filters.to) count++;
+    if (filters.status !== 'all') count++;
+    if (minAmount !== null) count++;
+    if (maxAmount !== null) count++;
+    return count;
+  }, [filters, minAmount, maxAmount]);
+
+  React.useEffect(() => {
+    localStorage.setItem('journal_filter_collapsed', String(isCollapsed));
+  }, [isCollapsed]);
+
   const getDateString = (date: Date): string => {
     return date.toISOString().slice(0, 10);
   };
@@ -104,14 +130,14 @@ export const FilterBar: React.FC = () => {
   const handleQuickFilter = (period: 'today' | 'week' | 'month' | 'year' | 'all') => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     if (period === 'all') {
       setFilters({ from: '', to: '' });
       return;
     }
 
     const from = new Date(today);
-    
+
     switch (period) {
       case 'today':
         // Already set to today
@@ -131,138 +157,187 @@ export const FilterBar: React.FC = () => {
   };
 
   return (
-    <div className="neon-panel mb-6 rounded-2xl px-6 py-5">
+    <div className="neon-panel mb-6 rounded-2xl px-4 py-3">
       <div className="flex flex-col gap-3">
-        {/* Section titles */}
+        {/* Header with collapse toggle */}
         <div className="flex items-center justify-between">
-          <span className="text-xs tracking-wider text-zinc-400 uppercase">Filters</span>
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="flex items-center gap-2 text-xs tracking-wider text-zinc-400 uppercase transition-colors hover:text-zinc-300"
+          >
+            <span>Filters</span>
+            {activeFilterCount > 0 && (
+              <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-[10px] font-semibold text-green-400">
+                {activeFilterCount}
+              </span>
+            )}
+            <svg
+              className={`h-4 w-4 transition-transform ${isCollapsed ? '' : 'rotate-180'}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
           <span className="text-xs tracking-wider text-zinc-400 uppercase">Totals</span>
         </div>
 
-        <div className="flex flex-wrap items-start gap-6">
-          {/* Left: Filter controls */}
-          <div className="grid min-w-0 flex-1 grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
-            <TradeTypeFilter />
-            <DateRangeFilter />
-            <StatusFilter />
-            <div className="flex flex-col">
-              <label className="mb-1 ml-0.5 text-[11px] tracking-wide text-zinc-400/90 uppercase">
-                Quick Filters
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <Button onClick={() => handleQuickFilter('today')} variant="secondary" size="sm" className="h-8 text-xs">
-                  Today
-                </Button>
-                <Button onClick={() => handleQuickFilter('week')} variant="secondary" size="sm" className="h-8 text-xs">
-                  This Week
-                </Button>
-                <Button onClick={() => handleQuickFilter('month')} variant="secondary" size="sm" className="h-8 text-xs">
-                  This Month
-                </Button>
-                <Button onClick={() => handleQuickFilter('year')} variant="secondary" size="sm" className="h-8 text-xs">
-                  This Year
-                </Button>
-                <Button onClick={() => handleQuickFilter('all')} variant="secondary" size="sm" className="h-8 col-span-2 text-xs">
-                  All Time
-                </Button>
+        {/* Quick Filter Chips */}
+        {!isCollapsed && (
+          <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={() => handleQuickFilter('today')}
+              variant="secondary"
+              size="sm"
+              className="h-6 px-2 text-xs"
+            >
+              Today
+            </Button>
+            <Button
+              onClick={() => handleQuickFilter('week')}
+              variant="secondary"
+              size="sm"
+              className="h-6 px-2 text-xs"
+            >
+              This Week
+            </Button>
+            <Button
+              onClick={() => handleQuickFilter('month')}
+              variant="secondary"
+              size="sm"
+              className="h-6 px-2 text-xs"
+            >
+              This Month
+            </Button>
+            <Button
+              onClick={() => handleQuickFilter('year')}
+              variant="secondary"
+              size="sm"
+              className="h-6 px-2 text-xs"
+            >
+              This Year
+            </Button>
+            <Button
+              onClick={() => handleQuickFilter('all')}
+              variant="secondary"
+              size="sm"
+              className="h-6 px-2 text-xs"
+            >
+              All Time
+            </Button>
+          </div>
+        )}
+
+        {!isCollapsed && (
+          <div className="flex flex-wrap items-start gap-6">
+            {/* Left: Filter controls */}
+            <div className="grid min-w-0 flex-1 grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3">
+              <TradeTypeFilter />
+              <DateRangeFilter />
+              <StatusFilter />
+              <div className="flex flex-col">
+                <label className="mb-0.5 ml-0.5 text-[10px] tracking-wide text-zinc-400/90 uppercase">
+                  Amount Range
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={minAmountInput}
+                    onChange={e => setMinAmountInput(e.target.value)}
+                    placeholder="Min"
+                    className="h-7 rounded-lg border border-zinc-700 bg-zinc-900 px-2 text-sm text-zinc-300 placeholder-zinc-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/30 focus:outline-none"
+                  />
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={maxAmountInput}
+                    onChange={e => setMaxAmountInput(e.target.value)}
+                    placeholder="Max"
+                    className="h-7 rounded-lg border border-zinc-700 bg-zinc-900 px-2 text-sm text-zinc-300 placeholder-zinc-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/30 focus:outline-none"
+                  />
+                </div>
               </div>
-            </div>
-            <div className="flex flex-col">
-              <label className="mb-1 ml-0.5 text-[11px] tracking-wide text-zinc-400/90 uppercase">
-                Amount Range
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  type="number"
-                  step="0.01"
-                  value={minAmountInput}
-                  onChange={(e) => setMinAmountInput(e.target.value)}
-                  placeholder="Min"
-                  className="h-8 rounded border border-zinc-700 bg-zinc-900 px-2 text-sm text-zinc-300 placeholder-zinc-500 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/30"
-                />
-                <input
-                  type="number"
-                  step="0.01"
-                  value={maxAmountInput}
-                  onChange={(e) => setMaxAmountInput(e.target.value)}
-                  placeholder="Max"
-                  className="h-8 rounded border border-zinc-700 bg-zinc-900 px-2 text-sm text-zinc-300 placeholder-zinc-500 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/30"
-                />
-              </div>
-            </div>
-            <div className="relative flex flex-col">
-              <label className="mb-1 ml-0.5 text-[11px] tracking-wide text-zinc-400/90 uppercase">
-                Presets
-              </label>
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => setShowPresetMenu(!showPresetMenu)}
-                  variant="secondary"
-                  size="sm"
-                  className="h-8 flex-1 text-xs"
-                >
-                  {filterPresets.length > 0 ? `📋 ${filterPresets.length}` : '📋 Save'}
-                </Button>
-                {filterPresets.length > 0 && (
+              <div className="relative flex flex-col">
+                <label className="mb-0.5 ml-0.5 text-[10px] tracking-wide text-zinc-400/90 uppercase">
+                  Presets
+                </label>
+                <div className="flex gap-2">
                   <Button
-                    onClick={savePreset}
+                    onClick={() => setShowPresetMenu(!showPresetMenu)}
                     variant="secondary"
                     size="sm"
-                    className="h-8 text-xs"
-                    title="Save current filters as preset"
+                    className="h-7 flex-1 text-xs"
                   >
-                    💾
+                    {filterPresets.length > 0 ? `📋 ${filterPresets.length}` : '📋 Save'}
                   </Button>
+                  {filterPresets.length > 0 && (
+                    <Button
+                      onClick={savePreset}
+                      variant="secondary"
+                      size="sm"
+                      className="h-7 text-xs"
+                      title="Save current filters as preset"
+                    >
+                      💾
+                    </Button>
+                  )}
+                </div>
+                {showPresetMenu && filterPresets.length > 0 && (
+                  <div className="absolute top-full z-50 mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-900 p-2 shadow-lg">
+                    <div className="space-y-1">
+                      {filterPresets.map((preset, index) => (
+                        <div key={index} className="flex items-center justify-between gap-2">
+                          <button
+                            onClick={() => loadPreset(preset)}
+                            className="flex-1 rounded px-2 py-1 text-left text-sm text-zinc-300 hover:bg-zinc-800"
+                          >
+                            {preset.name}
+                          </button>
+                          <button
+                            onClick={() => deletePreset(index)}
+                            className="rounded px-2 py-1 text-sm text-red-400 hover:bg-red-900/20"
+                            title="Delete preset"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
-              {showPresetMenu && filterPresets.length > 0 && (
-                <div className="absolute top-full z-50 mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-900 p-2 shadow-lg">
-                  <div className="space-y-1">
-                    {filterPresets.map((preset, index) => (
-                      <div key={index} className="flex items-center justify-between gap-2">
-                        <button
-                          onClick={() => loadPreset(preset)}
-                          className="flex-1 rounded px-2 py-1 text-left text-sm text-zinc-300 hover:bg-zinc-800"
-                        >
-                          {preset.name}
-                        </button>
-                        <button
-                          onClick={() => deletePreset(index)}
-                          className="rounded px-2 py-1 text-sm text-red-400 hover:bg-red-900/20"
-                          title="Delete preset"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <div className="flex flex-col">
+                <label
+                  className="pointer-events-none mb-0.5 ml-0.5 text-[10px] tracking-wide text-zinc-400/90 uppercase opacity-0"
+                  aria-hidden="true"
+                >
+                  Actions
+                </label>
+                <Button onClick={handleClearAll} className="h-7 w-full">
+                  Clear All
+                </Button>
+              </div>
             </div>
+
+            {/* Right: Summary stats */}
             <div className="flex flex-col">
               <label
                 className="pointer-events-none mb-1 ml-0.5 text-[11px] tracking-wide text-zinc-400/90 uppercase opacity-0"
                 aria-hidden="true"
               >
-                Actions
+                Summary
               </label>
-              <Button onClick={handleClearAll} className="h-9 w-full">
-                Clear All
-              </Button>
+              <SummaryStats totals={totals} />
             </div>
           </div>
-
-          {/* Right: Summary stats */}
-          <div className="flex flex-col">
-            <label
-              className="pointer-events-none mb-1 ml-0.5 text-[11px] tracking-wide text-zinc-400/90 uppercase opacity-0"
-              aria-hidden="true"
-            >
-              Summary
-            </label>
-            <SummaryStats totals={totals} />
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

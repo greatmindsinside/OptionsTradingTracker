@@ -1,15 +1,12 @@
 import { useMemo } from 'react';
 
 import { useWheelStore } from '@/stores/useWheelStore';
-import { computeCover } from '@/utils/wheel-calculations';
 
 export function useWheelMetrics() {
   // Memoize selector to prevent unnecessary re-subscriptions
   // Zustand does reference equality checking, so we only re-render when positions/lots actually change
-  const positions = useWheelStore(
-    useMemo(() => (state) => state.positions, [])
-  );
-  const lots = useWheelStore(useMemo(() => (state) => state.lots, []));
+  const positions = useWheelStore(useMemo(() => state => state.positions, []));
+  const lots = useWheelStore(useMemo(() => state => state.lots, []));
 
   return useMemo(() => {
     const premiumThisWeek =
@@ -26,29 +23,23 @@ export function useWheelMetrics() {
     positions
       .filter(p => p.type === 'C' && p.side === 'S')
       .forEach(p => shortBy.set(p.ticker, (shortBy.get(p.ticker) || 0) + p.qty * 100));
-    
+
     // Calculate total shares needed for all short calls
     // Each call contract represents 100 shares, so we sum up all short call shares
     let totalSharesNeeded = 0;
-    shortBy.forEach((sharesNeeded) => {
+    shortBy.forEach(sharesNeeded => {
       totalSharesNeeded += sharesNeeded;
     });
-    
-    // Also calculate currently covered shares (for reference)
-    let coveredShares = 0;
-    shortBy.forEach((sc, t) => {
-      coveredShares += computeCover(sharesBy.get(t) || 0, sc).covered;
-    });
 
-    // Debug logging for shares-for-calls calculation
-    console.log('🔍 Shares For Calls Debug:', {
-      lots: lots.map(l => ({ ticker: l.ticker, qty: l.qty })),
-      shortCalls: Array.from(shortBy.entries()).map(([t, sc]) => ({ ticker: t, shortCalls: sc })),
-      sharesBy: Array.from(sharesBy.entries()).map(([t, sh]) => ({ ticker: t, shares: sh })),
-      totalSharesNeeded,
-      coveredShares,
-      shortCallCount: shortBy.size,
-    });
+    // Debug logging for shares-for-calls calculation (DISABLED - performance)
+    // console.log('🔍 Shares For Calls Debug:', {
+    //   lots: lots.map(l => ({ ticker: l.ticker, qty: l.qty })),
+    //   shortCalls: Array.from(shortBy.entries()).map(([t, sc]) => ({ ticker: t, shortCalls: sc })),
+    //   sharesBy: Array.from(sharesBy.entries()).map(([t, sh]) => ({ ticker: t, shares: sh })),
+    //   totalSharesNeeded,
+    //   coveredShares,
+    //   shortCallCount: shortBy.size,
+    // });
 
     return {
       premiumThisWeek,

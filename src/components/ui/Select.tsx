@@ -25,20 +25,20 @@ export const Select: React.FC<SelectProps> = ({
       {label && (
         <label
           htmlFor={selectId}
-          className="mb-1 ml-0.5 text-[11px] tracking-wide text-zinc-200/90 uppercase"
+          className="mb-0.5 ml-0.5 text-[10px] tracking-wide text-zinc-200/90 uppercase"
         >
           {label}
         </label>
       )}
       <div className="relative">
         {icon && (
-          <div className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-green-500/60">
-            {icon}
+          <div className="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-green-500/60">
+            <div className="h-3.5 w-3.5 overflow-hidden [&>svg]:h-3.5 [&>svg]:w-3.5">{icon}</div>
           </div>
         )}
         <select
           id={selectId}
-          className={`w-full ${icon ? 'pl-9' : 'px-4'} appearance-none rounded-xl border border-green-500/70 bg-zinc-900 py-3 pr-10 text-zinc-200 shadow hover:border-green-400/80 hover:bg-zinc-800/70 focus:border-green-400/80 focus:ring-2 focus:ring-green-500/30 focus:ring-offset-1 focus:ring-offset-black/80 focus:outline-none disabled:cursor-not-allowed disabled:text-zinc-500 ${align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : 'text-left'} ${error ? 'border-red-500/50' : ''} ${className}`}
+          className={`w-full ${icon ? 'pl-8' : 'px-3'} appearance-none rounded-lg border border-green-500/70 bg-zinc-900 py-1.5 pr-8 text-sm text-zinc-200 shadow hover:border-green-400/80 hover:bg-zinc-800/70 focus:border-green-400/80 focus:ring-2 focus:ring-green-500/30 focus:ring-offset-1 focus:ring-offset-black/80 focus:outline-none disabled:cursor-not-allowed disabled:text-zinc-500 ${align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : 'text-left'} ${error ? 'border-red-500/50' : ''} ${className}`}
           {...props}
         >
           {options.map(option => (
@@ -49,7 +49,7 @@ export const Select: React.FC<SelectProps> = ({
         </select>
         {/* Chevron */}
         <svg
-          className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-green-500/60"
+          className="pointer-events-none absolute top-1/2 right-2.5 h-3.5 w-3.5 -translate-y-1/2 text-green-500/60"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"

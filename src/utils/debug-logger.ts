@@ -16,14 +16,14 @@ let isIntercepted = false;
 function safeStringify(arg: unknown): string {
   if (arg === null) return 'null';
   if (arg === undefined) return 'undefined';
-  
+
   const type = typeof arg;
-  
+
   if (type === 'string') return arg as string;
   if (type === 'number' || type === 'boolean' || type === 'bigint' || type === 'symbol') {
     return String(arg);
   }
-  
+
   // For objects, try JSON.stringify with error handling
   if (type === 'object') {
     try {
@@ -31,7 +31,7 @@ function safeStringify(arg: unknown): string {
       if (arg instanceof Error) {
         return `${arg.name}: ${arg.message}${arg.stack ? '\n' + arg.stack : ''}`;
       }
-      
+
       // Try JSON.stringify for other objects
       return JSON.stringify(arg, null, 2);
     } catch {
@@ -39,7 +39,7 @@ function safeStringify(arg: unknown): string {
       return `[${arg?.constructor?.name || 'Object'}]`;
     }
   }
-  
+
   // Fallback for any other types
   try {
     return String(arg);
@@ -53,17 +53,14 @@ function safeStringify(arg: unknown): string {
  * React DevTools intercepts console methods and tries to format arguments,
  * which can fail with objects that can't be converted to primitives.
  */
-function safeConsoleCall(
-  originalMethod: typeof console.log,
-  args: unknown[]
-): void {
+function safeConsoleCall(originalMethod: typeof console.log, args: unknown[]): void {
   // Use setTimeout to defer the call, which can help avoid React DevTools interception
   // However, to preserve console behavior, we'll try synchronously first
   try {
     originalMethod(...args);
     return;
   } catch {
-    // If synchronous call fails (React DevTools formatting issue), 
+    // If synchronous call fails (React DevTools formatting issue),
     // try with safe stringified arguments
     try {
       const safeArgs = args.map(arg => safeStringify(arg));
@@ -83,7 +80,9 @@ function safeConsoleCall(
             const safeMessage = args.map(arg => safeStringify(arg)).join(' ');
             // Use Function.prototype.apply to call the original method
             // This bypasses any proxy/wrapper that might be causing issues
-            (Function.prototype.apply.call as typeof console.log)(originalMethod, null, [safeMessage]);
+            (Function.prototype.apply.call as typeof console.log)(originalMethod, null, [
+              safeMessage,
+            ]);
           } catch {
             // Completely ignore - don't break the app
           }
@@ -157,4 +156,3 @@ export function restoreConsoleLog() {
 
   isIntercepted = false;
 }
-

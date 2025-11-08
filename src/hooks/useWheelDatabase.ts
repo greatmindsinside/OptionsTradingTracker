@@ -3,9 +3,9 @@
  * Connects the wheel page to the SQLite database
  */
 
-import { useCallback,useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-import { all,initDb } from '@/db/sql';
+import { all, initDb } from '@/db/sql';
 import type { SQLiteDatabase } from '@/modules/db/sqlite';
 import { initDatabase } from '@/modules/db/sqlite';
 import type { Entry } from '@/types/entry';
@@ -117,12 +117,15 @@ export function useWheelDatabase() {
       // Generate mock alerts based on real data
       const alerts = generateAlertsFromData(positions, tickers);
 
-      // Mock earnings calendar for now
+      // Load cached earnings (API fetch happens separately via useEarningsSync)
+      const { loadCache } = await import('@/utils/earningsApi');
+      const cachedEarnings = loadCache();
       const earningsCalendar: Record<string, string> = {};
       tickers.forEach(ticker => {
-        // Add some sample earnings dates
-        if (ticker === 'IDOI') earningsCalendar[ticker] = '2025-11-06';
-        if (ticker === 'HAMM') earningsCalendar[ticker] = '2025-11-05';
+        const cached = cachedEarnings[ticker];
+        if (cached?.date) {
+          earningsCalendar[ticker] = cached.date;
+        }
       });
 
       const wheelData: WheelData = {
@@ -258,17 +261,6 @@ function transformJournalToPositions(entries: Entry[]): Position[] {
     }
   });
 
-  // 🔍 DERIVED POSITIONS DEBUG
-  console.log('🔍 DERIVED POSITIONS:', {
-    totalPositions: positions.length,
-    positions: positions.map(p => ({
-      ticker: p.ticker,
-      type: p.type,
-      side: p.side,
-      qty: p.qty,
-      strike: p.strike,
-    })),
-  });
   return positions;
 }
 
@@ -317,14 +309,6 @@ function transformJournalToShareLots(entries: Entry[]): ShareLot[] {
         costPerShare: lot.totalCost / lot.qty,
       });
     }
-  });
-
-  // Debug logging
-  console.log('🔍 transformJournalToShareLots:', {
-    totalEntries: entries.length,
-    assignmentEntries: entries.filter(e => e.type === 'assignment_shares').length,
-    shareSaleEntries: entries.filter(e => e.type === 'share_sale').length,
-    lots: lots.map(l => ({ ticker: l.ticker, qty: l.qty, costPerShare: l.costPerShare })),
   });
 
   return lots;

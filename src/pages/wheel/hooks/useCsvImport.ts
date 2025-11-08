@@ -1,10 +1,24 @@
 import { detectBrokerFromHeaders, getBrokerAdapter } from '@/modules/import/broker-adapters';
-import type { NormalizedTradeData } from '@/modules/import/broker-adapters/base-adapter';
+import type {
+  BaseBrokerAdapter,
+  NormalizedTradeData,
+} from '@/modules/import/broker-adapters/base-adapter';
 import { CSVParser } from '@/modules/import/csv-parser';
 import { useEntriesStore } from '@/stores/useEntriesStore';
 import { useWheelStore } from '@/stores/useWheelStore';
 import { useWheelUIStore } from '@/stores/useWheelUIStore';
-import type { TemplateKind } from '@/types/templates';
+import type { TemplateKind, TemplatePayloads } from '@/types/templates';
+
+// Extended adapter interface for optional methods that may be exposed
+interface AdapterWithOptionalMethods extends BaseBrokerAdapter {
+  parseDescriptionForOptionDetails?: (description: string) => {
+    optionType: 'call' | 'put' | null;
+    strikePrice: number | null;
+    expirationDate: string | null;
+  };
+  parseDate?: (dateValue: unknown) => string | null;
+  parseNumber?: (value: unknown) => number | null;
+}
 
 export interface ImportResult {
   success: boolean;
@@ -72,7 +86,7 @@ export function useCsvImport() {
       for (let i = 0; i < parseResult.data.length; i++) {
         const row = parseResult.data[i] as Record<string, unknown>;
         const transCode = String(row['Trans Code'] || row['trans_code'] || '').toUpperCase();
-        
+
         // Skip expiration entries - they're handled by templates
         if (transCode === 'OEXP') {
           result.skipped++;
@@ -82,7 +96,7 @@ export function useCsvImport() {
         // Handle assignments separately - they need special processing
         if (transCode === 'OASGN') {
           // Try to parse assignment from OASGN row
-          const assignment = parseAssignmentFromOasgnRow(row, adapter, parseResult.data, i);
+          const assignment = parseAssignmentFromOasgnRow(row, adapter);
           if (assignment) {
             normalizedTrades.push(assignment);
           } else {
@@ -180,7 +194,7 @@ export function useCsvImport() {
  */
 async function mapNormalizedTradeToJournal(
   trade: NormalizedTradeData,
-  addEntry: <K extends TemplateKind>(kind: K, payload: any) => Promise<void>
+  addEntry: <K extends TemplateKind>(kind: K, payload: TemplatePayloads[K]) => Promise<void>
 ): Promise<void> {
   const accountId = 'default'; // Use default account
   const tradeDate = trade.trade_date || new Date().toISOString().split('T')[0];
@@ -240,7 +254,11 @@ async function mapNormalizedTradeToJournal(
     } else {
       throw new Error(`Unknown option type for assignment: ${trade.option_type}`);
     }
-  } else if (trade.trade_action === 'buy_to_open' || trade.trade_action === 'buy_to_close' || trade.trade_action === 'sell_to_close') {
+  } else if (
+    trade.trade_action === 'buy_to_open' ||
+    trade.trade_action === 'buy_to_close' ||
+    trade.trade_action === 'sell_to_close'
+  ) {
     // Skip buy-to-open, buy-to-close, and sell-to-close for now
     // These are typically closing trades or long positions we don't track
     throw new Error(`Trade action ${trade.trade_action} not supported for import`);
@@ -254,20 +272,22 @@ async function mapNormalizedTradeToJournal(
  */
 function parseAssignmentFromOasgnRow(
   oasgnRow: Record<string, unknown>,
-  adapter: any,
-  allRows: unknown[],
-  currentIndex: number
+  adapter: AdapterWithOptionalMethods
 ): NormalizedTradeData | null {
   try {
     // Try to extract option details from OASGN description
     const description = String(oasgnRow.Description || oasgnRow.description || '');
-    
+
     // Use the adapter's parseDescriptionForOptionDetails method if available
     // Otherwise, parse manually
-    let optionDetails: { optionType: 'call' | 'put' | null; strikePrice: number | null; expirationDate: string | null };
-    
-    if (typeof (adapter as any).parseDescriptionForOptionDetails === 'function') {
-      optionDetails = (adapter as any).parseDescriptionForOptionDetails(description);
+    let optionDetails: {
+      optionType: 'call' | 'put' | null;
+      strikePrice: number | null;
+      expirationDate: string | null;
+    };
+
+    if (adapter.parseDescriptionForOptionDetails) {
+      optionDetails = adapter.parseDescriptionForOptionDetails(description);
     } else {
       // Manual parsing
       optionDetails = {
@@ -275,19 +295,19 @@ function parseAssignmentFromOasgnRow(
         strikePrice: null,
         expirationDate: null,
       };
-      
+
       // Extract option type (Call/Put)
       const optionTypeMatch = description.match(/\b(call|put)\b/i);
       if (optionTypeMatch) {
         optionDetails.optionType = optionTypeMatch[1].toLowerCase() as 'call' | 'put';
       }
-      
+
       // Extract strike price ($80.00)
       const strikePriceMatch = description.match(/\$(\d+(?:\.\d{2})?)/);
       if (strikePriceMatch) {
         optionDetails.strikePrice = parseFloat(strikePriceMatch[1]);
       }
-      
+
       // Extract expiration date (10/24/2025)
       const expirationMatch = description.match(/(\d{1,2}\/\d{1,2}\/\d{4})/);
       if (expirationMatch) {
@@ -298,15 +318,15 @@ function parseAssignmentFromOasgnRow(
         }
       }
     }
-    
+
     if (!optionDetails.optionType || !optionDetails.strikePrice || !optionDetails.expirationDate) {
       return null;
     }
 
     // Get trade date using adapter's parseDate method
     let tradeDate: string | null = null;
-    if (typeof (adapter as any).parseDate === 'function') {
-      tradeDate = (adapter as any).parseDate(
+    if (adapter.parseDate) {
+      tradeDate = adapter.parseDate(
         oasgnRow['Activity Date'] || oasgnRow['activity_date'] || oasgnRow.date
       );
     } else {
@@ -319,15 +339,15 @@ function parseAssignmentFromOasgnRow(
         }
       }
     }
-    
+
     if (!tradeDate) {
       return null;
     }
 
     // Get quantity from OASGN row
     let quantity: number | null = null;
-    if (typeof (adapter as any).parseNumber === 'function') {
-      quantity = (adapter as any).parseNumber(oasgnRow.Quantity || oasgnRow.quantity);
+    if (adapter.parseNumber) {
+      quantity = adapter.parseNumber(oasgnRow.Quantity || oasgnRow.quantity);
     } else {
       // Manual number parsing
       const qtyValue = oasgnRow.Quantity || oasgnRow.quantity;
@@ -338,13 +358,15 @@ function parseAssignmentFromOasgnRow(
         }
       }
     }
-    
+
     if (!quantity || quantity === 0) {
       return null;
     }
 
     // Get symbol
-    const symbol = String(oasgnRow.Instrument || oasgnRow.instrument || '').toUpperCase().trim();
+    const symbol = String(oasgnRow.Instrument || oasgnRow.instrument || '')
+      .toUpperCase()
+      .trim();
     if (!symbol) {
       return null;
     }
@@ -354,7 +376,7 @@ function parseAssignmentFromOasgnRow(
       option_type: optionDetails.optionType,
       strike_price: optionDetails.strikePrice,
       expiration_date: optionDetails.expirationDate,
-      trade_action: 'assignment' as any, // Special marker for assignments
+      trade_action: 'assignment' as unknown as NormalizedTradeData['trade_action'], // Special marker for assignments
       quantity: Math.abs(quantity),
       premium: 0,
       commission: 0,

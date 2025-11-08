@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 
-import { type ImportResult,useCsvImport } from '@/pages/wheel/hooks/useCsvImport';
+import { type ImportResult, useCsvImport } from '@/pages/wheel/hooks/useCsvImport';
 import { useWheelUIStore } from '@/stores/useWheelUIStore';
 
 export const ImportTab: React.FC = () => {
@@ -15,11 +15,11 @@ export const ImportTab: React.FC = () => {
     if (!f) return;
     setFileName(f.name);
     setImportResult(null); // Clear previous result
-    
+
     try {
       const result = await handleImport(f);
       setImportResult(result);
-      
+
       // Clear file input after successful import
       if (result.success && inputRef.current) {
         inputRef.current.value = '';
@@ -38,7 +38,7 @@ export const ImportTab: React.FC = () => {
 
   return (
     <div className="space-y-4" data-testid="drawer.import">
-      <div className="text-sm text-zinc-400">Import trades from CSV to seed the Wheel data.</div>
+      <div className="text-sm text-slate-400">Import trades from CSV to seed the Wheel data.</div>
       <div className="flex items-center gap-3">
         <input
           ref={inputRef}
@@ -48,13 +48,13 @@ export const ImportTab: React.FC = () => {
           onChange={handleFileChange}
         />
         <button
-          className="rounded border border-green-500 bg-green-500/15 px-3 py-2 text-green-400 transition-colors hover:bg-green-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="rounded border border-teal-500 bg-teal-500/15 px-3 py-2 text-teal-400 transition-colors hover:bg-teal-500/25 disabled:cursor-not-allowed disabled:opacity-50"
           onClick={() => inputRef.current?.click()}
           disabled={importing}
         >
           {importing ? 'Importing…' : 'Choose CSV'}
         </button>
-        <div className="max-w-60 truncate text-sm text-zinc-500">
+        <div className="max-w-60 truncate text-sm text-slate-400">
           {fileName || 'No file selected'}
         </div>
       </div>
@@ -64,7 +64,7 @@ export const ImportTab: React.FC = () => {
         <div
           className={`rounded border p-3 text-sm ${
             importResult.success
-              ? 'border-green-500/50 bg-green-500/10 text-green-400'
+              ? 'border-teal-500/50 bg-teal-500/10 text-teal-400'
               : 'border-red-500/50 bg-red-500/10 text-red-400'
           }`}
         >
@@ -82,7 +82,7 @@ export const ImportTab: React.FC = () => {
         </div>
       )}
 
-      <div className="text-xs text-zinc-500">
+      <div className="text-xs text-slate-400">
         Tip: Use the sample file in public/sample-csv/sample-options.csv to test the flow.
       </div>
     </div>

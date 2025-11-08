@@ -64,7 +64,7 @@ function lsGet(name: string): Uint8Array | null {
 
 function lsSet(name: string, data: Uint8Array) {
   let bin = '';
-  for (let i = 0; i < data.length; i++) bin += String.fromCharCode(data[i]);
+  for (let i = 0; i < data.length; i++) bin += String.fromCharCode(data[i]!);
   const b64 = btoa(bin);
   localStorage.setItem(name, b64);
 }
@@ -237,6 +237,11 @@ export async function saveDb() {
   else lsSet(DB_NAME, u8);
 }
 
+/**
+ * @deprecated This function is no longer used. Expiration updates are now handled via localStorage overrides.
+ * See src/utils/dteOverrides.ts for the new implementation.
+ * Kept for reference but should not be called by any code.
+ */
 // Update all journal rows for a given symbol/strike/expiration to a new expiration date (YYYY-MM-DD)
 // Returns the number of rows affected (best-effort; not used by callers yet)
 export async function updateExpirationForPosition(
@@ -247,14 +252,44 @@ export async function updateExpirationForPosition(
 ): Promise<number> {
   // Ensure DB is ready
   if (!ready) await initDb();
-  const now = new Date().toISOString();
   // Store ISO timestamp; journal.expiration is full ISO string
   const newIso = new Date(newExpirationYmd).toISOString();
+
+  console.log('🗄️ updateExpirationForPosition:', {
+    symbol,
+    strike,
+    oldExpirationYmd,
+    newExpirationYmd,
+    newIso,
+  });
+
+  // First, let's see what journal entries exist for this symbol
+  const allSymbolEntries = all<{
+    id: string;
+    strike: number | null;
+    expiration: string | null;
+    type: string;
+    deleted_at: string | null;
+  }>(`SELECT id, strike, expiration, type, deleted_at FROM journal WHERE symbol = ?`, [symbol]);
+  console.log('📋 All journal entries for symbol', symbol, ':', allSymbolEntries);
+
+  // Check specifically for matching entries
+  const debugMatch = all<{
+    id: string;
+    strike: number | null;
+    expiration: string | null;
+    deleted_at: string | null;
+  }>(
+    `SELECT id, strike, substr(expiration,1,10) as exp_ymd, deleted_at FROM journal 
+     WHERE symbol = ? AND strike = ? AND substr(expiration,1,10) = ?`,
+    [symbol, strike, oldExpirationYmd]
+  );
+  console.log('🔍 Debug: matching entries WITHOUT deleted_at check:', debugMatch);
 
   // We update all non-deleted rows that share the same option identity
   // (symbol, strike, expiration by YMD). This covers sell_to_open and option_premium rows.
   const sql = `UPDATE journal
-               SET expiration = ?, updated_at = ?
+               SET expiration = ?
                WHERE symbol = ?
                  AND strike = ?
                  AND substr(expiration,1,10) = ?
@@ -266,8 +301,16 @@ export async function updateExpirationForPosition(
     [symbol, String(strike), oldExpirationYmd]
   );
 
-  run(sql, [newIso, now, symbol, String(strike), oldExpirationYmd]);
+  console.log(
+    '📊 Rows matching before update (strike=' + strike + ', oldExp=' + oldExpirationYmd + '):',
+    before.length,
+    before
+  );
+
+  run(sql, [newIso, symbol, String(strike), oldExpirationYmd]);
   await saveDb();
+
+  console.log('💾 Database saved');
 
   return before.length;
 }

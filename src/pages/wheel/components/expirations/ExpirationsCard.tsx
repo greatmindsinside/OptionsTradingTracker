@@ -1,3 +1,4 @@
+import { Icon } from '@iconify/react';
 import React, { useMemo } from 'react';
 
 import { useWheelStore } from '@/stores/useWheelStore';
@@ -25,8 +26,11 @@ export const ExpirationsCard: React.FC = () => {
   const sorted = useExpirationSort(rows);
 
   return (
-    <div className="rounded-2xl border border-green-500/20 bg-linear-to-br from-black/80 to-zinc-950/90 p-4 shadow-lg shadow-green-500/10 backdrop-blur-xl">
-      <div className="mb-2 font-semibold text-green-400">⏳ Upcoming Expirations</div>
+    <div className="glass-card-deep rounded-2xl p-4">
+      <div className="mb-2 flex items-center gap-2 font-semibold text-slate-100">
+        <Icon icon="fluent:timer-24-filled" className="h-4 w-4" style={{ color: '#F5B342' }} />
+        Upcoming Expirations
+      </div>
       <div className="space-y-2">
         {sorted.length === 0 && (
           <div className="py-4 text-center text-sm text-slate-500">No upcoming expirations</div>
