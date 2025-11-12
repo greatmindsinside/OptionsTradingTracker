@@ -116,7 +116,10 @@ export const KeyboardShortcutsProvider: React.FC<KeyboardShortcutsProps> = ({
       if (!acc[shortcut.category]) {
         acc[shortcut.category] = [];
       }
-      acc[shortcut.category].push(shortcut);
+      const categoryArray = acc[shortcut.category];
+      if (categoryArray) {
+        categoryArray.push(shortcut);
+      }
       return acc;
     },
     {} as Record<string, KeyboardShortcut[]>
@@ -127,7 +130,7 @@ export const KeyboardShortcutsProvider: React.FC<KeyboardShortcutsProps> = ({
       {children}
       {showShortcuts && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-sm"
           onClick={() => setShowShortcuts(false)}
         >
           <div

@@ -1,62 +1,7 @@
-import type { Page } from '@playwright/test';
-import { expect,test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
-// Helper function to fill trade form fields safely
-async function fillTradeForm(
-  page: Page,
-  options: {
-    qty: string;
-    dte?: string;
-    expiration?: string;
-    strike: string;
-    premium: string;
-    fees?: string;
-  }
-) {
-  await page.getByLabel(/qty/i).fill(options.qty);
-
-  // Handle DTE - may be date picker or number input
-  const expirationInput = page.getByLabel(/expiration/i).first();
-  const dteInput = page.getByLabel(/dte/i).first();
-  const hasDatePicker = (await expirationInput.count()) > 0;
-
-  if (hasDatePicker && options.expiration) {
-    await expirationInput.fill(options.expiration);
-  } else if (!hasDatePicker && options.dte) {
-    await dteInput.fill(options.dte);
-  }
-
-  await page.getByLabel(/strike/i).fill(options.strike);
-  
-  // Premium field - find by label "Premium" text or by position
-  const premiumLabel = page.locator('text=/premium.*per share/i').first();
-  const premiumInput = premiumLabel.locator('..').locator('input[type="number"]').first();
-  if (await premiumInput.count() > 0) {
-    await premiumInput.fill(options.premium);
-  } else {
-    // Fallback: find by position (after strike input)
-    const allNumberInputs = await page.locator('input[type="number"]').all();
-    // Premium is typically after qty, dte, strike - so index 3 if we have 4+ inputs
-    if (allNumberInputs.length >= 4) {
-      await (allNumberInputs[3]!).fill(options.premium);
-    }
-  }
-
-  // Fees field - find input near "Fees" text or use last number input
-  if (options.fees !== undefined) {
-    const feesSection = page.locator('text=/fees/i').locator('..');
-    const feesInput = feesSection.locator('input[type="number"]').first();
-    if (await feesInput.count() > 0) {
-      await feesInput.fill(options.fees);
-    } else {
-      // Fallback: use last number input
-      const allNumberInputs = await page.locator('input[type="number"]').all();
-      if (allNumberInputs.length > 0) {
-        await (allNumberInputs[allNumberInputs.length - 1]!).fill(options.fees);
-      }
-    }
-  }
-}
+import { JournalPage } from '../pages/JournalPage';
+import { WheelPage } from '../pages/WheelPage';
 
 // show the browser console logs for debugging
 test.beforeEach(async ({ page }) => {
@@ -67,36 +12,31 @@ test.beforeEach(async ({ page }) => {
 
 test.describe('Covered Call Wheel Phase', () => {
   test.beforeEach(async ({ page }) => {
+    const wheelPage = new WheelPage(page);
     // Navigate to the wheel page
-    await page.goto('http://localhost:5173/wheel');
-
-    // Wait for the page to load
-    await page.waitForLoadState('networkidle');
+    await wheelPage.navigate();
   });
 
   test('should show correct wheel phase after adding a covered call', async ({ page }) => {
+    const wheelPage = new WheelPage(page);
+
     // Step 1: Open the trade drawer
-    await page.click('button:has-text("💸 Premium Printer")');
+    await wheelPage.openActionsDrawer();
 
     // Wait for drawer to open and click on Trade tab
-    await page.click('button:has-text("Trade")');
-
-    // Wait for trade form to be visible - check for symbol input or trade form elements
-    await expect(page.getByLabel(/symbol/i)).toBeVisible();
+    await wheelPage.openTradeTab();
 
     // Step 2: Fill in the trade form for a covered call
-    // Symbol
-    await page.getByLabel(/symbol/i).fill('ASTS');
+    await wheelPage.symbolInput.fill('ASTS');
 
     // Type: Select "Call" from dropdown
-    await page.selectOption('select', { label: 'Call' });
+    await wheelPage.selectOptionType('Call');
 
     // Side: Select "Sell" from dropdown
-    const sideSelects = await page.locator('select').all();
-    await (sideSelects[1]!).selectOption({ label: 'Sell' });
+    await wheelPage.selectSide('Sell');
 
     // Fill trade form
-    await fillTradeForm(page, {
+    await wheelPage.fillTradeForm({
       qty: '1',
       dte: '4',
       strike: '82',
@@ -108,10 +48,10 @@ test.describe('Covered Call Wheel Phase', () => {
     await expect(page.locator('text=/Sell 1.*C.*ASTS.*82/')).toBeVisible();
 
     // Step 4: Submit the trade
-    await page.click('button:has-text("+ Add Trade")');
+    await wheelPage.addTradeButton.click();
 
     // Wait for trade to be added (drawer should close)
-    await page.waitForTimeout(1000);
+    await wheelPage.wait(1000);
 
     // Step 5: Verify the wheel phase section shows correct phase
     // Look for ASTS ticker in the Wheel Phase section
@@ -155,18 +95,19 @@ test.describe('Covered Call Wheel Phase', () => {
   });
 
   test('should show correct phase progression: puts -> calls', async ({ page }) => {
+    const wheelPage = new WheelPage(page);
+
     // Test Case 1: Start with selling a put
-    await page.click('button:has-text("💸 Premium Printer")');
-    await page.click('button:has-text("Trade")');
-    await page.getByLabel(/symbol/i).fill('ASTS');
+    await wheelPage.openActionsDrawer();
+    await wheelPage.openTradeTab();
+    await wheelPage.symbolInput.fill('ASTS');
 
     // Select Put and Sell
-    await page.selectOption('select', { label: 'Put' });
-    const sideSelects = await page.locator('select').all();
-    await (sideSelects[1]!).selectOption({ label: 'Sell' });
+    await wheelPage.selectOptionType('Put');
+    await wheelPage.selectSide('Sell');
 
     // Fill in put details
-    await fillTradeForm(page, {
+    await wheelPage.fillTradeForm({
       qty: '1',
       dte: '30',
       strike: '50',
@@ -174,28 +115,31 @@ test.describe('Covered Call Wheel Phase', () => {
       fees: '0',
     });
 
-    await page.click('button:has-text("+ Add Trade")');
-    await page.waitForTimeout(1000);
+    await wheelPage.addTradeButton.click();
+    await wheelPage.wait(1000);
+
+    // Wait for ASTS to appear in the wheel phase section
+    await wheelPage.waitForSymbol('ASTS', 5000);
 
     // Verify: Should show "Sell Cash Secured Puts"
     const wheelPhaseSection = page
       .locator('[data-testid="wheel-phase-card"]')
       .or(page.locator('text=Wheel Phase').locator('..'));
+    await expect(wheelPhaseSection.locator('text=ASTS')).toBeVisible({ timeout: 5000 });
     const wheelText = await wheelPhaseSection.textContent();
     expect(wheelText).toContain('Sell Cash Secured Put');
 
     // Test Case 2: Now add a covered call for the same ticker
-    await page.click('button:has-text("💸 Premium Printer")');
-    await page.click('button:has-text("Trade")');
-    await page.getByLabel(/symbol/i).fill('ASTS');
+    await wheelPage.openActionsDrawer();
+    await wheelPage.openTradeTab();
+    await wheelPage.symbolInput.fill('ASTS');
 
     // Select Call and Sell
-    await page.selectOption('select', { label: 'Call' });
-    const sideSelects2 = await page.locator('select').all();
-    await (sideSelects2[1]!).selectOption({ label: 'Sell' });
+    await wheelPage.selectOptionType('Call');
+    await wheelPage.selectSide('Sell');
 
     // Fill in call details
-    await fillTradeForm(page, {
+    await wheelPage.fillTradeForm({
       qty: '1',
       dte: '30',
       strike: '55',
@@ -203,8 +147,8 @@ test.describe('Covered Call Wheel Phase', () => {
       fees: '0',
     });
 
-    await page.click('button:has-text("+ Add Trade")');
-    await page.waitForTimeout(1000);
+    await wheelPage.addTradeButton.click();
+    await wheelPage.wait(1000);
 
     // Verify: Phase should update (may show both put and call, or just call phase)
     // The main assertion is that we can add a call after a put without errors
@@ -213,23 +157,24 @@ test.describe('Covered Call Wheel Phase', () => {
   });
 
   test('should show call in upcoming expirations with correct type', async ({ page }) => {
+    const wheelPage = new WheelPage(page);
+
     // Add a call trade
-    await page.click('button:has-text("💸 Premium Printer")');
-    await page.click('button:has-text("Trade")');
-    await page.getByLabel(/symbol/i).fill('MSFT');
+    await wheelPage.openActionsDrawer();
+    await wheelPage.openTradeTab();
+    await wheelPage.symbolInput.fill('MSFT');
 
-    await page.selectOption('select', { label: 'Call' });
-    const sideSelects = await page.locator('select').all();
-    await (sideSelects[1]!).selectOption({ label: 'Sell' });
+    await wheelPage.selectOptionType('Call');
+    await wheelPage.selectSide('Sell');
 
-    // Fill form fields by label to avoid index dependency
-    await page.getByLabel(/qty/i).fill('2');
-    
+    // Fill form fields
+    await wheelPage.qtyInput.fill('2');
+
     // Handle DTE - may be date picker or number input
-    const expirationInput = page.getByLabel(/expiration/i);
-    const dteInput = page.getByLabel(/dte/i).first();
+    const expirationInput = wheelPage.expirationInput;
+    const dteInput = wheelPage.dteInput;
     const hasDatePicker = (await expirationInput.count()) > 0;
-    
+
     if (hasDatePicker) {
       // Use date picker - calculate date 7 days from now
       const futureDate = new Date();
@@ -240,37 +185,37 @@ test.describe('Covered Call Wheel Phase', () => {
       // Use DTE number input
       await dteInput.fill('7');
     }
-    
-    await page.getByLabel(/strike/i).fill('100');
-    
+
+    await wheelPage.strikeInput.fill('100');
+
     // Premium field - find by label "Premium" text or by position
     const premiumLabel = page.locator('text=/premium.*per share/i').first();
     const premiumInput = premiumLabel.locator('..').locator('input[type="number"]').first();
-    if (await premiumInput.count() > 0) {
+    if ((await premiumInput.count()) > 0) {
       await premiumInput.fill('1.75');
     } else {
       // Fallback: find by position (after strike input)
       const allNumberInputs = await page.locator('input[type="number"]').all();
       if (allNumberInputs.length >= 4) {
-        await (allNumberInputs[3]!).fill('1.75');
+        await allNumberInputs[3]!.fill('1.75');
       }
     }
-    
+
     // Fees field - find input near "Fees" text or use last number input
     const feesSection = page.locator('text=/fees/i').locator('..');
     const feesInput = feesSection.locator('input[type="number"]').first();
-    if (await feesInput.count() > 0) {
+    if ((await feesInput.count()) > 0) {
       await feesInput.fill('0');
     } else {
       // Fallback: use last number input
       const allNumberInputs = await page.locator('input[type="number"]').all();
       if (allNumberInputs.length > 0) {
-        await (allNumberInputs[allNumberInputs.length - 1]!).fill('0');
+        await allNumberInputs[allNumberInputs.length - 1]!.fill('0');
       }
     }
 
-    await page.click('button:has-text("+ Add Trade")');
-    await page.waitForTimeout(1000);
+    await wheelPage.addTradeButton.click();
+    await wheelPage.wait(1000);
 
     // Check Upcoming Expirations section
     const upcomingSection = page.locator('text=Upcoming Expirations').locator('..');
@@ -284,21 +229,22 @@ test.describe('Covered Call Wheel Phase', () => {
   });
 
   test('should calculate premium correctly for calls', async ({ page }) => {
+    const wheelPage = new WheelPage(page);
+
     // Get initial premium value
     const premiumMetric = page.locator('text=Premium This Week').locator('..');
     const initialPremiumText = await premiumMetric.textContent();
     const initialPremium = parseFloat(initialPremiumText?.replace(/[^0-9.-]/g, '') || '0');
 
     // Add a call trade: 3 contracts @ $2.50 = $750
-    await page.click('button:has-text("💸 Premium Printer")');
-    await page.click('button:has-text("Trade")');
-    await page.getByLabel(/symbol/i).fill('NVDA');
+    await wheelPage.openActionsDrawer();
+    await wheelPage.openTradeTab();
+    await wheelPage.symbolInput.fill('NVDA');
 
-    await page.selectOption('select', { label: 'Call' });
-    const sideSelects = await page.locator('select').all();
-    await (sideSelects[1]!).selectOption({ label: 'Sell' });
+    await wheelPage.selectOptionType('Call');
+    await wheelPage.selectSide('Sell');
 
-    await fillTradeForm(page, {
+    await wheelPage.fillTradeForm({
       qty: '3',
       dte: '14',
       strike: '500',
@@ -306,8 +252,8 @@ test.describe('Covered Call Wheel Phase', () => {
       fees: '0',
     });
 
-    await page.click('button:has-text("+ Add Trade")');
-    await page.waitForTimeout(1000);
+    await wheelPage.addTradeButton.click();
+    await wheelPage.wait(1000);
 
     // Verify premium increased by $750 (2.50 × 100 × 3)
     const newPremiumText = await premiumMetric.textContent();
@@ -320,19 +266,19 @@ test.describe('Covered Call Wheel Phase', () => {
 
 test.describe('Covered Call Journal Integration', () => {
   test('should show call in journal page with correct type', async ({ page }) => {
+    const wheelPage = new WheelPage(page);
+    const journalPage = new JournalPage(page);
+
+    // Set desktop viewport to ensure table is visible
+    await page.setViewportSize({ width: 1280, height: 720 });
+
     // Add a call trade
-    await page.goto('http://localhost:5173/wheel');
-    await page.waitForLoadState('networkidle');
+    await wheelPage.navigate();
 
-    await page.click('button:has-text("💸 Premium Printer")');
-    await page.click('button:has-text("Trade")');
-
-    await page.getByLabel(/symbol/i).fill('AAPL');
-    await page.selectOption('select', { label: 'Call' });
-    const sideSelects = await page.locator('select').all();
-    await (sideSelects[1]!).selectOption({ label: 'Sell' });
-
-    await fillTradeForm(page, {
+    await wheelPage.addTrade({
+      symbol: 'AAPL',
+      type: 'Call',
+      side: 'Sell',
       qty: '1',
       dte: '30',
       strike: '150',
@@ -340,19 +286,11 @@ test.describe('Covered Call Journal Integration', () => {
       fees: '0.70',
     });
 
-    await page.click('button:has-text("+ Add Trade")');
-    await page.waitForTimeout(1000);
-
     // Navigate to journal page using the navigation link
-    await page.goto('http://localhost:5173/journal');
-    await page.waitForLoadState('networkidle');
+    await journalPage.navigate();
 
-    // Verify entry appears in journal - use table cell to be more specific
-    const journalTable = page.locator('table');
-    await expect(journalTable).toBeVisible();
-
-    // Verify AAPL appears in a table cell
-    await expect(journalTable.getByRole('cell', { name: 'AAPL' }).first()).toBeVisible();
+    // Verify entry appears in journal - check for AAPL text (works for both mobile cards and desktop table)
+    await expect(page.getByText('AAPL').first()).toBeVisible({ timeout: 10000 });
 
     // Verify amount is correct: $300 (3.00 × 100)
     const journalContent = await page.content();

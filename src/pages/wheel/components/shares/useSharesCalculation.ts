@@ -23,7 +23,7 @@ export function useSharesCalculation() {
       const avg = v.shares ? v.costSum / v.shares : 0;
       const covered = Math.min(v.shares, v.shortCalls);
       const uncovered = Math.max(0, v.shares - v.shortCalls);
-      return { t, shares: v.shares, covered, uncovered, avg };
+      return { t, shares: v.shares, covered, uncovered, avg, shortCalls: v.shortCalls };
     });
     return rows;
   }, [lots, pos]);

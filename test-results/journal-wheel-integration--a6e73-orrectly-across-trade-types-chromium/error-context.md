@@ -1,0 +1,70 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - img "Wheel to Tendies logo" [ref=e7] [cursor=pointer]
+      - navigation [ref=e8]:
+        - link "Wheel" [ref=e9] [cursor=pointer]:
+          - /url: /
+        - link "Journal" [ref=e10] [cursor=pointer]:
+          - /url: /journal
+      - searchbox "Filter tickers" [ref=e13]
+      - button "💸 Premium Printer" [ref=e15] [cursor=pointer]
+  - main [ref=e16]:
+    - generic [ref=e18]:
+      - main [ref=e20]:
+        - generic [ref=e21]:
+          - generic [ref=e22]:
+            - generic [ref=e23]:
+              - generic [ref=e24]: Premium This Week
+              - generic [ref=e25]: $300.00
+              - generic [ref=e26]: Net option cash flow
+            - generic [ref=e27]:
+              - generic [ref=e28]: Capital In Puts
+              - generic [ref=e29]: $10,000.00
+              - generic [ref=e30]: Open short puts collateral
+            - generic [ref=e31]:
+              - generic [ref=e32]: Shares For Calls
+              - generic [ref=e33]: "0"
+              - generic [ref=e34]: 0 symbols
+          - generic [ref=e36]:
+            - generic [ref=e37]: Wheel Phase
+            - generic [ref=e39]:
+              - generic [ref=e40] [cursor=pointer]: PLTEST
+              - generic [ref=e42]: Sell Cash Secured Puts
+              - button "Open menu" [ref=e45] [cursor=pointer]
+          - generic [ref=e46]:
+            - generic [ref=e47]: Upcoming Expirations
+            - generic [ref=e49]:
+              - generic [ref=e50]: PLTEST
+              - generic [ref=e51]: P 100
+              - generic [ref=e52]: 2025-11-11 · DTE 0
+              - generic [ref=e53]:
+                - button "Assign" [ref=e54] [cursor=pointer]
+                - button "Open menu" [ref=e57] [cursor=pointer]
+        - generic [ref=e58]:
+          - generic [ref=e60]:
+            - generic [ref=e61]:
+              - generic [ref=e62]:
+                - generic [ref=e63]: Alerts
+                - generic [ref=e64]: "2"
+              - generic [ref=e65]: auto from data
+            - generic [ref=e66]:
+              - generic [ref=e69] [cursor=pointer]: PLTEST 100% max profit
+              - generic [ref=e72] [cursor=pointer]: PLTEST expires today
+          - generic [ref=e74]:
+            - generic [ref=e75]:
+              - generic [ref=e76]: Shares
+              - button "Show" [ref=e77] [cursor=pointer]
+            - generic [ref=e78]:
+              - generic [ref=e79]:
+                - generic [ref=e80]: Symbol
+                - generic [ref=e81]: Shares
+                - generic [ref=e82]: Covered
+                - generic [ref=e83]: Uncov.
+                - generic [ref=e84]: Avg Cost
+              - generic [ref=e85]: No data
+      - button "Quick Actions" [ref=e86] [cursor=pointer]
+```

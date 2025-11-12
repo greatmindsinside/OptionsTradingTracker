@@ -1,4 +1,7 @@
-import { expect,test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+
+import { JournalPage } from '../pages/JournalPage';
+import { WheelPage } from '../pages/WheelPage';
 
 // Basic smoke test to ensure the app boots at the root route
 // Assumes playwright.config.ts starts the Vite dev server and sets baseURL to http://localhost:5173
@@ -42,6 +45,8 @@ test('home page loads and renders header', async ({ page }, testInfo) => {
   const benignPatterns = [
     'net::ERR_NETWORK_ACCESS_DENIED',
     'Failed to load resource: Could not connect to server',
+    'Cross-Origin Request Blocked', // CORS errors from iconify API in test environment
+    'CORS request did not succeed',
   ];
   const filtered = errors.filter(
     e => !benignPatterns.some(pattern => e.includes(pattern))
@@ -53,8 +58,10 @@ test('home page loads and renders header', async ({ page }, testInfo) => {
 // This only runs if the UI renders the Actions button
 // You can remove this test if it becomes brittle.
 test('actions drawer can open (if present)', async ({ page }) => {
-  await page.goto('/');
-  const actionsBtn = page.getByTestId('wheel.action.open');
+  const wheelPage = new WheelPage(page);
+  await wheelPage.navigate();
+  
+  const actionsBtn = wheelPage.actionsButton;
   if (await actionsBtn.count()) {
     if (await actionsBtn.first().isVisible()) {
       await actionsBtn.first().click();
@@ -65,7 +72,29 @@ test('actions drawer can open (if present)', async ({ page }) => {
 });
 
 test('journal page loads and shows entries', async ({ page }) => {
-  await page.goto('/journal');
-  await expect(page.getByTestId('journal.title')).toBeVisible();
-  await expect(page.getByTestId('journal.entry')).toBeVisible();
+  const journalPage = new JournalPage(page);
+  await journalPage.navigate();
+  await expect(journalPage.title).toBeVisible();
+  
+  // Wait for entries to load - the database might need time to initialize
+  // The seed entry should exist, so at least one should be visible
+  // Entries can be in table (desktop) or cards (mobile), both have the testid
+  const entryLocator = page.getByTestId('journal.entry');
+  
+  // Wait for at least one entry to be visible
+  // Check if any entry is visible (either in table or cards)
+  await page.waitForFunction(
+    () => {
+      const entries = document.querySelectorAll('[data-testid="journal.entry"]');
+      return Array.from(entries).some(entry => {
+        const rect = entry.getBoundingClientRect();
+        const style = window.getComputedStyle(entry);
+        return rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden';
+      });
+    },
+    { timeout: 10000 }
+  );
+  
+  // Verify at least one entry is visible using Playwright's visibility check
+  await expect(entryLocator.first()).toBeVisible({ timeout: 5000 });
 });

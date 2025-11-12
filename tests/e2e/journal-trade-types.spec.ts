@@ -1,4 +1,6 @@
-import { expect,test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+
+import { JournalPage } from '../pages/JournalPage';
 
 /**
  * Comprehensive E2E tests for Journal trade entry and editing
@@ -14,203 +16,174 @@ import { expect,test } from '@playwright/test';
 
 test.describe('Journal - Add All Trade Types', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/journal');
-    await expect(page.getByRole('heading', { name: /journal/i })).toBeVisible();
+    const journalPage = new JournalPage(page);
+    await journalPage.navigate();
   });
 
   test('should add a Sell Put trade', async ({ page }) => {
+    const journalPage = new JournalPage(page);
     const symbol = 'TESTPUT';
-    
-    // Open new entry modal
-    await page.getByRole('button', { name: /new entry/i }).click();
-    
-    // Select Sell Put template
-    await page.getByRole('button', { name: 'Sell Put' }).click();
-    
-    // Fill in the form
-    await page.getByLabel(/symbol/i).fill(symbol);
-    await page.getByLabel(/contracts/i).fill('2');
-    await page.getByLabel(/strike/i).fill('150.00');
-    await page.getByLabel(/premium/i).fill('2.50');
-    await page.getByLabel(/fee/i).fill('1.30');
-    
-    // Save
-    await page.getByRole('button', { name: /save entry/i }).click();
-    
-    // Wait for modal to close
-    await page.waitForTimeout(500);
-    
+
+    await journalPage.addEntry({
+      tradeType: 'Sell Put',
+      symbol,
+      contracts: '2',
+      strike: '150.00',
+      premium: '2.50',
+      fee: '1.30',
+    });
+
     // Wait for entry to appear in table with correct type
-    // Use a more specific locator that waits for the entry to be saved
-    const cellLocator = page.getByRole('cell', { name: symbol }).first();
-    await expect(cellLocator).toBeVisible({ timeout: 10000 });
-    
-    const row = page.locator('tr', { has: page.getByRole('cell', { name: symbol }) }).filter({ hasText: 'sell to open' });
-    await expect(row).toBeVisible({ timeout: 5000 });
+    await journalPage.waitForEntry(symbol);
+    await journalPage.waitForEntryWithType(symbol, 'sell to open');
   });
 
   test('should add a Put Assigned trade', async ({ page }) => {
+    const journalPage = new JournalPage(page);
     const symbol = 'TESTASSIGN';
-    
-    await page.getByRole('button', { name: /new entry/i }).click();
-    await page.getByRole('button', { name: 'Put Assigned' }).click();
-    
-    await page.getByLabel(/symbol/i).fill(symbol);
-    await page.getByLabel(/contracts/i).fill('1');
-    await page.getByLabel(/strike/i).fill('100.00');
-    
-    await page.getByRole('button', { name: /save entry/i }).click();
-    await page.waitForTimeout(1000);
-    
-    await expect(page.getByRole('cell', { name: symbol }).first()).toBeVisible();
-    const row = page.locator('tr', { has: page.getByRole('cell', { name: symbol }) }).last();
-    await expect(row).toContainText('assignment shares');
+
+    await journalPage.addEntry({
+      tradeType: 'Put Assigned',
+      symbol,
+      contracts: '1',
+      strike: '100.00',
+    });
+
+    await journalPage.waitForEntry(symbol);
+    // Wait for the type text to appear in the page (it's displayed as "assignment shares")
+    await journalPage.waitForEntryWithType(symbol, 'assignment shares');
   });
 
   test('should add a Sell Covered Call trade', async ({ page }) => {
+    const journalPage = new JournalPage(page);
     const symbol = 'TESTCC';
-    
-    await page.getByRole('button', { name: /new entry/i }).click();
-    await page.getByRole('button', { name: 'Sell Covered Call' }).click();
-    
-    await page.getByLabel(/symbol/i).fill(symbol);
-    await page.getByLabel(/contracts/i).fill('3');
-    await page.getByLabel(/strike/i).fill('175.00');
-    await page.getByLabel(/premium/i).fill('1.75');
-    
-    await page.getByRole('button', { name: /save entry/i }).click();
-    await page.waitForTimeout(1000);
-    
-    await expect(page.getByRole('cell', { name: symbol }).first()).toBeVisible();
-    const row = page.locator('tr', { has: page.getByRole('cell', { name: symbol }) }).filter({ hasText: 'sell to open' });
-    await expect(row).toBeVisible();
+
+    await journalPage.addEntry({
+      tradeType: 'Sell Covered Call',
+      symbol,
+      contracts: '3',
+      strike: '175.00',
+      premium: '1.75',
+    });
+
+    await journalPage.waitForEntry(symbol);
+    await journalPage.waitForEntryWithType(symbol, 'sell to open');
   });
 
   test('should add a Call Assigned trade', async ({ page }) => {
+    const journalPage = new JournalPage(page);
     const symbol = 'TESTCALL';
-    
-    await page.getByRole('button', { name: /new entry/i }).click();
-    await page.getByRole('button', { name: 'Call Assigned' }).click();
-    
-    await page.getByLabel(/symbol/i).fill(symbol);
-    await page.getByLabel(/contracts/i).fill('2');
-    await page.getByLabel(/strike/i).fill('200.00');
-    
-    await page.getByRole('button', { name: /save entry/i }).click();
-    await page.waitForTimeout(1000);
-    
-    await expect(page.getByRole('cell', { name: symbol }).first()).toBeVisible();
-    const row = page.locator('tr', { has: page.getByRole('cell', { name: symbol }) }).last();
-    await expect(row).toContainText('share sale');
+
+    await journalPage.addEntry({
+      tradeType: 'Call Assigned',
+      symbol,
+      contracts: '2',
+      strike: '200.00',
+    });
+
+    await journalPage.waitForEntry(symbol);
+    // Wait for the type text to appear in the page (it's displayed as "share sale")
+    await journalPage.waitForEntryWithType(symbol, 'share sale');
   });
 
   test('should add a Dividend entry', async ({ page }) => {
+    const journalPage = new JournalPage(page);
     const symbol = 'TESTDIV';
-    
-    await page.getByRole('button', { name: /new entry/i }).click();
-    await page.getByRole('button', { name: 'Dividend' }).click();
-    
-    await page.getByLabel(/symbol/i).fill(symbol);
-    await page.getByLabel(/amount/i).fill('45.50');
-    
-    await page.getByRole('button', { name: /save entry/i }).click();
-    await page.waitForTimeout(1000);
-    
-    await expect(page.getByRole('cell', { name: symbol }).first()).toBeVisible();
-    const row = page.locator('tr', { has: page.getByRole('cell', { name: symbol }) }).last();
-    await expect(row).toContainText('dividend');
+
+    await journalPage.addEntry({
+      tradeType: 'Dividend',
+      symbol,
+      amount: '45.50',
+    });
+
+    await journalPage.waitForEntry(symbol);
+    // Wait for the type text to appear in the page
+    await journalPage.waitForEntryWithType(symbol, 'dividend');
   });
 
   test('should add a Fee entry', async ({ page }) => {
+    const journalPage = new JournalPage(page);
     const symbol = 'TESTFEE';
-    
-    await page.getByRole('button', { name: /new entry/i }).click();
-    await page.waitForTimeout(500);
-    
-    // Click the Fee button using exact match  
+
+    await journalPage.openNewEntryModal();
+    await journalPage.wait(500);
+
+    // Click the Fee button using exact match
     const feeButton = page.getByRole('button', { name: 'Fee', exact: true });
     await expect(feeButton).toBeVisible();
     await feeButton.click();
-    
+
     // Wait for the button to be in primary state
     await expect(feeButton).toHaveClass(/primary/);
+
+    await journalPage.fillEntryForm({
+      symbol,
+      amount: '5.00',
+    });
+
+    await journalPage.saveEntry();
+
+    // Wait for the entry to appear in the UI with the 'fee' type
+    // This ensures both the symbol and type are present
+    // waitForEntryWithType already verifies that the entry exists with the correct type
+    await journalPage.waitForEntryWithType(symbol, 'fee');
     
-    await page.getByLabel(/symbol/i).fill(symbol);
-    await page.getByLabel(/amount/i).fill('5.00');
-    
-    await page.getByRole('button', { name: /save entry/i }).click();
-    await page.waitForTimeout(1000);
-    
-    await expect(page.getByRole('cell', { name: symbol }).first()).toBeVisible();
-    
-    // Verify the entry was created with 'fee' type
-    const allRows = page.locator('tr').filter({ has: page.getByRole('cell', { name: symbol }) });
-    const rowCount = await allRows.count();
-    
-    console.log(`Found ${rowCount} rows with symbol ${symbol}`);
-    
-    // Check each row and log the type
-    for (let i = 0; i < rowCount; i++) {
-      const rowText = await allRows.nth(i).textContent();
-      console.log(`Row ${i}: ${rowText}`);
-    }
-    
-    // Look for a row with 'fee' text in it
-    const row = page.locator('tr', { has: page.getByRole('cell', { name: symbol }) }).last();
-    await expect(row).toContainText('fee');
+    // The waitForEntryWithType method already verified that both the symbol and "fee" type
+    // appear in the page, so we don't need additional verification
   });
 });
 
 test.describe('Journal - Edit Trade Entries', () => {
   test.beforeEach(async ({ page }) => {
+    const journalPage = new JournalPage(page);
     // Setup: Add a test entry first
-    await page.goto('/journal');
-    await expect(page.getByRole('heading', { name: /journal/i })).toBeVisible();
-    
+    await journalPage.navigate();
+
     // Add a sell put entry to edit
-    await page.getByRole('button', { name: /new entry/i }).click();
-    await page.getByRole('button', { name: 'Sell Put' }).click();
-    await page.getByLabel(/symbol/i).fill('EDITTEST');
-    await page.getByLabel(/contracts/i).fill('1');
-    await page.getByLabel(/strike/i).fill('100.00');
-    await page.getByLabel(/premium/i).fill('2.00');
-    await page.getByRole('button', { name: /save entry/i }).click();
-    await page.waitForTimeout(1000);
+    await journalPage.addEntry({
+      tradeType: 'Sell Put',
+      symbol: 'EDITTEST',
+      contracts: '1',
+      strike: '100.00',
+      premium: '2.00',
+    });
   });
 
   // Skip: This test requires VITE_FEATURE_JOURNAL_EDIT_DRAWER=true
   // The legacy edit form doesn't support editing strike/contracts
   test.skip('should edit an existing trade entry', async ({ page }) => {
+    const journalPage = new JournalPage(page);
+
     // Find and click edit button for EDITTEST entry
-    const editButton = page.locator('button[title="Edit entry"]').first();
+    const editButton = journalPage.getEditButton(0);
     await editButton.click();
-    
+
     // Wait for edit drawer to open
     await expect(page.getByRole('dialog')).toBeVisible();
     await expect(page.getByRole('heading', { name: /edit entry/i })).toBeVisible();
-    
+
     // Verify the form is populated with existing values
-    await expect(page.getByLabel(/symbol/i)).toHaveValue('EDITTEST');
-    
+    await expect(journalPage.symbolInput).toHaveValue('EDITTEST');
+
     // Change the strike price
-    const strikeInput = page.getByLabel(/strike/i);
+    const strikeInput = journalPage.strikeInput;
     await strikeInput.clear();
     await strikeInput.fill('105.00');
-    
+
     // Change contracts
-    const contractsInput = page.getByLabel(/contracts/i);
+    const contractsInput = journalPage.contractsInput;
     await contractsInput.clear();
     await contractsInput.fill('2');
-    
+
     // Fill in the required edit reason
     await page.getByLabel(/edit reason/i).fill('Correcting strike price from broker statement');
-    
+
     // Save changes
-    await page.getByRole('button', { name: /save changes/i }).click();
-    
+    await journalPage.saveChangesButton.click();
+
     // Wait for drawer to close
-    await page.waitForTimeout(1000);
-    
+    await journalPage.wait(1000);
+
     // Verify changes appear in the table
     await expect(page.getByRole('cell', { name: 'EDITTEST' }).last()).toBeVisible();
     await expect(page.getByText('$105.00')).toBeVisible();
@@ -219,63 +192,81 @@ test.describe('Journal - Edit Trade Entries', () => {
   // Skip: This test requires VITE_FEATURE_JOURNAL_EDIT_DRAWER=true
   // The legacy edit form doesn't support changing trade type
   test.skip('should change trade type when editing', async ({ page }) => {
+    const journalPage = new JournalPage(page);
+
     // Find and click edit button
-    const editButton = page.locator('button[title="Edit entry"]').first();
+    const editButton = journalPage.getEditButton(0);
     await editButton.click();
-    
+
     await expect(page.getByRole('dialog')).toBeVisible();
-    
+
     // Edit the amount (type editing not available in legacy edit form)
-    const amountInput = page.getByLabel(/amount/i);
+    const amountInput = journalPage.amountInput;
     await amountInput.fill('350.00');
-    
+
     // Fill edit reason
     await page.getByLabel(/edit reason/i).fill('Updating trade amount');
-    
+
     // Save
-    await page.getByRole('button', { name: /save changes/i }).click();
-    await page.waitForTimeout(1000);
-    
+    await journalPage.saveChangesButton.click();
+    await journalPage.wait(1000);
+
     // Verify amount changed in table
-    const row = page.locator('tr', { has: page.getByRole('cell', { name: 'EDITTEST' }) }).filter({ hasText: 'sell to open' });
+    const row = (await journalPage.getEntryRow('EDITTEST')).filter({ hasText: 'sell to open' });
     await expect(row).toContainText('$350.00');
   });
 
   test('should validate auto-calculation for assignment types', async ({ page }) => {
+    const journalPage = new JournalPage(page);
+
     // Add an assignment_shares entry
-    await page.getByRole('button', { name: /new entry/i }).click();
-    await page.getByRole('button', { name: 'Put Assigned' }).click();
-    await page.getByLabel(/symbol/i).fill('AUTOCAL');
-    await page.getByLabel(/contracts/i).fill('1');
-    await page.getByLabel(/strike/i).fill('50.00');
-    await page.getByRole('button', { name: /save entry/i }).click();
+    await journalPage.addEntry({
+      tradeType: 'Put Assigned',
+      symbol: 'AUTOCAL',
+      contracts: '1',
+      strike: '50.00',
+    });
+
+    // Wait for entry to appear
+    await journalPage.waitForEntry('AUTOCAL');
     await page.waitForTimeout(1000);
-    
-    // Edit the entry
+
+    // Edit the entry - find the edit button for this entry
     const editButtons = page.locator('button[title="Edit entry"]');
-    await editButtons.last().click();
+    const buttonCount = await editButtons.count();
     
-    await expect(page.getByRole('dialog')).toBeVisible();
-    
+    // Click the last edit button (should be for the most recent entry)
+    if (buttonCount > 0) {
+      await editButtons.last().scrollIntoViewIfNeeded();
+      await expect(editButtons.last()).toBeVisible({ timeout: 10000 });
+      await expect(editButtons.last()).toBeEnabled({ timeout: 5000 });
+      await editButtons.last().click({ force: true });
+    } else {
+      // Fallback: use the editEntry method
+      await journalPage.editEntry('AUTOCAL', {}, 0);
+    }
+
+    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10000 });
+
     // Verify amount is auto-calculated: -(50 * 1 * 100) = -5000
     // Support both legacy modal (labeled Amount) and drawer (Amount input with placeholder)
-    let amountInput = page.getByLabel(/amount/i);
-    if (await amountInput.count().then(c => c === 0)) {
+    let amountInput = journalPage.amountInput;
+    if ((await amountInput.count()) === 0) {
       amountInput = page.getByRole('dialog').locator('input[placeholder*="credit"], input[placeholder*="debit"]').first();
     }
     await expect(amountInput).toHaveValue('-5000');
-    
+
     // Verify auto-calculated badge is shown
     await expect(page.getByText(/auto-calculated/i)).toBeVisible();
-    
+
     // Change qty and verify recalculation
     // Support both legacy modal label and drawer label which can be "Contracts" or "Shares" for assignments
     let qtyInput = page.getByLabel(/contracts|shares/i);
-    if (await qtyInput.count().then(c => c === 0)) {
+    if ((await qtyInput.count()) === 0) {
       // Drawer fallback: query by adjacent label
       const sharesLabel = page.getByRole('dialog').locator('label:has-text("Shares")');
       const contractsLabel = page.getByRole('dialog').locator('label:has-text("Contracts")');
-      if (await sharesLabel.count().then(c => c > 0)) {
+      if ((await sharesLabel.count()) > 0) {
         qtyInput = sharesLabel.locator('+ input').first();
       } else {
         qtyInput = contractsLabel.locator('+ input').first();
@@ -283,61 +274,80 @@ test.describe('Journal - Edit Trade Entries', () => {
     }
 
     // If the drawer shows "Shares", then 1 contract = 100 shares. Update to 2 contracts -> 200 shares.
-    const isSharesMode = await page.getByRole('dialog').locator('label:has-text("Shares")').count().then(c => c > 0);
+    const isSharesMode = (await page.getByRole('dialog').locator('label:has-text("Shares")').count()) > 0;
     await qtyInput.clear();
     await qtyInput.fill(isSharesMode ? '200' : '2');
-    
+
     // Wait for recalculation
-    await page.waitForTimeout(500);
-    
+    await journalPage.wait(500);
+
     // Amount should update: -(50 * 2 * 100) = -10000
     await expect(amountInput).toHaveValue('-10000');
-    
+
     // Cancel without saving
-    await page.getByRole('button', { name: /cancel/i }).click();
+    await journalPage.cancelButton.click();
   });
 });
 
 test.describe('Journal - Trade Entry Validation', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/journal');
+    const journalPage = new JournalPage(page);
+    await journalPage.navigate();
   });
 
   test('should require edit reason when editing', async ({ page }) => {
+    const journalPage = new JournalPage(page);
+
     // Add an entry first
-    await page.getByRole('button', { name: /new entry/i }).click();
-    await page.getByRole('button', { name: 'Sell Put' }).click();
-    await page.getByLabel(/symbol/i).fill('REQTEST');
-    await page.getByRole('button', { name: /save entry/i }).click();
+    await journalPage.addEntry({
+      tradeType: 'Sell Put',
+      symbol: 'REQTEST',
+    });
+
+    // Wait for entry to appear
+    await journalPage.waitForEntry('REQTEST');
     await page.waitForTimeout(1000);
-    
-    // Edit the entry
-    const editButton = page.locator('button[title="Edit entry"]').first();
-    await editButton.click();
-    
-    // Try to save without edit reason
-    await page.getByRole('button', { name: /save changes/i }).click();
-    
-    // Should show alert or error
+
+    // Set up dialog handler BEFORE clicking save
+    let dialogHandled = false;
     page.on('dialog', dialog => {
-      expect(dialog.message()).toContain('reason');
+      dialogHandled = true;
+      expect(dialog.message().toLowerCase()).toMatch(/reason|required|edit/i);
       dialog.accept();
     });
+
+    // Edit the entry
+    const editButton = journalPage.getEditButton(0);
+    await expect(editButton).toBeVisible({ timeout: 10000 });
+    await expect(editButton).toBeEnabled({ timeout: 5000 });
+    await editButton.scrollIntoViewIfNeeded();
+    await editButton.click({ force: true });
+
+    // Wait for edit modal/drawer to open
+    await page.waitForTimeout(1000);
+
+    // Try to save without edit reason
+    await journalPage.saveChangesButton.click();
+
+    // Wait for dialog to appear
+    await page.waitForTimeout(1000);
+    
+    // Verify dialog was shown
+    expect(dialogHandled).toBe(true);
   });
 
   test('should handle decimal values correctly', async ({ page }) => {
-    await page.getByRole('button', { name: /new entry/i }).click();
-    await page.getByRole('button', { name: 'Sell Put' }).click();
-    
-    await page.getByLabel(/symbol/i).fill('DECIMAL');
-    await page.getByLabel(/strike/i).fill('152.75');
-    await page.getByLabel(/premium/i).fill('3.25');
-    await page.getByLabel(/fee/i).fill('0.65');
-    
-    await page.getByRole('button', { name: /save entry/i }).click();
-    await page.waitForTimeout(1000);
-    
-    await expect(page.getByRole('cell', { name: 'DECIMAL' }).first()).toBeVisible();
+    const journalPage = new JournalPage(page);
+
+    await journalPage.addEntry({
+      tradeType: 'Sell Put',
+      symbol: 'DECIMAL',
+      strike: '152.75',
+      premium: '3.25',
+      fee: '0.65',
+    });
+
+    await journalPage.waitForEntry('DECIMAL');
     await expect(page.getByText('$152.75').first()).toBeVisible();
   });
 });

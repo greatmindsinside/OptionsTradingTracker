@@ -75,31 +75,32 @@ export interface AlertRule {
 
 /**
  * Priority level configurations
+ * Gold/amber-based color scheme aligned with page theme (black/green/gold)
  */
 export const PRIORITY_CONFIG = {
   urgent: {
-    color: '#EF4444',
-    bgColor: 'rgba(239, 68, 68, 0.15)',
-    borderColor: 'rgba(239, 68, 68, 0.4)',
+    color: '#D97706', // Intense amber - conveys urgency while staying on theme
+    bgColor: 'rgba(217, 119, 6, 0.15)',
+    borderColor: 'rgba(217, 119, 6, 0.5)',
     icon: '🔴',
     label: 'URGENT',
   },
   warning: {
-    color: '#FB923C',
-    bgColor: 'rgba(251, 146, 60, 0.15)',
-    borderColor: 'rgba(251, 146, 60, 0.4)',
+    color: '#F5B342', // Medium gold - matches page accent color
+    bgColor: 'rgba(245, 179, 66, 0.15)',
+    borderColor: 'rgba(245, 179, 66, 0.4)',
     icon: '🟠',
     label: 'WARNING',
   },
   info: {
-    color: '#F5B342',
-    bgColor: 'rgba(245, 179, 66, 0.15)',
-    borderColor: 'rgba(245, 179, 66, 0.4)',
+    color: '#FCD34D', // Light gold - softer, less attention-grabbing
+    bgColor: 'rgba(252, 211, 77, 0.12)',
+    borderColor: 'rgba(252, 211, 77, 0.3)',
     icon: '🟡',
     label: 'INFO',
   },
   opportunity: {
-    color: '#10B981',
+    color: '#10B981', // Emerald green - matches page theme
     bgColor: 'rgba(16, 185, 129, 0.15)',
     borderColor: 'rgba(16, 185, 129, 0.4)',
     icon: '🟢',

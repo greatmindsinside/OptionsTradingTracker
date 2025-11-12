@@ -164,13 +164,13 @@ export function useWheelDatabase() {
 
 // Helper functions to transform journal entries into wheel data
 
-function transformJournalToPositions(entries: Entry[]): Position[] {
+export function transformJournalToPositions(entries: Entry[]): Position[] {
   const positions: Position[] = [];
   const positionMap = new Map<string, Partial<Position>>();
 
-  // Group entries by position (symbol + strike + expiration)
+  // First pass: Build positions from opening entries
   for (const entry of entries) {
-    // Only process option-related entries
+    // Only process option-related entries that open positions
     if (
       entry.type !== 'sell_to_open' &&
       entry.type !== 'option_premium' &&
@@ -251,6 +251,31 @@ function transformJournalToPositions(entries: Entry[]): Position[] {
     } else if (entry.type === 'buy_to_close') {
       const contracts = entry.qty || 1;
       position.qty = (position.qty || 0) - contracts;
+    }
+  }
+
+  // Second pass: Process expiration entries that close positions (assignments)
+  for (const entry of entries) {
+    if (entry.type === 'expiration' && entry.strike && entry.expiration) {
+      // Parse meta to check if this is an assignment
+      let metaObj: Record<string, unknown> | null | undefined = entry.meta;
+      if (typeof entry.meta === 'string') {
+        try {
+          metaObj = JSON.parse(entry.meta) as Record<string, unknown>;
+        } catch {
+          metaObj = null;
+        }
+      }
+
+      // If this is an assignment, close the matching position
+      if (metaObj && typeof metaObj === 'object' && metaObj.assigned === true) {
+        const key = `${entry.symbol}_${entry.strike}_${entry.expiration}`;
+        const position = positionMap.get(key);
+        if (position) {
+          const contracts = entry.qty || 1;
+          position.qty = Math.max(0, (position.qty || 0) - contracts);
+        }
+      }
     }
   }
 

@@ -1,3 +1,30 @@
+/**
+ * TickerDrawer Component
+ *
+ * PURPOSE:
+ * Displays detailed information about a specific stock ticker in a slide-out drawer panel.
+ * Shows all positions, share lots, and earnings data for the selected symbol.
+ *
+ * HOW IT WORKS:
+ * - Opens when user clicks a ticker symbol or "View" button in TickerPhaseRow
+ * - Reads the selected ticker from useWheelUIStore.contextSymbol
+ * - Filters positions and lots from useWheelStore to show only data for that ticker
+ * - Displays earnings date from useWheelStore.earnings if available
+ * - Closes when user clicks backdrop or close button
+ *
+ * INTERACTIONS:
+ * - Opened by: TickerPhaseRow (clicking ticker or "View" button), SharesTable (clicking ticker)
+ * - State managed by: useWheelUIStore (contextSymbol, closeContext)
+ * - Data from: useWheelStore (lots, positions, earnings)
+ * - UI pattern: Fixed overlay with right-side drawer panel (similar to ActionsDrawer)
+ *
+ * DATA FLOW:
+ * 1. User clicks ticker → openContext(symbol) called → contextSymbol set in store
+ * 2. TickerDrawer reads contextSymbol → filters lots/positions for that symbol
+ * 3. Displays filtered data in organized sections
+ * 4. User closes → closeContext() called → contextSymbol set to null → drawer unmounts
+ */
+
 import React, { useMemo } from 'react';
 
 import { useWheelStore } from '@/stores/useWheelStore';
@@ -8,6 +35,7 @@ export const TickerDrawer: React.FC = () => {
   const close = useWheelUIStore(s => s.closeContext);
   const lots = useWheelStore(s => s.lots);
   const pos = useWheelStore(s => s.positions);
+  const earnings = useWheelStore(s => s.earnings);
 
   const filtered = useMemo(() => {
     const S = sym?.toUpperCase() || '';
@@ -58,6 +86,29 @@ export const TickerDrawer: React.FC = () => {
                 </div>
               ))}
             </div>
+          </div>
+          <div>
+            <div className="mb-1 text-zinc-500">Earnings</div>
+            {(() => {
+              const earningsDate = sym ? earnings[sym] : null;
+              if (!earningsDate) {
+                return <div className="text-zinc-600">TBD</div>;
+              }
+              const date = new Date(earningsDate);
+              const isValidDate = !isNaN(date.getTime());
+              if (!isValidDate) {
+                return <div className="text-zinc-600">TBD</div>;
+              }
+              return (
+                <div className="rounded border border-green-500/20 bg-zinc-950/40 px-3 py-2 text-zinc-300">
+                  {date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>

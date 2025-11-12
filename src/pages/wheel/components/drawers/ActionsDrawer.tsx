@@ -1,3 +1,32 @@
+/**
+ * ActionsDrawer Component
+ *
+ * PURPOSE:
+ * Main modal drawer container that provides access to three primary actions:
+ * - Trade: Add new option trades (sell puts/calls, buy to close)
+ * - Import: Import trades from CSV files
+ * - Data: Open the Data Explorer for debugging/inspection
+ *
+ * HOW IT WORKS:
+ * - Opens as a centered modal overlay when actionsOpen is true
+ * - Contains tab navigation to switch between Trade/Import/Data tabs
+ * - Each tab is a separate component (TradeTab, ImportTab, DataTab)
+ * - Tab state is managed in useWheelUIStore.actionsTab
+ * - Closes when user clicks backdrop or close button
+ *
+ * INTERACTIONS:
+ * - Opened by: WheelHeader ("Premium Printer" button), QuickActionFAB, TickerPhaseRow ("Sell Put/Call" buttons)
+ * - State managed by: useWheelUIStore (actionsOpen, actionsTab, openActions, closeActions, setActionsTab)
+ * - Contains: TradeTab, ImportTab, DataTab components
+ * - UI pattern: Fixed overlay with centered modal panel (different from TickerDrawer's side panel)
+ *
+ * DATA FLOW:
+ * 1. User triggers action → openActions(tab?) called → actionsOpen=true, actionsTab set
+ * 2. ActionsDrawer renders → shows selected tab component
+ * 3. Tab component handles its own logic (form submission, file import, etc.)
+ * 4. User closes → closeActions() called → actionsOpen=false → drawer unmounts
+ */
+
 import React from 'react';
 
 import { useWheelUIStore } from '@/stores/useWheelUIStore';

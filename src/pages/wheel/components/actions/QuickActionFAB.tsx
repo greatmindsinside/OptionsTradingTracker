@@ -3,6 +3,7 @@ import React, { useCallback, useState } from 'react';
 
 import { AssignmentForm } from './AssignmentForm';
 import { QuickActionsMenu } from './QuickActionsMenu';
+import { RollForm } from './RollForm';
 import { ShareTransactionForm } from './ShareTransactionForm';
 import { useQuickActions } from './useQuickActions';
 
@@ -50,6 +51,12 @@ export const QuickActionFAB: React.FC = () => {
       )}
       {isOpen && activeForm === 'sellShares' && (
         <ShareTransactionForm type="sell" prefillData={prefillData} onClose={closeForm} />
+      )}
+      {isOpen && activeForm === 'rollPut' && (
+        <RollForm type="put" prefillData={prefillData} onClose={closeForm} />
+      )}
+      {isOpen && activeForm === 'rollCall' && (
+        <RollForm type="call" prefillData={prefillData} onClose={closeForm} />
       )}
     </>
   );

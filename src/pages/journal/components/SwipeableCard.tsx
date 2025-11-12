@@ -31,6 +31,7 @@ export const SwipeableCard: React.FC<SwipeableCardProps> = ({
   return (
     <div
       ref={swipeable.ref as React.RefObject<HTMLDivElement>}
+      data-testid="journal.entry"
       className="rounded-xl border border-zinc-700/60 bg-zinc-900/60 p-4 shadow-lg transition-transform"
     >
       {children}

@@ -284,13 +284,18 @@ export const uncoveredCallsRule: AlertRule = {
     const uncovered = Math.max(0, sharesNeeded - sharesOwned);
 
     if (uncovered > 0) {
+      const isFullyUncovered = sharesOwned === 0;
       return {
         id: `uncovered-${position.id}`,
         ticker: position.ticker,
         category: 'risk_management',
-        priority: 'warning',
-        title: `${position.ticker} calls partially uncovered`,
-        message: `Short ${position.qty} ${position.ticker} call${position.qty > 1 ? 's' : ''} but only own ${sharesOwned} shares. ${uncovered} shares uncovered (unlimited risk).`,
+        priority: isFullyUncovered ? 'urgent' : 'warning',
+        title: isFullyUncovered
+          ? `${position.ticker} calls fully uncovered (naked)`
+          : `${position.ticker} calls partially uncovered`,
+        message: isFullyUncovered
+          ? `Short ${position.qty} ${position.ticker} call${position.qty > 1 ? 's' : ''} but own 0 shares. ${uncovered} shares uncovered (unlimited risk). Record share purchase or assignment.`
+          : `Short ${position.qty} ${position.ticker} call${position.qty > 1 ? 's' : ''} but only own ${sharesOwned} shares. ${uncovered} shares uncovered (unlimited risk).`,
         actions: [
           { label: 'Buy Shares', action: 'custom' },
           { label: 'Close Calls', action: 'close' },

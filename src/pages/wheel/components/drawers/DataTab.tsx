@@ -1,3 +1,36 @@
+/**
+ * DataTab Component
+ *
+ * PURPOSE:
+ * Simple button interface to open the Data Explorer modal. The Data Explorer provides
+ * debugging and inspection tools to view raw store data (lots, positions, earnings, ledger).
+ *
+ * HOW IT WORKS:
+ * - Renders a single button that toggles the Data Explorer modal
+ * - Uses useWheelUIStore.toggleData to open/close the Data Explorer
+ * - Data Explorer is a separate modal component (DataExplorerModal) that shows:
+ *   - Overview stats (symbol count, lots, positions, events)
+ *   - Tables view (formatted data for lots, positions, earnings)
+ *   - Ledger view (chronological event log)
+ *
+ * INTERACTIONS:
+ * - Parent: ActionsDrawer (rendered when actionsTab === 'Data')
+ * - State: useWheelUIStore.toggleData (opens/closes DataExplorerModal)
+ * - Data Explorer: DataExplorerModal component (lazy-loaded in WheelPage)
+ * - Alternative access: Can also be opened from WheelHeader via "Data" button
+ *
+ * DATA FLOW:
+ * 1. User clicks "Open Data Explorer" → toggleData() called
+ * 2. useWheelUIStore.dataOpen toggles → DataExplorerModal renders/unmounts
+ * 3. DataExplorerModal reads data from useWheelStore (lots, positions, earnings, ledger)
+ * 4. Displays data in organized tabs (Overview, Tables, Ledger)
+ *
+ * USE CASES:
+ * - Debugging: Inspect raw store data to verify calculations
+ * - Verification: Check that trades were imported/added correctly
+ * - Development: Understand data structure and relationships
+ */
+
 import React from 'react';
 
 import { useWheelUIStore } from '@/stores/useWheelUIStore';

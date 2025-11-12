@@ -157,7 +157,7 @@ export const FilterBar: React.FC = () => {
   };
 
   return (
-    <div className="neon-panel mb-6 rounded-2xl px-4 py-3">
+    <div className="glass-card mb-6 rounded-2xl px-4 py-3">
       <div className="flex flex-col gap-3">
         {/* Header with collapse toggle */}
         <div className="flex items-center justify-between">
@@ -196,6 +196,7 @@ export const FilterBar: React.FC = () => {
               variant="secondary"
               size="sm"
               className="h-6 px-2 text-xs"
+              title="Filter entries from today only"
             >
               Today
             </Button>
@@ -204,6 +205,7 @@ export const FilterBar: React.FC = () => {
               variant="secondary"
               size="sm"
               className="h-6 px-2 text-xs"
+              title="Filter entries from the last 7 days"
             >
               This Week
             </Button>
@@ -212,6 +214,7 @@ export const FilterBar: React.FC = () => {
               variant="secondary"
               size="sm"
               className="h-6 px-2 text-xs"
+              title="Filter entries from the last 30 days"
             >
               This Month
             </Button>
@@ -220,6 +223,7 @@ export const FilterBar: React.FC = () => {
               variant="secondary"
               size="sm"
               className="h-6 px-2 text-xs"
+              title="Filter entries from the last year"
             >
               This Year
             </Button>
@@ -228,6 +232,7 @@ export const FilterBar: React.FC = () => {
               variant="secondary"
               size="sm"
               className="h-6 px-2 text-xs"
+              title="Show all entries (no date filter)"
             >
               All Time
             </Button>
@@ -274,8 +279,9 @@ export const FilterBar: React.FC = () => {
                     variant="secondary"
                     size="sm"
                     className="h-7 flex-1 text-xs"
+                    title={filterPresets.length > 0 ? `View ${filterPresets.length} saved filter preset(s)` : 'View saved filter presets'}
                   >
-                    {filterPresets.length > 0 ? `📋 ${filterPresets.length}` : '📋 Save'}
+                    {filterPresets.length > 0 ? `Presets (${filterPresets.length})` : 'Save Preset'}
                   </Button>
                   {filterPresets.length > 0 && (
                     <Button
@@ -285,7 +291,7 @@ export const FilterBar: React.FC = () => {
                       className="h-7 text-xs"
                       title="Save current filters as preset"
                     >
-                      💾
+                      Save
                     </Button>
                   )}
                 </div>
@@ -297,6 +303,7 @@ export const FilterBar: React.FC = () => {
                           <button
                             onClick={() => loadPreset(preset)}
                             className="flex-1 rounded px-2 py-1 text-left text-sm text-zinc-300 hover:bg-zinc-800"
+                            title={`Load filter preset: ${preset.name}`}
                           >
                             {preset.name}
                           </button>
@@ -320,7 +327,11 @@ export const FilterBar: React.FC = () => {
                 >
                   Actions
                 </label>
-                <Button onClick={handleClearAll} className="h-7 w-full">
+                <Button
+                  onClick={handleClearAll}
+                  className="h-7 w-full"
+                  title="Clear all active filters (date range, symbol, type, status, amount range)"
+                >
                   Clear All
                 </Button>
               </div>

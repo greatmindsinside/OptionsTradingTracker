@@ -239,11 +239,11 @@ export const JournalDrawer: React.FC = () => {
   return (
     <div className="fixed inset-0 z-40" aria-modal role="dialog" aria-labelledby="journal-edit-title">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onOverlayClick} />
-      <div className="absolute top-0 right-0 bottom-0 w-full max-w-3xl border-l border-green-500/30 bg-zinc-950/95 shadow-2xl shadow-green-500/20 overflow-y-auto">
+      <div className="absolute top-0 right-0 bottom-0 w-full max-w-3xl border-l border-[rgba(245,179,66,0.3)] bg-zinc-950/95 shadow-2xl shadow-[rgba(245,179,66,0.2)] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/95 p-3 backdrop-blur-sm">
           <div className="mb-2 flex items-center justify-between">
-            <h2 id="journal-edit-title" className="text-base font-semibold text-emerald-400">
+            <h2 id="journal-edit-title" className="text-base font-semibold text-[#F5B342]">
               Edit Entry
             </h2>
             <button 
@@ -257,7 +257,7 @@ export const JournalDrawer: React.FC = () => {
           
           {/* Pills and Meta */}
           <div className="flex flex-wrap items-center gap-1.5">
-            <div className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-medium text-emerald-400">
+            <div className="rounded-full bg-[rgba(245,179,66,0.2)] px-2.5 py-0.5 text-xs font-medium text-[#F5B342]">
               {form.symbol || entry?.symbol || '—'}
             </div>
             <div className="rounded-full bg-zinc-800 px-2.5 py-0.5 text-xs text-zinc-300">
@@ -280,8 +280,8 @@ export const JournalDrawer: React.FC = () => {
         <div className="p-3 space-y-6">
           <div className="space-y-6">
             {/* Entry Identity Card */}
-            <div className="rounded-2xl border border-green-500/30 bg-linear-to-br from-black/80 to-green-950/20 p-5 shadow-lg shadow-green-500/20 backdrop-blur-xl">
-              <h3 className="mb-3 text-sm font-semibold tracking-wide text-green-400 uppercase">📊 Entry Identity</h3>
+            <div className="rounded-2xl border border-[rgba(245,179,66,0.3)] bg-linear-to-br from-black/80 to-[rgba(11,15,14,0.8)] p-5 shadow-lg shadow-[rgba(245,179,66,0.2)] backdrop-blur-xl">
+              <h3 className="mb-3 text-sm font-semibold tracking-wide text-[#F5B342] uppercase">📊 Entry Identity</h3>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Input 
@@ -295,7 +295,7 @@ export const JournalDrawer: React.FC = () => {
                 <div>
                   <label className="mb-1 block text-xs font-medium text-zinc-200">Type</label>
                   <select
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 focus:border-[#F5B342] focus:outline-none focus:ring-2 focus:ring-[rgba(245,179,66,0.3)]"
                     value={(form.type as string) ?? entry?.type ?? ''}
                     onChange={e => setForm(f => ({ ...f, type: e.target.value as TradeType }))}
                     disabled={disabled}
@@ -320,8 +320,8 @@ export const JournalDrawer: React.FC = () => {
             </div>
 
             {/* Contract Details Card */}
-            <div className="rounded-2xl border border-green-500/30 bg-linear-to-br from-black/80 to-green-950/20 p-5 shadow-lg shadow-green-500/20 backdrop-blur-xl">
-              <h3 className="mb-3 text-sm font-semibold tracking-wide text-green-400 uppercase">📋 Contract Details</h3>
+            <div className="rounded-2xl border border-[rgba(245,179,66,0.3)] bg-linear-to-br from-black/80 to-[rgba(11,15,14,0.8)] p-5 shadow-lg shadow-[rgba(245,179,66,0.2)] backdrop-blur-xl">
+              <h3 className="mb-3 text-sm font-semibold tracking-wide text-[#F5B342] uppercase">📋 Contract Details</h3>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-zinc-200">
@@ -366,7 +366,7 @@ export const JournalDrawer: React.FC = () => {
                   <label className="mb-1 block text-xs font-medium text-zinc-200">Expiration Date</label>
                   <input
                     type="date"
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 focus:border-[#F5B342] focus:outline-none focus:ring-2 focus:ring-[rgba(245,179,66,0.3)]"
                     value={toYmd(form.expiration ?? entry?.expiration ?? null)}
                     onChange={e => setForm(f => ({ ...f, expiration: e.target.value ? e.target.value : null }))}
                     disabled={disabled}
@@ -377,8 +377,8 @@ export const JournalDrawer: React.FC = () => {
             </div>
 
             {/* Market Context Card */}
-            <div className="rounded-2xl border border-green-500/30 bg-linear-to-br from-black/80 to-green-950/20 p-5 shadow-lg shadow-green-500/20 backdrop-blur-xl">
-              <h3 className="mb-3 text-sm font-semibold tracking-wide text-green-400 uppercase">📅 Market Context</h3>
+            <div className="rounded-2xl border border-[rgba(245,179,66,0.3)] bg-linear-to-br from-black/80 to-[rgba(11,15,14,0.8)] p-5 shadow-lg shadow-[rgba(245,179,66,0.2)] backdrop-blur-xl">
+              <h3 className="mb-3 text-sm font-semibold tracking-wide text-[#F5B342] uppercase">📅 Market Context</h3>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Input 

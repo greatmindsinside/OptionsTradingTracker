@@ -1,5 +1,7 @@
+import { Icon } from '@iconify/react';
 import React from 'react';
 
+import { DropdownMenu, type DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import { all } from '@/db/sql';
 import { useEntriesStore } from '@/stores/useEntriesStore';
 import { useWheelStore } from '@/stores/useWheelStore';
@@ -10,10 +12,26 @@ import { usePhaseCalculation } from './usePhaseCalculation';
 
 export const TickerPhaseRow: React.FC<{ ticker: string }> = ({ ticker }) => {
   const { phase } = usePhaseCalculation(ticker);
-  const earnings = useWheelStore(s => s.earnings);
   const openContext = useWheelUIStore(s => s.openContext);
+  const openActions = useWheelUIStore(s => s.openActions);
   const { deleteEntry } = useEntriesStore();
   const reloadFn = useWheelStore(s => s.reloadFn);
+
+  // Determine action button based on phase
+  const getPhaseAction = () => {
+    switch (phase) {
+      case 'Sell Cash Secured Puts':
+      case 'Put Expires Worthless':
+        return { label: 'Sell Put', action: () => openActions('Trade') };
+      case 'Call Expires Worthless':
+      case 'Sell Covered Calls':
+        return { label: 'Sell Call', action: () => openActions('Trade') };
+      default:
+        return null;
+    }
+  };
+
+  const phaseAction = getPhaseAction();
 
   const handleClosePosition = async () => {
     const confirmed = window.confirm(
@@ -72,14 +90,14 @@ export const TickerPhaseRow: React.FC<{ ticker: string }> = ({ ticker }) => {
 
   return (
     <div
-      className="flex items-center gap-4 rounded-xl backdrop-blur-sm transition-all hover:-translate-y-0.5"
+      className="flex min-w-0 items-center gap-2 rounded-xl backdrop-blur-sm transition-all hover:-translate-y-0.5"
       style={{
         border: '1px solid rgba(245, 179, 66, 0.4)',
         background: `
           radial-gradient(ellipse at 50% 100%, rgba(0, 227, 159, 0.05), transparent 60%),
           linear-gradient(135deg, rgba(11, 15, 14, 0.88), rgba(15, 25, 22, 0.94))
         `,
-        padding: '1rem',
+        padding: '0.75rem',
         boxShadow: `
           0 0 10px rgba(245, 179, 66, 0.075),
           0 4px 12px rgba(0, 0, 0, 0.5),
@@ -112,7 +130,7 @@ export const TickerPhaseRow: React.FC<{ ticker: string }> = ({ ticker }) => {
       }}
     >
       <div
-        className="cursor-pointer text-xl font-semibold tracking-wide transition-all"
+        className="cursor-pointer text-base font-semibold tracking-wide transition-all"
         onClick={() => openContext(ticker)}
         style={{
           color: '#FFFFFF',
@@ -141,87 +159,56 @@ export const TickerPhaseRow: React.FC<{ ticker: string }> = ({ ticker }) => {
       >
         {ticker}
       </div>
-      <span
-        className="rounded px-3 py-1.5 text-xs font-semibold"
-        style={{
-          border: '1px solid rgba(245, 179, 66, 0.4)',
-          background: 'linear-gradient(135deg, rgba(5, 30, 25, 0.95), rgba(8, 20, 18, 0.98))',
-          color: '#F5B342',
-          textShadow: `
-            0 0 4px rgba(245, 179, 66, 0.35),
-            0 0 8px rgba(245, 179, 66, 0.15),
-            0 1px 2px rgba(0, 0, 0, 0.8)
-          `,
-          boxShadow: `
-            0 0 7px rgba(245, 179, 66, 0.1),
-            0 4px 12px rgba(0, 0, 0, 0.7),
-            inset 0 1px 0 rgba(245, 179, 66, 0.1)
-          `,
-        }}
-      >
-        {phase}
-      </span>
-      {earnings[ticker] && (
-        <div className="ml-auto text-xs" style={{ color: 'rgba(245, 179, 66, 0.7)' }}>
-          📊 Earnings:{' '}
-          {new Date(earnings[ticker]).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-          })}
-        </div>
-      )}
-      {!earnings[ticker] && <div className="ml-auto text-xs text-slate-500">📊 Earnings: TBD</div>}
-      <button
-        onClick={() => openContext(ticker)}
-        className="rounded px-2.5 py-1 text-xs font-semibold transition-all"
-        style={{
-          border: '1px solid rgba(245, 179, 66, 0.3)',
-          background: 'rgba(245, 179, 66, 0.08)',
-          color: '#F5B342',
-          boxShadow: '0 0 5px rgba(245, 179, 66, 0.075), inset 0 1px 0 rgba(245, 179, 66, 0.05)',
-        }}
-        onMouseEnter={e => {
-          e.currentTarget.style.borderColor = 'rgba(245, 179, 66, 0.5)';
-          e.currentTarget.style.background = 'rgba(245, 179, 66, 0.15)';
-          e.currentTarget.style.boxShadow =
-            '0 0 7px rgba(245, 179, 66, 0.125), inset 0 1px 0 rgba(245, 179, 66, 0.1)';
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.style.borderColor = 'rgba(245, 179, 66, 0.3)';
-          e.currentTarget.style.background = 'rgba(245, 179, 66, 0.08)';
-          e.currentTarget.style.boxShadow =
-            '0 0 5px rgba(245, 179, 66, 0.075), inset 0 1px 0 rgba(245, 179, 66, 0.05)';
-        }}
-      >
-        Open
-      </button>
-      <button
-        onClick={handleClosePosition}
-        className="rounded px-2.5 py-1 text-xs font-semibold transition-all"
-        style={{
-          border: '1px solid rgba(239, 68, 68, 0.4)',
-          background: 'rgba(239, 68, 68, 0.1)',
-          color: '#EF4444',
-          boxShadow: '0 0 5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(239, 68, 68, 0.075)',
-        }}
-        onMouseEnter={e => {
-          e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.6)';
-          e.currentTarget.style.background = 'rgba(239, 68, 68, 0.18)';
-          e.currentTarget.style.boxShadow =
-            '0 0 7px rgba(239, 68, 68, 0.15), inset 0 1px 0 rgba(239, 68, 68, 0.125)';
-          e.currentTarget.style.color = '#FCA5A5';
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.4)';
-          e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
-          e.currentTarget.style.boxShadow =
-            '0 0 5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(239, 68, 68, 0.075)';
-          e.currentTarget.style.color = '#EF4444';
-        }}
-        title="Close all positions for this ticker"
-      >
-        ✕ Close
-      </button>
+      <div className="flex min-w-0 items-center gap-2">
+        <span
+          className="rounded px-2 py-1 text-xs font-semibold"
+          style={{
+            border: '1px solid rgba(245, 179, 66, 0.4)',
+            background: 'linear-gradient(135deg, rgba(5, 30, 25, 0.95), rgba(8, 20, 18, 0.98))',
+            color: '#F5B342',
+            textShadow: `
+              0 0 4px rgba(245, 179, 66, 0.35),
+              0 0 8px rgba(245, 179, 66, 0.15),
+              0 1px 2px rgba(0, 0, 0, 0.8)
+            `,
+            boxShadow: `
+              0 0 7px rgba(245, 179, 66, 0.1),
+              0 4px 12px rgba(0, 0, 0, 0.7),
+              inset 0 1px 0 rgba(245, 179, 66, 0.1)
+            `,
+          }}
+        >
+          {phase}
+        </span>
+      </div>
+      <div className="relative ml-auto z-10">
+        <DropdownMenu
+          align="right"
+          className="[&>button]:rounded! [&>button]:px-1.5! [&>button]:py-0.5! [&>button]:text-xs! [&>button]:font-semibold! [&>button]:transition-all! [&>button]:border! [&>button]:border-[rgba(245,179,66,0.3)]! [&>button]:bg-[rgba(245,179,66,0.08)]! [&>button]:text-[#F5B342]! [&>button]:shadow-[0_0_4px_rgba(245,179,66,0.06)]! [&>button]:hover:border-[rgba(245,179,66,0.5)]! [&>button]:hover:bg-[rgba(245,179,66,0.15)]! [&>button]:hover:shadow-[0_0_6px_rgba(245,179,66,0.1)]! [&>button]:flex! [&>button]:items-center! [&>button]:gap-1! [&>button]:min-w-0! [&>button_svg:last-child]:hidden!"
+          trigger={<Icon icon="mdi:dots-vertical" className="h-4 w-4" />}
+          items={[
+            ...(phaseAction
+              ? [
+                  {
+                    label: phaseAction.label,
+                    onClick: phaseAction.action,
+                  } as DropdownMenuItem,
+                ]
+              : []),
+            {
+              label: 'View',
+              onClick: () => openContext(ticker),
+            },
+            {
+              divider: true,
+            },
+            {
+              label: 'Close Position',
+              onClick: handleClosePosition,
+            },
+          ]}
+        />
+      </div>
     </div>
   );
 };

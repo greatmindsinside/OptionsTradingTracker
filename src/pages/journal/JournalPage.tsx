@@ -670,10 +670,7 @@ const JournalPage: React.FC = () => {
         setOpen(true);
       } else if (e.key === '/') {
         e.preventDefault();
-        const searchInput = document.getElementById('sym');
-        if (searchInput) {
-          searchInput.focus();
-        }
+        // Search input is now in AppHeader
       } else if (e.key === 'Escape') {
         if (open) {
           setOpen(false);
@@ -689,17 +686,16 @@ const JournalPage: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [open, editModalOpen]);
 
-  // Debounced search state
-  const [searchInput, setSearchInput] = useState(filters.symbol);
-
-  // Debounce search input
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      filters.setFilters({ symbol: searchInput });
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchInput, filters]);
+  // Listen for new entry event from AppHeader
+  React.useEffect(() => {
+    const handleNewEntry = () => {
+      setOpen(true);
+    };
+    window.addEventListener('journal:new-entry', handleNewEntry);
+    return () => {
+      window.removeEventListener('journal:new-entry', handleNewEntry);
+    };
+  }, []);
 
   // Load entries on mount and when filters change
   useEffect(() => {
@@ -1050,112 +1046,94 @@ const JournalPage: React.FC = () => {
 
   return (
     <KeyboardShortcutsProvider>
-      <div className="cyber-bg relative min-h-screen overflow-hidden bg-black text-zinc-200">
-        {/* Glow orbs */}
-        <div className="pointer-events-none absolute -top-24 -left-20 aspect-square h-112 rounded-full bg-green-500/15 blur-3xl" />
-        <div className="pointer-events-none absolute -right-24 -bottom-32 aspect-square h-128 rounded-full bg-green-400/20 blur-3xl" />
+      <div className="relative min-h-screen overflow-hidden text-zinc-100" style={{ backgroundColor: '#0B0F0E' }}>
+        {/* Base background image layer - same as Wheel page */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage: 'url(/goldcitypng.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            zIndex: 1,
+          }}
+        />
 
-        {/* Header */}
-        <header className="page-header">
-          <div className="page-header__inner">
-            <h1
-              className="page-header__brand page-header__brand--cyberpunk"
-              data-testid="journal.title"
-            >
-              💼 Wheel Strategy Journal
-            </h1>
-            <div className="page-header__search">
-              <div className="page-header__search-wrapper">
-                <svg
-                  className="page-header__search-icon"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 16a8 8 0 100-16 8 8 0 000 16zM15 15l5 5"
-                  />
-                </svg>
+        {/* Gold Spine Grid CSS overlay - same as Wheel page */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: `
+              radial-gradient(60% 40% at 50% 120%, rgba(0,227,159,.18), transparent 60%),
+              radial-gradient(40% 30% at 100% 0%, rgba(195,0,255,.10), transparent 60%),
+              linear-gradient(to bottom, rgba(245,179,66,.25), transparent 12%),
+              linear-gradient(to top, rgba(245,179,66,.25), transparent 12%),
+              repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0px, transparent 1px, transparent 24px),
+              repeating-linear-gradient(90deg, rgba(255,255,255,.03) 0px, transparent 1px, transparent 24px)
+            `,
+            backgroundSize: '100% 100%, 100% 100%, 100% 12%, 100% 12%, 24px 24px, 24px 24px',
+            backgroundRepeat: 'no-repeat, no-repeat, no-repeat, no-repeat, repeat, repeat',
+            zIndex: 2,
+          }}
+        />
+
+        {/* Column Visibility Menu */}
+        <div
+          id="column-visibility-menu"
+          className="no-print absolute top-20 right-4 z-50 hidden rounded-lg border border-zinc-700 bg-zinc-900 p-4 shadow-lg"
+          style={{ display: 'none' }}
+        >
+          <div className="mb-2 text-sm font-semibold text-zinc-300">Column Visibility</div>
+          <div className="space-y-2">
+            {[
+              { key: 'date', label: 'Date' },
+              { key: 'symbol', label: 'Symbol' },
+              { key: 'type', label: 'Type' },
+              { key: 'qty', label: 'Qty' },
+              { key: 'strike', label: 'Strike' },
+              { key: 'exp', label: 'Exp' },
+              { key: 'dte', label: 'DTE' },
+              { key: 'stock', label: 'Stock' },
+              { key: 'amount', label: 'Amount' },
+              { key: 'notes', label: 'Notes' },
+              { key: 'delta', label: 'Delta' },
+              { key: 'iv_rank', label: 'IV Rank' },
+              { key: 'actions', label: 'Actions' },
+            ].map(col => (
+              <label key={col.key} className="flex items-center gap-2 text-sm text-zinc-300">
                 <input
-                  id="sym"
-                  type="search"
-                  value={searchInput}
-                  onChange={e => setSearchInput(e.target.value)}
-                  placeholder="Search symbol, notes, type, amount..."
-                  className="page-header__search-input"
-                  aria-label="Search journal entries"
+                  type="checkbox"
+                  checked={visibleColumns.has(col.key)}
+                  onChange={e => {
+                    setVisibleColumns(prev => {
+                      const next = new Set(prev);
+                      if (e.target.checked) {
+                        next.add(col.key);
+                      } else {
+                        next.delete(col.key);
+                      }
+                      return next;
+                    });
+                  }}
+                  className="rounded border-zinc-600 bg-zinc-800 text-green-500 focus:ring-green-500"
                 />
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {/* Primary Action */}
-              <button
-                onClick={() => setOpen(true)}
-                className="page-header__btn page-header__btn--primary no-print"
-                aria-label="Create new journal entry"
-              >
-                ✨ New Entry
-              </button>
-            </div>
+                {col.label}
+              </label>
+            ))}
           </div>
-
-          {/* Column Visibility Menu */}
-          <div
-            id="column-visibility-menu"
-            className="no-print absolute top-20 right-4 z-50 hidden rounded-lg border border-zinc-700 bg-zinc-900 p-4 shadow-lg"
-            style={{ display: 'none' }}
-          >
-            <div className="mb-2 text-sm font-semibold text-zinc-300">Column Visibility</div>
-            <div className="space-y-2">
-              {[
-                { key: 'date', label: 'Date' },
-                { key: 'symbol', label: 'Symbol' },
-                { key: 'type', label: 'Type' },
-                { key: 'qty', label: 'Qty' },
-                { key: 'strike', label: 'Strike' },
-                { key: 'exp', label: 'Exp' },
-                { key: 'dte', label: 'DTE' },
-                { key: 'stock', label: 'Stock' },
-                { key: 'amount', label: 'Amount' },
-                { key: 'notes', label: 'Notes' },
-                { key: 'delta', label: 'Delta' },
-                { key: 'iv_rank', label: 'IV Rank' },
-                { key: 'actions', label: 'Actions' },
-              ].map(col => (
-                <label key={col.key} className="flex items-center gap-2 text-sm text-zinc-300">
-                  <input
-                    type="checkbox"
-                    checked={visibleColumns.has(col.key)}
-                    onChange={e => {
-                      setVisibleColumns(prev => {
-                        const next = new Set(prev);
-                        if (e.target.checked) {
-                          next.add(col.key);
-                        } else {
-                          next.delete(col.key);
-                        }
-                        return next;
-                      });
-                    }}
-                    className="rounded border-zinc-600 bg-zinc-800 text-green-500 focus:ring-green-500"
-                  />
-                  {col.label}
-                </label>
-              ))}
-            </div>
-          </div>
-        </header>
+        </div>
 
         {/* Main Content */}
-        <div className="flex justify-center px-4 py-8 sm:px-6 lg:px-8">
+        <div className="relative z-10 flex justify-center px-4 py-8 sm:px-6 lg:px-8">
           <main
             ref={pullToRefresh.ref as React.RefObject<HTMLElement>}
             className="relative w-full max-w-7xl"
           >
+            {/* Page Title */}
+            <h1 className="mb-6 text-2xl font-bold text-zinc-100" data-testid="journal.title">
+              Journal
+            </h1>
+
             {/* Summary Cards */}
             <div className="no-print mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
               <SummaryCard
@@ -1231,7 +1209,7 @@ const JournalPage: React.FC = () => {
 
             {/* Wheel Cycles Summary */}
             {wheelCalcs.byTicker.length > 0 && (
-              <div className="neon-panel no-print mb-6 rounded-2xl px-4 py-3">
+              <div className="glass-card no-print mb-6 rounded-2xl px-4 py-3">
                 <h2 className="mb-3 flex items-center gap-2 text-base font-semibold">
                   <span>📊</span> Wheel Strategy Summary by Ticker
                 </h2>
@@ -1295,12 +1273,12 @@ const JournalPage: React.FC = () => {
                     : 'border-2 border-zinc-700/50 bg-zinc-800/50 text-zinc-400 hover:border-zinc-600'
                 }`}
               >
-                🗑️ Deleted Entries ({deletedEntries.length})
+                Deleted Entries ({deletedEntries.length})
               </button>
             </div>
 
             {/* Entries Table */}
-            <div className="neon-panel rounded-2xl px-6 py-4">
+            <div className="glass-card rounded-2xl px-6 py-4">
               {loading ? (
                 <div className="py-12">
                   <div className="space-y-3">
@@ -1850,19 +1828,19 @@ const JournalPage: React.FC = () => {
                                       >
                                         <button
                                           onClick={() => handleEditClick(r)}
-                                          className="mr-2 min-h-11 min-w-11 touch-manipulation text-blue-400 transition-colors hover:text-blue-300"
+                                          className="mr-2 rounded px-2 py-1 text-xs font-semibold touch-manipulation text-blue-400 transition-colors hover:text-blue-300"
                                           title="Edit entry"
                                           aria-label={`Edit entry for ${r.symbol}`}
                                         >
-                                          ✏️
+                                          Edit
                                         </button>
                                         <button
                                           onClick={() => handleDeleteClick(r)}
-                                          className="min-h-11 min-w-11 touch-manipulation text-red-400 transition-colors hover:text-red-300"
+                                          className="rounded px-2 py-1 text-xs font-semibold touch-manipulation text-red-400 transition-colors hover:text-red-300"
                                           title="Delete entry"
                                           aria-label={`Delete entry for ${r.symbol}`}
                                         >
-                                          🗑️
+                                          Delete
                                         </button>
                                       </td>
                                     </tr>
@@ -2175,19 +2153,19 @@ const JournalPage: React.FC = () => {
                                             <td className="px-3 py-0.5 text-center">
                                               <button
                                                 onClick={() => handleEditClick(r)}
-                                                className="mr-2 text-blue-400 transition-colors hover:text-blue-300"
+                                                className="mr-2 rounded px-2 py-1 text-xs font-semibold text-blue-400 transition-colors hover:text-blue-300"
                                                 title="Edit entry"
                                                 aria-label={`Edit entry for ${r.symbol}`}
                                               >
-                                                ✏️
+                                                Edit
                                               </button>
                                               <button
                                                 onClick={() => handleDeleteClick(r)}
-                                                className="text-red-400 transition-colors hover:text-red-300"
+                                                className="rounded px-2 py-1 text-xs font-semibold text-red-400 transition-colors hover:text-red-300"
                                                 title="Delete entry"
                                                 aria-label={`Delete entry for ${r.symbol}`}
                                               >
-                                                🗑️
+                                                Delete
                                               </button>
                                             </td>
                                           </tr>
@@ -2429,10 +2407,10 @@ const JournalPage: React.FC = () => {
                           <td className="px-3 py-0.5 text-center">
                             <button
                               onClick={() => handleRestoreClick(r)}
-                              className="text-green-400 transition-colors hover:text-green-300"
+                              className="rounded px-2 py-1 text-xs font-semibold text-green-400 transition-colors hover:text-green-300"
                               title="Restore entry"
                             >
-                              ♻️ Restore
+                              Restore
                             </button>
                           </td>
                         </tr>
@@ -2474,6 +2452,7 @@ const JournalPage: React.FC = () => {
                   variant={tmpl === 'sellPut' ? 'primary' : 'secondary'}
                   onClick={() => setTmpl('sellPut')}
                   size="sm"
+                  title="Sell a cash-secured put option to collect premium"
                 >
                   Sell Put
                 </Button>
@@ -2481,6 +2460,7 @@ const JournalPage: React.FC = () => {
                   variant={tmpl === 'putAssigned' ? 'primary' : 'secondary'}
                   onClick={() => setTmpl('putAssigned')}
                   size="sm"
+                  title="Record assignment when a put option is exercised and shares are purchased"
                 >
                   Put Assigned
                 </Button>
@@ -2488,6 +2468,7 @@ const JournalPage: React.FC = () => {
                   variant={tmpl === 'sellCC' ? 'primary' : 'secondary'}
                   onClick={() => setTmpl('sellCC')}
                   size="sm"
+                  title="Sell a covered call option on existing shares to collect premium"
                 >
                   Sell Covered Call
                 </Button>
@@ -2495,6 +2476,7 @@ const JournalPage: React.FC = () => {
                   variant={tmpl === 'callAssigned' ? 'primary' : 'secondary'}
                   onClick={() => setTmpl('callAssigned')}
                   size="sm"
+                  title="Record assignment when a call option is exercised and shares are sold"
                 >
                   Call Assigned
                 </Button>
@@ -2502,6 +2484,7 @@ const JournalPage: React.FC = () => {
                   variant={tmpl === 'dividend' ? 'primary' : 'secondary'}
                   onClick={() => setTmpl('dividend')}
                   size="sm"
+                  title="Record dividend income received from shares"
                 >
                   Dividend
                 </Button>
@@ -2509,6 +2492,7 @@ const JournalPage: React.FC = () => {
                   variant={tmpl === 'fee' ? 'primary' : 'secondary'}
                   onClick={() => setTmpl('fee')}
                   size="sm"
+                  title="Record fees or commissions paid"
                 >
                   Fee
                 </Button>
@@ -2760,7 +2744,7 @@ const JournalPage: React.FC = () => {
           <Modal
             isOpen={editModalOpen}
             onClose={() => setEditModalOpen(false)}
-            title="✏️ Edit Entry"
+            title="Edit Entry"
             size="lg"
           >
             <EditEntryForm

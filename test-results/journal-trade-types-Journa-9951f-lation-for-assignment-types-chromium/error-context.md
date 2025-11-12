@@ -1,0 +1,245 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - img "Wheel to Tendies logo" [ref=e7] [cursor=pointer]
+      - navigation [ref=e8]:
+        - link "Wheel" [ref=e9] [cursor=pointer]:
+          - /url: /
+        - link "Journal" [ref=e10] [cursor=pointer]:
+          - /url: /journal
+      - searchbox "Search journal entries" [ref=e13]
+      - button "Create new journal entry" [ref=e15] [cursor=pointer]: New Entry
+  - main [ref=e16]:
+    - main [ref=e19]:
+      - heading "Journal" [level=1] [ref=e20]
+      - generic [ref=e21]:
+        - button "💰 Total Premium $205.00" [ref=e22] [cursor=pointer]:
+          - generic [ref=e23]:
+            - generic [ref=e24]:
+              - generic [ref=e25]:
+                - generic [ref=e26]: 💰
+                - generic [ref=e27]: Total Premium
+              - generic [ref=e28]: $205.00
+            - img [ref=e30]
+        - button "📈 Net P/L -$4,795.00" [ref=e32] [cursor=pointer]:
+          - generic [ref=e33]:
+            - generic [ref=e34]:
+              - generic [ref=e35]:
+                - generic [ref=e36]: 📈
+                - generic [ref=e37]: Net P/L
+              - generic [ref=e38]: "-$4,795.00"
+            - img [ref=e40]
+        - button "📊 Active Positions 3" [ref=e42] [cursor=pointer]:
+          - generic [ref=e43]:
+            - generic [ref=e44]:
+              - generic [ref=e45]:
+                - generic [ref=e46]: 📊
+                - generic [ref=e47]: Active Positions
+              - generic [ref=e48]: "3"
+            - img [ref=e50]
+      - generic [ref=e54]:
+        - generic [ref=e55]:
+          - button "Filters" [ref=e56] [cursor=pointer]:
+            - generic [ref=e57]: Filters
+            - img [ref=e58]
+          - generic [ref=e60]: Totals
+        - generic [ref=e61]:
+          - button "Today" [ref=e62] [cursor=pointer]:
+            - generic [ref=e63]: Today
+          - button "This Week" [ref=e64] [cursor=pointer]:
+            - generic [ref=e65]: This Week
+          - button "This Month" [ref=e66] [cursor=pointer]:
+            - generic [ref=e67]: This Month
+          - button "This Year" [ref=e68] [cursor=pointer]:
+            - generic [ref=e69]: This Year
+          - button "All Time" [ref=e70] [cursor=pointer]:
+            - generic [ref=e71]: All Time
+        - generic [ref=e72]:
+          - generic [ref=e73]:
+            - generic [ref=e74]:
+              - generic [ref=e75]: Trade Type
+              - generic [ref=e76]:
+                - generic:
+                  - generic:
+                    - img
+                - combobox "Trade Type" [ref=e77]:
+                  - option "All types" [selected]
+                  - option "Sell to Open"
+                  - option "Buy to Close"
+                  - option "Expiration"
+                  - option "Assignment (Shares)"
+                  - option "Share Sale"
+                  - option "Dividend"
+                  - option "Fee"
+                  - option "Transfer"
+                  - option "Correction"
+                - img
+            - generic [ref=e78]:
+              - generic [ref=e79]: From Date
+              - textbox "From Date" [ref=e81]
+            - generic [ref=e82]:
+              - generic [ref=e83]: To Date
+              - textbox "To Date" [ref=e85]
+            - generic [ref=e86]:
+              - generic [ref=e87]: Status
+              - generic [ref=e88]:
+                - generic:
+                  - generic:
+                    - img
+                - combobox "Status" [ref=e89]:
+                  - option "All Status" [selected]
+                  - option "Open"
+                  - option "Closed"
+                - img
+            - generic [ref=e90]:
+              - generic [ref=e91]: Amount Range
+              - generic [ref=e92]:
+                - spinbutton [ref=e93]
+                - spinbutton [ref=e94]
+            - generic [ref=e95]:
+              - generic [ref=e96]: Presets
+              - button "Save Preset" [ref=e98] [cursor=pointer]:
+                - generic [ref=e99]: Save Preset
+            - generic [ref=e100]:
+              - generic: Actions
+              - button "Clear All" [ref=e101] [cursor=pointer]:
+                - generic [ref=e102]: Clear All
+          - generic [ref=e103]:
+            - generic: Summary
+            - generic [ref=e104]:
+              - generic [ref=e105]:
+                - generic [ref=e106]: In
+                - generic [ref=e107]: $205.00
+              - generic [ref=e108]:
+                - generic [ref=e109]: Out
+                - generic [ref=e110]: $5,000.00
+              - generic [ref=e111]:
+                - generic [ref=e112]: Net
+                - generic [ref=e113]: "-$4,795.00"
+      - generic [ref=e114]:
+        - heading "📊 Wheel Strategy Summary by Ticker" [level=2] [ref=e115]:
+          - generic [ref=e116]: 📊
+          - text: Wheel Strategy Summary by Ticker
+        - generic [ref=e117]:
+          - generic [ref=e118]:
+            - generic [ref=e119]: EDITTEST
+            - generic [ref=e120]: 2 days
+            - generic [ref=e121]:
+              - generic [ref=e122]: "Premium: $200.00"
+              - generic [ref=e123]: "Net P/L: $200.00"
+              - generic [ref=e124]:
+                - text: "Shares:"
+                - generic [ref=e125]: 0 @ $0.00
+              - generic [ref=e126]:
+                - text: "Open Pos:"
+                - generic [ref=e127]: 0P / 0C
+          - generic [ref=e128]:
+            - generic [ref=e129]: AAPL
+            - generic [ref=e130]: 1 days
+            - generic [ref=e131]:
+              - generic [ref=e132]: "Premium: $0.00"
+              - generic [ref=e133]: "Net P/L: $5.00"
+              - generic [ref=e134]:
+                - text: "Shares:"
+                - generic [ref=e135]: 0 @ $0.00
+              - generic [ref=e136]:
+                - text: "Open Pos:"
+                - generic [ref=e137]: 0P / 0C
+          - generic [ref=e138]:
+            - generic [ref=e139]: AUTOCAL
+            - generic [ref=e140]: 2 days
+            - generic [ref=e141]:
+              - generic [ref=e142]: "Premium: $0.00"
+              - generic [ref=e143]: "Net P/L: -$5,000.00"
+              - generic [ref=e144]:
+                - text: "Shares:"
+                - generic [ref=e145]: 100 @ $50.00
+              - generic [ref=e146]:
+                - text: "Open Pos:"
+                - generic [ref=e147]: 0P / 0C
+      - generic [ref=e148]:
+        - button "📊 Active Entries (5)" [ref=e149] [cursor=pointer]
+        - button "Deleted Entries (0)" [ref=e150] [cursor=pointer]
+      - generic [ref=e151]:
+        - generic [ref=e152]:
+          - generic [ref=e153]:
+            - generic [ref=e154]:
+              - generic [ref=e155]:
+                - heading "AAPL" [level=3] [ref=e156]
+                - paragraph [ref=e157]: 2025-11-10
+              - generic [ref=e158]: dividend
+            - generic [ref=e159]:
+              - text: "0"
+              - generic [ref=e160]: Amount:$5.00
+            - generic [ref=e161]:
+              - button "Edit" [ref=e162] [cursor=pointer]
+              - button "Delete" [ref=e163] [cursor=pointer]
+          - generic [ref=e164]:
+            - generic [ref=e165]:
+              - generic [ref=e166]:
+                - heading "EDITTEST" [level=3] [ref=e167]
+                - paragraph [ref=e168]: 2025-11-09
+              - generic [ref=e169]: sell to open
+            - generic [ref=e170]:
+              - generic [ref=e171]: Qty:1
+              - generic [ref=e172]:
+                - text: "Strike:"
+                - generic [ref=e173]: $100.00
+              - generic [ref=e174]: Exp:2025-11-17
+              - generic [ref=e175]: DTE:8
+              - generic [ref=e176]: Amount:$200.00
+            - generic [ref=e177]:
+              - button "Edit" [ref=e178] [cursor=pointer]
+              - button "Delete" [ref=e179] [cursor=pointer]
+          - generic [ref=e180]:
+            - generic [ref=e181]:
+              - generic [ref=e182]:
+                - heading "AUTOCAL" [level=3] [ref=e183]
+                - paragraph [ref=e184]: 2025-11-09
+              - generic [ref=e185]: expiration
+            - generic [ref=e186]:
+              - generic [ref=e187]: Qty:1
+              - generic [ref=e188]:
+                - text: "Strike:"
+                - generic [ref=e189]: $50.00
+              - generic [ref=e190]: Exp:2025-11-09
+              - generic [ref=e191]: DTE:0
+              - generic [ref=e192]: Amount:$0.00
+            - generic [ref=e193]:
+              - button "Edit" [ref=e194] [cursor=pointer]
+              - button "Delete" [ref=e195] [cursor=pointer]
+          - generic [ref=e196]:
+            - generic [ref=e197]:
+              - generic [ref=e198]:
+                - heading "AUTOCAL" [level=3] [ref=e199]
+                - paragraph [ref=e200]: 2025-11-09
+              - generic [ref=e201]: assignment shares
+            - generic [ref=e202]:
+              - generic [ref=e203]: Qty:100
+              - generic [ref=e204]:
+                - text: "Strike:"
+                - generic [ref=e205]: $50.00
+              - generic [ref=e206]: Exp:2025-11-09
+              - generic [ref=e207]: DTE:0
+              - generic [ref=e208]: Amount:-$5,000.00
+            - generic [ref=e209]:
+              - button "Edit" [ref=e210] [cursor=pointer]
+              - button "Delete" [ref=e211] [cursor=pointer]
+        - generic [ref=e212]:
+          - generic [ref=e213]:
+            - generic [ref=e214]: Showing 1 to 4 of 4 entries
+            - combobox [ref=e215]:
+              - option "25 per page"
+              - option "50 per page" [selected]
+              - option "100 per page"
+              - option "All"
+          - generic [ref=e216]:
+            - button "First" [disabled] [ref=e217] [cursor=pointer]
+            - button "Previous" [disabled] [ref=e218] [cursor=pointer]
+            - generic [ref=e219]: Page 1 of 1
+            - button "Next" [disabled] [ref=e220] [cursor=pointer]
+            - button "Last" [disabled] [ref=e221] [cursor=pointer]
+```

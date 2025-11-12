@@ -28,8 +28,7 @@ export const WheelContainer: React.FC<{ children: React.ReactNode }> = ({ childr
       className="relative min-h-screen overflow-hidden text-zinc-100"
       style={{ backgroundColor: '#0B0F0E' }}
     >
-      {/* Base background image layer - SWAP PNG HERE when available */}
-      {/* Currently using goldcitypng.png, can be replaced with Gold Spine Grid PNG */}
+      {/* Base background image layer - goldcitypng.png */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{

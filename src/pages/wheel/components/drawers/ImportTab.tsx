@@ -1,3 +1,38 @@
+/**
+ * ImportTab Component
+ *
+ * PURPOSE:
+ * Provides CSV file import functionality to bulk-load option trades into the journal.
+ * Allows users to import historical trades from CSV files instead of entering them manually.
+ *
+ * HOW IT WORKS:
+ * - Uses hidden file input to accept .csv files
+ * - Delegates import logic to useCsvImport hook (handles parsing, validation, database insertion)
+ * - Displays import results (success/failure, count of imported/skipped/errors)
+ * - Shows loading state while import is in progress
+ * - Clears file input after successful import
+ *
+ * INTERACTIONS:
+ * - Parent: ActionsDrawer (rendered when actionsTab === 'Import')
+ * - Import logic: useCsvImport hook (handles file parsing and database operations)
+ * - Loading state: useWheelUIStore.importing (prevents multiple simultaneous imports)
+ * - File format: Expects CSV with columns matching sample-options.csv format
+ * - Database: useCsvImport persists entries via useEntriesStore
+ *
+ * DATA FLOW:
+ * 1. User clicks "Choose CSV" → hidden file input triggered
+ * 2. User selects file → handleFileChange() called
+ * 3. useCsvImport.handleImport() processes file → parses CSV, validates rows, creates entries
+ * 4. Import result displayed (success/failure, counts)
+ * 5. If successful, file input cleared and importing flag reset
+ * 6. Wheel data automatically refreshes (via useEntriesStore updates triggering reloads)
+ *
+ * FILE FORMAT:
+ * - Sample file: public/sample-csv/sample-options.csv
+ * - Expected columns: symbol, type, side, qty, strike, premium, expiration, fees, etc.
+ * - Invalid rows are skipped with error messages
+ */
+
 import React, { useRef, useState } from 'react';
 
 import { type ImportResult, useCsvImport } from '@/pages/wheel/hooks/useCsvImport';

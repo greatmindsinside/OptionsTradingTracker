@@ -203,3 +203,121 @@ export function tmplSellShares(
   }
   return rows;
 }
+
+export function tmplRoll(
+  p: Common & {
+    // Old position
+    oldContracts: number;
+    oldStrike: number;
+    oldExpiration: string | Date;
+    closePremium?: number; // Premium paid to close (if buying to close)
+    // New position
+    newContracts: number;
+    newPremiumPerContract: number;
+    newStrike: number;
+    newExpiration: string | Date;
+    // Fees
+    closeFee?: number;
+    openFee?: number;
+    // Roll type
+    rollType: 'same_strike' | 'up_strike' | 'down_strike';
+    // Option type
+    optionType: 'put' | 'call';
+  }
+): JournalRow[] {
+  const oldExp = toIso(p.oldExpiration);
+  const newExp = toIso(p.newExpiration);
+  
+  const rows: JournalRow[] = [];
+  
+  // Close old position
+  // If closePremium is provided, use buy_to_close; otherwise use expiration (letting it expire)
+  if (p.closePremium !== undefined && p.closePremium !== 0) {
+    // Buy to close (paying premium to close early)
+    rows.push(
+      baseRow(p, 'buy_to_close', -(p.closePremium * OPT_MULT * p.oldContracts), {
+        qty: p.oldContracts,
+        strike: p.oldStrike,
+        expiration: oldExp,
+        meta: {
+          leg: p.optionType,
+          template: 'tmplRoll',
+          rollType: p.rollType,
+        },
+      })
+    );
+  } else {
+    // Let it expire (zero-amount expiration entry)
+    rows.push(
+      baseRow({ ...p, date: p.oldExpiration }, 'expiration', 0, {
+        qty: p.oldContracts,
+        strike: p.oldStrike,
+        expiration: oldExp,
+        meta: {
+          leg: p.optionType,
+          template: 'tmplRoll',
+          rollType: p.rollType,
+          closes: 'sell_to_open',
+        },
+      })
+    );
+  }
+  
+  // Close fee if provided
+  if (p.closeFee && p.closeFee !== 0) {
+    rows.push(
+      baseRow(p, 'fee', -Math.abs(p.closeFee), {
+        meta: { template: 'tmplRoll', rollPhase: 'close' },
+      })
+    );
+  }
+  
+  // Open new position
+  rows.push(
+    baseRow(p, 'sell_to_open', p.newPremiumPerContract * OPT_MULT * p.newContracts, {
+      qty: p.newContracts,
+      strike: p.newStrike,
+      expiration: newExp,
+      meta: {
+        leg: p.optionType,
+        template: 'tmplRoll',
+        rollType: p.rollType,
+      },
+    })
+  );
+  
+  // Add expiration entry for new position (for future closing)
+  rows.push(
+    baseRow({ ...p, date: p.newExpiration }, 'expiration', 0, {
+      qty: p.newContracts,
+      strike: p.newStrike,
+      expiration: newExp,
+      meta: { closes: 'sell_to_open' },
+    })
+  );
+  
+  // Open fee if provided
+  if (p.openFee && p.openFee !== 0) {
+    rows.push(
+      baseRow(p, 'fee', -Math.abs(p.openFee), {
+        meta: { template: 'tmplRoll', rollPhase: 'open' },
+      })
+    );
+  }
+  
+  // Link entries via meta after creation (since baseRow generates new IDs)
+  const closeEntry = rows[0];
+  const openEntry = rows.find(r => r.type === 'sell_to_open');
+  
+  if (closeEntry && openEntry) {
+    // Link entries via meta
+    if (closeEntry.meta && typeof closeEntry.meta === 'object') {
+      closeEntry.meta.rolledTo = openEntry.id;
+    }
+    if (openEntry.meta && typeof openEntry.meta === 'object') {
+      openEntry.meta.rolledFrom = closeEntry.id;
+    }
+  }
+  
+  return rows;
+}

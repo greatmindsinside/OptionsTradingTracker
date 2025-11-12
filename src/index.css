@@ -1841,3 +1841,106 @@ img {
     opacity: 0.4;
   }
 }
+
+/* Alert Animations - Magic UI Patterns */
+@keyframes alert-entrance {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes alert-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes alert-pulse {
+  0%,
+  100% {
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3), 0 0 0 0 rgba(217, 119, 6, 0.4);
+  }
+  50% {
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3), 0 0 0 4px rgba(217, 119, 6, 0.1);
+  }
+}
+
+@keyframes gradient-border {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Alert entrance animation */
+.alert-entrance {
+  animation: alert-entrance 0.3s ease-out forwards;
+}
+
+/* Urgent alert shimmer effect */
+.alert-urgent-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.alert-urgent-shimmer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(245, 179, 66, 0.3),
+    transparent
+  );
+  animation: alert-shimmer 2s infinite;
+  pointer-events: none;
+}
+
+/* Urgent alert pulse */
+.alert-urgent-pulse {
+  animation: alert-pulse 2s ease-in-out infinite;
+}
+
+/* Gradient border for high-priority alerts */
+.alert-gradient-border {
+  position: relative;
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.15), rgba(245, 179, 66, 0.15));
+  background-size: 200% 200%;
+  animation: gradient-border 3s ease infinite;
+}
+
+.alert-gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(217, 119, 6, 0.6),
+    rgba(245, 179, 66, 0.6),
+    rgba(252, 211, 77, 0.6),
+    rgba(16, 185, 129, 0.4),
+    rgba(217, 119, 6, 0.6)
+  );
+  background-size: 200% 200%;
+  animation: gradient-border 3s ease infinite;
+  z-index: -1;
+  pointer-events: none;
+}

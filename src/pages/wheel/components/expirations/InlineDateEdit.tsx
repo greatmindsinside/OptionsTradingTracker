@@ -1,17 +1,53 @@
 import React, { useEffect, useState } from 'react';
 
-export const InlineDateEdit: React.FC<{ date: string; onSave: (ymd: string) => void }> = ({
+interface InlineDateEditProps {
+  date: string;
+  onSave: (ymd: string) => void;
+  isEditing?: boolean;
+  onCancel?: () => void;
+}
+
+export const InlineDateEdit: React.FC<InlineDateEditProps> = ({
   date,
   onSave,
+  isEditing: controlledEditing,
+  onCancel,
 }) => {
-  const [editing, setEditing] = useState(false);
+  const [internalEditing, setInternalEditing] = useState(false);
   const [val, setVal] = useState(date);
   useEffect(() => setVal(date), [date]);
+
+  // Use controlled editing if provided, otherwise use internal state
+  const editing = controlledEditing !== undefined ? controlledEditing : internalEditing;
+
+  const handleSave = () => {
+    onSave(val);
+    if (controlledEditing === undefined) {
+      setInternalEditing(false);
+    } else if (onCancel) {
+      onCancel();
+    }
+  };
+
+  const handleCancel = () => {
+    setVal(date); // Reset to original value
+    if (controlledEditing === undefined) {
+      setInternalEditing(false);
+    } else if (onCancel) {
+      onCancel();
+    }
+  };
+
   if (!editing)
     return (
       <button
         className="rounded border border-green-500/30 px-2 py-1 text-xs text-green-400 transition-colors hover:border-green-400/50"
-        onClick={() => setEditing(true)}
+        onClick={() => {
+          if (controlledEditing === undefined) {
+            setInternalEditing(true);
+          }
+        }}
+        title="Edit expiration date"
       >
         📝 Edit
       </button>
@@ -26,16 +62,13 @@ export const InlineDateEdit: React.FC<{ date: string; onSave: (ymd: string) => v
       />
       <button
         className="rounded border border-green-500 bg-green-500/15 px-2 py-1 text-xs text-green-400 transition-colors hover:bg-green-500/25"
-        onClick={() => {
-          onSave(val);
-          setEditing(false);
-        }}
+        onClick={handleSave}
       >
         Save
       </button>
       <button
         className="rounded border border-zinc-600 px-2 py-1 text-xs text-zinc-400 transition-colors hover:border-zinc-500"
-        onClick={() => setEditing(false)}
+        onClick={handleCancel}
       >
         Cancel
       </button>

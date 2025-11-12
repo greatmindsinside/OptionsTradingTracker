@@ -1,3 +1,42 @@
+/**
+ * TradeTab Component
+ *
+ * PURPOSE:
+ * Form interface for adding new option trades to the journal. Handles both sell-to-open
+ * (premium collection) and buy-to-close (position closure) trades for puts and calls.
+ *
+ * HOW IT WORKS:
+ * - Uses useTradeComposer hook to manage form state (symbol, type, side, qty, strike, premium, DTE, fees)
+ * - Supports two DTE input modes: date picker (feature flag) or numeric DTE input
+ * - Validates form data before submission
+ * - Creates entries in both in-memory journal (useJournal) and database (useEntriesStore)
+ * - Uses entry templates (tmplSellPut, tmplSellCoveredCall, tmplFee) for database persistence
+ * - Reloads wheel data after successful submission to update UI
+ *
+ * INTERACTIONS:
+ * - Parent: ActionsDrawer (rendered when actionsTab === 'Trade')
+ * - Form state: useTradeComposer hook (manages all form fields)
+ * - Data persistence: useJournal (in-memory), useEntriesStore (database via templates)
+ * - Data refresh: useWheelStore.reloadFn (reloads wheel calculations after trade added)
+ * - UI state: useWheelUIStore.closeActions (closes drawer after successful submission)
+ * - Telemetry: track() function for analytics (trade_add_success, trade_add_error, etc.)
+ *
+ * DATA FLOW:
+ * 1. User fills form → useTradeComposer manages state
+ * 2. User clicks "Add Trade" → handleAddTrade() validates and submits
+ * 3. Entry created in useJournal (in-memory) for immediate UI updates
+ * 4. Entry persisted to database via useEntriesStore.addEntry() with appropriate template
+ * 5. useWheelStore.reloadFn() called → recalculates positions, lots, metrics
+ * 6. Drawer closes → UI updates with new trade data
+ *
+ * FEATURES:
+ * - DTE input: Can use date picker (if feature flag enabled) or numeric DTE
+ * - Advanced DTE: Toggle to manually enter DTE number when using date picker
+ * - Fee estimation: Shows typical fee calculation ($0.70/contract)
+ * - Preview: Real-time preview of trade being entered
+ * - Validation: Warns if past date selected for expiration
+ */
+
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@/components/Button';

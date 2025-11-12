@@ -65,6 +65,20 @@ export const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({ isOpen, onCl
       color: 'text-amber-400',
     },
     {
+      id: 'rollPut',
+      label: 'Roll Put → Later Expiration',
+      description: 'Close put and open new put with later expiration',
+      icon: 'mdi:swap-horizontal',
+      color: 'text-purple-400',
+    },
+    {
+      id: 'rollCall',
+      label: 'Roll Call → Later Expiration',
+      description: 'Close call and open new call with later expiration',
+      icon: 'mdi:swap-horizontal',
+      color: 'text-purple-400',
+    },
+    {
       id: 'buyShares',
       label: 'Buy Shares Directly',
       description: 'Record direct share purchase',

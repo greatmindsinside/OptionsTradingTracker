@@ -1,8 +1,11 @@
-import { expect,test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+
+import { JournalPage } from '../pages/JournalPage';
+import { WheelPage } from '../pages/WheelPage';
 
 /**
  * E2E test to verify "Shares For Calls" metric calculation
- * 
+ *
  * This test verifies that:
  * 1. Put assignment creates shares in the journal
  * 2. Sell covered call creates a short call position
@@ -13,72 +16,46 @@ import { expect,test } from '@playwright/test';
 
 test.describe('Shares For Calls Metric', () => {
   test.beforeEach(async ({ page }) => {
+    const journalPage = new JournalPage(page);
     // Navigate to journal page
-    await page.goto('/journal');
-    await expect(page.getByTestId('journal.title')).toBeVisible();
+    await journalPage.navigate();
   });
 
   test('should show correct covered shares after put assignment and covered call', async ({
     page,
   }) => {
+    const journalPage = new JournalPage(page);
+    const wheelPage = new WheelPage(page);
     const symbol = 'SHARES4CALLS';
     const contracts = 1; // 1 contract = 100 shares
 
     // Step 1: Add Put Assignment (creates shares)
-    {
-      const newEntryBtn = page.getByRole('button', { name: /new entry/i });
-      await expect(newEntryBtn).toBeVisible();
-      await newEntryBtn.scrollIntoViewIfNeeded();
-      await newEntryBtn.click();
-    }
+    await journalPage.addEntry({
+      tradeType: 'Put Assigned',
+      symbol,
+      contracts: String(contracts),
+      strike: '50.00',
+    });
 
-    await page.getByRole('button', { name: 'Put Assigned' }).click();
-    await page.getByLabel(/symbol/i).fill(symbol);
-    await page.getByLabel(/contracts/i).fill(String(contracts));
-    await page.getByLabel(/strike/i).fill('50.00');
-
-    {
-      const dialog = page.getByRole('dialog', { name: /new entry/i });
-      await expect(dialog).toBeVisible();
-      const save = dialog.getByRole('button', { name: /save entry/i });
-      await expect(save).toBeVisible();
-      await expect(save).toBeEnabled();
-      await save.click({ force: true });
-    }
-
+    // Wait for first entry
+    await journalPage.waitForEntry(symbol);
     await page.waitForTimeout(1000);
 
     // Step 2: Add Sell Covered Call (creates short call position)
-    {
-      const newEntryBtn = page.getByRole('button', { name: /new entry/i });
-      await expect(newEntryBtn).toBeVisible();
-      await newEntryBtn.scrollIntoViewIfNeeded();
-      await newEntryBtn.click();
-    }
+    await journalPage.addEntry({
+      tradeType: 'Sell Covered Call',
+      symbol,
+      contracts: String(contracts),
+      strike: '55.00',
+      premium: '1.00',
+    });
 
-    await page.getByRole('button', { name: 'Sell Covered Call' }).click();
-    await page.getByLabel(/symbol/i).fill(symbol);
-    await page.getByLabel(/contracts/i).fill(String(contracts));
-    await page.getByLabel(/strike/i).fill('55.00');
-    await page.getByLabel(/premium/i).fill('1.00');
-
-    {
-      const dialog = page.getByRole('dialog', { name: /new entry/i });
-      await expect(dialog).toBeVisible();
-      const save = dialog.getByRole('button', { name: /save entry/i });
-      await expect(save).toBeVisible();
-      await expect(save).toBeEnabled();
-      await save.click({ force: true });
-    }
-
-    await page.waitForTimeout(1000);
+    // Wait for second entry
+    await journalPage.waitForEntry(symbol);
+    await page.waitForTimeout(2000);
 
     // Step 3: Navigate to Wheel page and verify "Shares For Calls" metric
-    await page.goto('/');
-    await expect(page.getByTestId('wheel.title')).toBeVisible();
-
-    // Wait for wheel data to load
-    await page.waitForLoadState('networkidle');
+    await wheelPage.navigate();
 
     // Find the "Shares For Calls" metric card
     const sharesForCallsCard = page
@@ -119,87 +96,60 @@ test.describe('Shares For Calls Metric', () => {
   });
 
   test('should update metric when shares are sold via call assignment', async ({ page }) => {
+    const journalPage = new JournalPage(page);
+    const wheelPage = new WheelPage(page);
     const symbol = 'SHARESUPDATE';
     const contracts = 2; // 2 contracts = 200 shares
 
     // Step 1: Add Put Assignment (creates 200 shares)
-    {
-      const newEntryBtn = page.getByRole('button', { name: /new entry/i });
-      await expect(newEntryBtn).toBeVisible();
-      await newEntryBtn.scrollIntoViewIfNeeded();
-      await newEntryBtn.click();
-    }
+    await journalPage.addEntry({
+      tradeType: 'Put Assigned',
+      symbol,
+      contracts: String(contracts),
+      strike: '50.00',
+    });
 
-    await page.getByRole('button', { name: 'Put Assigned' }).click();
-    await page.getByLabel(/symbol/i).fill(symbol);
-    await page.getByLabel(/contracts/i).fill(String(contracts));
-    await page.getByLabel(/strike/i).fill('50.00');
-
-    {
-      const dialog = page.getByRole('dialog', { name: /new entry/i });
-      await expect(dialog).toBeVisible();
-      await dialog.getByRole('button', { name: /save entry/i }).click({ force: true });
-    }
-
+    // Wait for first entry
+    await journalPage.waitForEntry(symbol);
     await page.waitForTimeout(1000);
 
     // Step 2: Add Sell Covered Call (1 contract = 100 shares covered)
-    {
-      const newEntryBtn = page.getByRole('button', { name: /new entry/i });
-      await newEntryBtn.click();
-    }
+    await journalPage.addEntry({
+      tradeType: 'Sell Covered Call',
+      symbol,
+      contracts: '1', // 1 contract = 100 shares
+      strike: '55.00',
+      premium: '1.00',
+    });
 
-    await page.getByRole('button', { name: 'Sell Covered Call' }).click();
-    await page.getByLabel(/symbol/i).fill(symbol);
-    await page.getByLabel(/contracts/i).fill('1'); // 1 contract = 100 shares
-    await page.getByLabel(/strike/i).fill('55.00');
-    await page.getByLabel(/premium/i).fill('1.00');
-
-    {
-      const dialog = page.getByRole('dialog', { name: /new entry/i });
-      await expect(dialog).toBeVisible();
-      await dialog.getByRole('button', { name: /save entry/i }).click({ force: true });
-    }
-
-    await page.waitForTimeout(1000);
+    // Wait for second entry
+    await journalPage.waitForEntry(symbol);
+    await page.waitForTimeout(2000);
 
     // Step 3: Verify "Shares For Calls" shows 100 covered shares
-    await page.goto('/');
-    await expect(page.getByTestId('wheel.title')).toBeVisible();
-    await page.waitForLoadState('networkidle');
+    await wheelPage.navigate();
 
-    const sharesForCallsValue = page
-      .locator('[data-testid="shares-for-calls-value"]')
-      .first();
+    const sharesForCallsValue = page.locator('[data-testid="shares-for-calls-value"]').first();
 
     await expect(sharesForCallsValue).toBeVisible();
     const initialValue = await sharesForCallsValue.textContent();
     expect(initialValue).toBeTruthy();
 
     // Step 4: Add Call Assignment (sells 1 contract = 100 shares)
-    await page.goto('/journal');
-    {
-      const newEntryBtn = page.getByRole('button', { name: /new entry/i });
-      await newEntryBtn.click();
-    }
+    await journalPage.navigate();
+    await journalPage.addEntry({
+      tradeType: 'Call Assigned',
+      symbol,
+      contracts: '1',
+      strike: '55.00',
+    });
 
-    await page.getByRole('button', { name: 'Call Assigned' }).click();
-    await page.getByLabel(/symbol/i).fill(symbol);
-    await page.getByLabel(/contracts/i).fill('1');
-    await page.getByLabel(/strike/i).fill('55.00');
-
-    {
-      const dialog = page.getByRole('dialog', { name: /new entry/i });
-      await expect(dialog).toBeVisible();
-      await dialog.getByRole('button', { name: /save entry/i }).click({ force: true });
-    }
-
-    await page.waitForTimeout(1000);
+    // Wait for entry to be saved
+    await journalPage.waitForEntry(symbol);
+    await page.waitForTimeout(2000);
 
     // Step 5: Verify "Shares For Calls" metric updated to 0 (no more covered calls)
-    await page.goto('/');
-    await expect(page.getByTestId('wheel.title')).toBeVisible();
-    await page.waitForLoadState('networkidle');
+    await wheelPage.navigate();
 
     const updatedValue = await sharesForCallsValue.textContent();
     expect(updatedValue).toBeTruthy();
@@ -210,39 +160,28 @@ test.describe('Shares For Calls Metric', () => {
   });
 
   test('should show total shares needed for naked calls (no shares owned)', async ({ page }) => {
+    const journalPage = new JournalPage(page);
+    const wheelPage = new WheelPage(page);
     const symbol = 'NAKEDCALL';
 
     // Step 1: Add Sell Covered Call WITHOUT having shares first (naked call)
-    {
-      const newEntryBtn = page.getByRole('button', { name: /new entry/i });
-      await expect(newEntryBtn).toBeVisible();
-      await newEntryBtn.scrollIntoViewIfNeeded();
-      await newEntryBtn.click();
-    }
+    await journalPage.addEntry({
+      tradeType: 'Sell Covered Call',
+      symbol,
+      contracts: '1',
+      strike: '55.00',
+      premium: '1.00',
+    });
 
-    await page.getByRole('button', { name: 'Sell Covered Call' }).click();
-    await page.getByLabel(/symbol/i).fill(symbol);
-    await page.getByLabel(/contracts/i).fill('1');
-    await page.getByLabel(/strike/i).fill('55.00');
-    await page.getByLabel(/premium/i).fill('1.00');
-
-    {
-      const dialog = page.getByRole('dialog', { name: /new entry/i });
-      await expect(dialog).toBeVisible();
-      await dialog.getByRole('button', { name: /save entry/i }).click({ force: true });
-    }
-
-    await page.waitForTimeout(1000);
+    // Wait for entry to be saved
+    await journalPage.waitForEntry(symbol);
+    await page.waitForTimeout(2000);
 
     // Step 2: Verify "Shares For Calls" shows 100 (total shares needed for 1 call)
     // Even if shares aren't owned, the metric shows total shares needed to cover the calls
-    await page.goto('/');
-    await expect(page.getByTestId('wheel.title')).toBeVisible();
-    await page.waitForLoadState('networkidle');
+    await wheelPage.navigate();
 
-    const sharesForCallsValue = page
-      .locator('[data-testid="shares-for-calls-value"]')
-      .first();
+    const sharesForCallsValue = page.locator('[data-testid="shares-for-calls-value"]').first();
 
     await expect(sharesForCallsValue).toBeVisible();
     const valueText = await sharesForCallsValue.textContent();
@@ -265,59 +204,41 @@ test.describe('Shares For Calls Metric', () => {
   });
 
   test('should show 200 for 2 covered calls', async ({ page }) => {
+    const journalPage = new JournalPage(page);
+    const wheelPage = new WheelPage(page);
     const symbol1 = 'MULTICALL1';
     const symbol2 = 'MULTICALL2';
 
     // Step 1: Add first covered call
-    {
-      const newEntryBtn = page.getByRole('button', { name: /new entry/i });
-      await expect(newEntryBtn).toBeVisible();
-      await newEntryBtn.scrollIntoViewIfNeeded();
-      await newEntryBtn.click();
-    }
+    await journalPage.addEntry({
+      tradeType: 'Sell Covered Call',
+      symbol: symbol1,
+      contracts: '1',
+      strike: '50.00',
+      premium: '1.00',
+    });
 
-    await page.getByRole('button', { name: 'Sell Covered Call' }).click();
-    await page.getByLabel(/symbol/i).fill(symbol1);
-    await page.getByLabel(/contracts/i).fill('1');
-    await page.getByLabel(/strike/i).fill('50.00');
-    await page.getByLabel(/premium/i).fill('1.00');
-
-    {
-      const dialog = page.getByRole('dialog', { name: /new entry/i });
-      await expect(dialog).toBeVisible();
-      await dialog.getByRole('button', { name: /save entry/i }).click({ force: true });
-    }
-
+    // Wait for first entry
+    await journalPage.waitForEntry(symbol1);
     await page.waitForTimeout(1000);
 
     // Step 2: Add second covered call
-    {
-      const newEntryBtn = page.getByRole('button', { name: /new entry/i });
-      await newEntryBtn.click();
-    }
+    await journalPage.addEntry({
+      tradeType: 'Sell Covered Call',
+      symbol: symbol2,
+      contracts: '1',
+      strike: '60.00',
+      premium: '1.50',
+    });
 
-    await page.getByRole('button', { name: 'Sell Covered Call' }).click();
-    await page.getByLabel(/symbol/i).fill(symbol2);
-    await page.getByLabel(/contracts/i).fill('1');
-    await page.getByLabel(/strike/i).fill('60.00');
-    await page.getByLabel(/premium/i).fill('1.50');
-
-    {
-      const dialog = page.getByRole('dialog', { name: /new entry/i });
-      await expect(dialog).toBeVisible();
-      await dialog.getByRole('button', { name: /save entry/i }).click({ force: true });
-    }
-
-    await page.waitForTimeout(1000);
+    // Wait for second entry
+    await journalPage.waitForEntry(symbol2);
+    await page.waitForTimeout(2000);
 
     // Step 3: Verify "Shares For Calls" shows 200 (2 calls × 100 shares = 200)
-    await page.goto('/');
-    await expect(page.getByTestId('wheel.title')).toBeVisible();
-    await page.waitForLoadState('networkidle');
+    await wheelPage.navigate();
 
-    const sharesForCallsValue = page
-      .locator('[data-testid="shares-for-calls-value"]')
-      .first();
+    const sharesForCallsValue = page.locator('[data-testid="shares-for-calls-value"]').first();
 
     await expect(sharesForCallsValue).toBeVisible();
     const valueText = await sharesForCallsValue.textContent();
@@ -336,5 +257,3 @@ test.describe('Shares For Calls Metric', () => {
     expect(subtitleText).toMatch(/2.*symbol/i);
   });
 });
-
-

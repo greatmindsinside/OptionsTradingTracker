@@ -8,7 +8,6 @@ import { AlertsCard } from '@/pages/wheel/components/alerts/AlertsCard';
 import { ActionsDrawer } from '@/pages/wheel/components/drawers/ActionsDrawer';
 import { ExpirationsCard } from '@/pages/wheel/components/expirations/ExpirationsCard';
 import { WheelContainer } from '@/pages/wheel/components/layout/WheelContainer';
-import { WheelHeader } from '@/pages/wheel/components/layout/WheelHeader';
 import { SummaryMetrics } from '@/pages/wheel/components/metrics/SummaryMetrics';
 import { SharesCard } from '@/pages/wheel/components/shares/SharesCard';
 import { WheelPhaseCard } from '@/pages/wheel/components/wheel-phase/WheelPhaseCard';
@@ -157,7 +156,6 @@ export default function WheelPage() {
 
   return (
     <WheelContainer>
-      <WheelHeader />
       <div className="flex justify-center px-4 pt-12 pb-8 sm:px-6 lg:px-8">
         <main className="glass-panel-dark light-refraction shimmer-effect relative grid w-full max-w-6xl grid-cols-3 gap-6 rounded-3xl px-6 py-8">
           <div className="col-span-2 space-y-6">

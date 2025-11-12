@@ -1,5 +1,6 @@
-import type { Page } from '@playwright/test';
-import { expect,test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+
+import { WheelPage } from '../pages/WheelPage';
 
 /**
  * E2E: Edit an upcoming expiration date, save, reload, and verify persistence.
@@ -9,63 +10,6 @@ import { expect,test } from '@playwright/test';
  *  3) Verify the new date is displayed.
  *  4) Reload the page and verify the new date persists (DB saved).
  */
-
-// Helper function to fill trade form fields safely
-async function fillTradeForm(
-  page: Page,
-  options: {
-    qty: string;
-    dte?: string;
-    expiration?: string;
-    strike: string;
-    premium: string;
-    fees?: string;
-  }
-) {
-  await page.getByLabel(/qty/i).fill(options.qty);
-
-  // Handle DTE - may be date picker or number input
-  const expirationInput = page.getByLabel(/expiration/i).first();
-  const dteInput = page.getByLabel(/dte/i).first();
-  const hasDatePicker = (await expirationInput.count()) > 0;
-
-  if (hasDatePicker && options.expiration) {
-    await expirationInput.fill(options.expiration);
-  } else if (!hasDatePicker && options.dte) {
-    await dteInput.fill(options.dte);
-  }
-
-  await page.getByLabel(/strike/i).fill(options.strike);
-
-  // Premium field - find by label "Premium" text or by position
-  const premiumLabel = page.locator('text=/premium.*per share/i').first();
-  const premiumInput = premiumLabel.locator('..').locator('input[type="number"]').first();
-  if (await premiumInput.count() > 0) {
-    await premiumInput.fill(options.premium);
-  } else {
-    // Fallback: find by position (after strike input)
-    const allNumberInputs = await page.locator('input[type="number"]').all();
-    // Premium is typically after qty, dte, strike - so index 3 if we have 4+ inputs
-    if (allNumberInputs.length >= 4) {
-      await (allNumberInputs[3]!).fill(options.premium);
-    }
-  }
-
-  // Fees field - find input near "Fees" text or use last number input
-  if (options.fees !== undefined) {
-    const feesSection = page.locator('text=/fees/i').locator('..');
-    const feesInput = feesSection.locator('input[type="number"]').first();
-    if (await feesInput.count() > 0) {
-      await feesInput.fill(options.fees);
-    } else {
-      // Fallback: use last number input
-      const allNumberInputs = await page.locator('input[type="number"]').all();
-      if (allNumberInputs.length > 0) {
-        await (allNumberInputs[allNumberInputs.length - 1]!).fill(options.fees);
-      }
-    }
-  }
-}
 
 function formatMMDDYYYY(d: Date) {
   const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -79,19 +23,19 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('editing Upcoming Expirations date persists after reload', async ({ page }) => {
-  await page.goto('http://localhost:5173/wheel');
-  await page.waitForLoadState('networkidle');
+  const wheelPage = new WheelPage(page);
+  await wheelPage.navigate();
 
   // Open trade drawer and choose Trade tab
-  await page.getByRole('button', { name: /Premium Printer/i }).click();
-  await page.getByRole('button', { name: /^Trade$/ }).click();
+  await wheelPage.openActionsDrawer();
+  await wheelPage.openTradeTab();
 
   // Compose: Sell 1 Call ASTS, DTE 5, Strike 80
-  await page.getByLabel(/symbol/i).fill('ASTS');
-  await page.locator('select').first().selectOption({ label: 'Call' });
-  await page.locator('select').nth(1).selectOption({ label: 'Sell' });
+  await wheelPage.symbolInput.fill('ASTS');
+  await wheelPage.selectOptionType('Call');
+  await wheelPage.selectSide('Sell');
 
-  await fillTradeForm(page, {
+  await wheelPage.fillTradeForm({
     qty: '1',
     dte: '5',
     strike: '80',
@@ -99,17 +43,52 @@ test('editing Upcoming Expirations date persists after reload', async ({ page })
     fees: '0',
   });
 
-  await page.getByRole('button', { name: /\+ Add Trade/ }).click();
-  await page.waitForTimeout(600);
+  await wheelPage.addTradeButton.click();
+  await wheelPage.wait(600);
+
+  // Wait for trade to be saved and appear on wheel
+  await page.waitForTimeout(2000);
 
   // Locate Upcoming Expirations card and the ASTS row
   const upcoming = page.getByText('Upcoming Expirations').locator('..');
-  await expect(upcoming).toBeVisible();
+  await expect(upcoming).toBeVisible({ timeout: 10000 });
+  
+  // Wait for ASTS to appear in upcoming expirations
+  await page.waitForFunction(
+    () => {
+      const text = document.body.textContent || '';
+      return text.includes('ASTS') && text.includes('Upcoming Expirations');
+    },
+    { timeout: 10000 }
+  );
+  
   const astsRow = upcoming.locator('text=ASTS').first().locator('..');
-  await expect(astsRow).toBeVisible();
+  await expect(astsRow).toBeVisible({ timeout: 10000 });
 
-  // Start editing
-  await astsRow.getByRole('button', { name: /Edit/ }).click();
+  // Start editing - the edit button is in a dropdown menu (three dots icon)
+  // First, find and click the dropdown trigger (three dots icon)
+  const dropdownTrigger = astsRow.locator('button').filter({ 
+    has: page.locator('svg, [class*="icon"]')
+  }).or(
+    astsRow.locator('[class*="dropdown"] button')
+  ).or(
+    astsRow.locator('button').last()
+  ).first();
+  
+  await expect(dropdownTrigger).toBeVisible({ timeout: 10000 });
+  await dropdownTrigger.scrollIntoViewIfNeeded();
+  await dropdownTrigger.click({ force: true });
+  
+  // Wait for dropdown menu to appear
+  await page.waitForTimeout(500);
+  
+  // Now click the "Edit" option in the dropdown
+  const editOption = page.getByRole('menuitem', { name: /Edit/i }).or(
+    page.locator('text=/Edit/i').filter({ hasText: /Edit/i })
+  ).first();
+  
+  await expect(editOption).toBeVisible({ timeout: 5000 });
+  await editOption.click();
 
   // Choose a new date = today + 2 days (ensure valid business date)
   const today = new Date();
@@ -124,7 +103,7 @@ test('editing Upcoming Expirations date persists after reload', async ({ page })
   await expect(astsRow).toContainText(ymd, { timeout: 10000 });
 
   // Give the async DB write a moment to persist
-  await page.waitForTimeout(1000);
+  await wheelPage.wait(1000);
 
   // Reload and verify persistence
   await page.reload();

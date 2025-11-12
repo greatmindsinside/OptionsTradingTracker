@@ -1,5 +1,7 @@
-import React from 'react';
+import { Icon } from '@iconify/react';
+import React, { useState } from 'react';
 
+import { DropdownMenu } from '@/components/ui/DropdownMenu';
 import { useQuickActions } from '@/pages/wheel/components/actions/useQuickActions';
 import { useWheelStore } from '@/stores/useWheelStore';
 import type { ExpRow } from '@/types/wheel';
@@ -11,6 +13,7 @@ export const ExpirationRow: React.FC<{ row: ExpRow }> = ({ row }) => {
   const updateExpiration = useWheelStore(s => s.updateExpiration);
   const { openForm } = useQuickActions();
   const d = daysTo(row.expiration);
+  const [isEditingDate, setIsEditingDate] = useState(false);
 
   // Determine urgency styling
   const isUrgent = d === 0;
@@ -85,64 +88,78 @@ export const ExpirationRow: React.FC<{ row: ExpRow }> = ({ row }) => {
         {row.expiration} · DTE {d}
       </div>
       <div className="ml-auto flex items-center gap-2">
-        <InlineDateEdit
-          date={row.expiration}
-          onSave={ymd => updateExpiration(row.id, ymd, row.expiration)}
-        />
-        {showAssignButton && (
-          <button
-            className="rounded px-2 py-1 text-xs font-semibold transition-all"
-            style={{
-              border: '1px solid rgba(251, 146, 60, 0.4)',
-              background: 'rgba(251, 146, 60, 0.1)',
-              color: '#FB923C',
-              boxShadow: '0 0 4px rgba(251, 146, 60, 0.08)',
+        {isEditingDate ? (
+          <InlineDateEdit
+            date={row.expiration}
+            isEditing={true}
+            onSave={ymd => {
+              updateExpiration(row.id, ymd, row.expiration);
+              setIsEditingDate(false);
             }}
-            onMouseEnter={e => {
-              e.currentTarget.style.borderColor = 'rgba(251, 146, 60, 0.6)';
-              e.currentTarget.style.background = 'rgba(251, 146, 60, 0.18)';
-              e.currentTarget.style.boxShadow = '0 0 8px rgba(251, 146, 60, 0.15)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.borderColor = 'rgba(251, 146, 60, 0.4)';
-              e.currentTarget.style.background = 'rgba(251, 146, 60, 0.1)';
-              e.currentTarget.style.boxShadow = '0 0 4px rgba(251, 146, 60, 0.08)';
-            }}
-            onClick={() => {
-              const formType = row.type === 'P' ? 'assignPut' : 'assignCall';
-              openForm(formType, {
-                symbol: row.symbol,
-                contracts: row.qty,
-                strike: row.strike,
-                expiration: row.expiration,
-              });
-            }}
-            title="Record assignment"
-          >
-            Assign
-          </button>
+            onCancel={() => setIsEditingDate(false)}
+          />
+        ) : (
+          <>
+            {showAssignButton && (
+              <button
+                className="rounded px-2 py-1 text-xs font-semibold transition-all"
+                style={{
+                  border: '1px solid rgba(251, 146, 60, 0.4)',
+                  background: 'rgba(251, 146, 60, 0.1)',
+                  color: '#FB923C',
+                  boxShadow: '0 0 4px rgba(251, 146, 60, 0.08)',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = 'rgba(251, 146, 60, 0.6)';
+                  e.currentTarget.style.background = 'rgba(251, 146, 60, 0.18)';
+                  e.currentTarget.style.boxShadow = '0 0 8px rgba(251, 146, 60, 0.15)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = 'rgba(251, 146, 60, 0.4)';
+                  e.currentTarget.style.background = 'rgba(251, 146, 60, 0.1)';
+                  e.currentTarget.style.boxShadow = '0 0 4px rgba(251, 146, 60, 0.08)';
+                }}
+                onClick={() => {
+                  const formType = row.type === 'P' ? 'assignPut' : 'assignCall';
+                  openForm(formType, {
+                    symbol: row.symbol,
+                    contracts: row.qty,
+                    strike: row.strike,
+                    expiration: row.expiration,
+                  });
+                }}
+                title="Record assignment (option expires in ≤3 days)"
+              >
+                Assign
+              </button>
+            )}
+            <div className="relative z-10">
+              <DropdownMenu
+                align="right"
+                className="[&>button]:rounded! [&>button]:px-1.5! [&>button]:py-0.5! [&>button]:text-xs! [&>button]:font-semibold! [&>button]:transition-all! [&>button]:border! [&>button]:border-[rgba(245,179,66,0.3)]! [&>button]:bg-[rgba(245,179,66,0.08)]! [&>button]:text-[#F5B342]! [&>button]:shadow-[0_0_4px_rgba(245,179,66,0.06)]! [&>button]:hover:border-[rgba(245,179,66,0.5)]! [&>button]:hover:bg-[rgba(245,179,66,0.15)]! [&>button]:hover:shadow-[0_0_6px_rgba(245,179,66,0.1)]! [&>button]:flex! [&>button]:items-center! [&>button]:gap-1! [&>button]:min-w-0! [&>button_svg:last-child]:hidden!"
+                trigger={<Icon icon="mdi:dots-vertical" className="h-4 w-4" />}
+                items={[
+                  {
+                    label: 'Edit',
+                    onClick: () => setIsEditingDate(true),
+                  },
+                  {
+                    label: 'Plan Roll',
+                    onClick: () => {
+                      const formType = row.type === 'P' ? 'rollPut' : 'rollCall';
+                      openForm(formType, {
+                        symbol: row.symbol,
+                        oldContracts: row.qty,
+                        oldStrike: row.strike,
+                        oldExpiration: row.expiration,
+                      });
+                    },
+                  },
+                ]}
+              />
+            </div>
+          </>
         )}
-        <button
-          className="rounded px-2 py-1 text-xs font-semibold transition-all"
-          style={{
-            border: '1px solid rgba(245, 179, 66, 0.3)',
-            background: 'rgba(245, 179, 66, 0.08)',
-            color: '#F5B342',
-            boxShadow: '0 0 4px rgba(245, 179, 66, 0.06)',
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.borderColor = 'rgba(245, 179, 66, 0.5)';
-            e.currentTarget.style.background = 'rgba(245, 179, 66, 0.15)';
-            e.currentTarget.style.boxShadow = '0 0 6px rgba(245, 179, 66, 0.1)';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.borderColor = 'rgba(245, 179, 66, 0.3)';
-            e.currentTarget.style.background = 'rgba(245, 179, 66, 0.08)';
-            e.currentTarget.style.boxShadow = '0 0 4px rgba(245, 179, 66, 0.06)';
-          }}
-        >
-          Plan Roll
-        </button>
       </div>
     </div>
   );
