@@ -38,6 +38,15 @@ Closes #(issue number)
 
 ## Screenshots (if applicable)
 
+## Spec-Driven Development Checklist
+
+For features developed using spec-driven development (see `.cursor/rules/spec_playwright.md`):
+
+- [ ] Linked spec file under `docs/tasks/`
+- [ ] Playwright e2e tests cover every acceptance criterion
+- [ ] Spec version bumped and ADR added if behavior changed
+- [ ] Local run: `npx playwright test` is green
+
 ## Checklist
 
 - [ ] My code follows the style guidelines of this project

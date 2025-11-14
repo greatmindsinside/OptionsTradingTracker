@@ -22,12 +22,17 @@ export function toYmdLocal(d: Date): string {
  * calcDTE
  * Calculate whole calendar days from today (local) to the expiration ISO date string.
  * Today to today is 0. Today to tomorrow is 1.
+ * Handles both YYYY-MM-DD strings and ISO date strings.
  */
 export function calcDTE(expISO: string, now: Date = new Date()): number {
   if (!expISO) return 0;
   const nowStart = startOfLocalDay(now);
+
+  // Extract YYYY-MM-DD from ISO string if needed (handles both "2025-11-14" and "2025-11-14T00:00:00.000Z")
+  const ymd = expISO.includes('T') ? expISO.slice(0, 10) : expISO;
+
   // Parse YYYY-MM-DD as local date to avoid timezone issues
-  const [y, m, d] = expISO.split('-').map(Number);
+  const [y, m, d] = ymd.split('-').map(Number);
   if (!y || !m || !d) return 0;
   const exp = new Date(y, m - 1, d);
   if (Number.isNaN(exp.getTime())) return 0;

@@ -135,6 +135,7 @@ yarn preview        # Preview production build
 Vite provides instant HMR. Changes to React components, CSS, and TypeScript files update without full page reload.
 
 **Tips:**
+
 - Keep components small for faster HMR
 - Use React Fast Refresh compatible patterns
 - Avoid side effects in module scope
@@ -148,6 +149,7 @@ Vite provides instant HMR. Changes to React components, CSS, and TypeScript file
 We use **Tailwind CSS v4** with a consolidated design system in `src/index.css`.
 
 **Key Principles:**
+
 1. **Single source of truth** - All styles in `src/index.css`
 2. **Utility-first** - Use Tailwind utilities for 95% of styling
 3. **Component patterns** - Use `@layer components` for reusable patterns
@@ -173,23 +175,23 @@ src/
 ```css
 :root {
   /* Colors */
-  --color-primary: #10b981;      /* Emerald 500 */
-  --color-danger: #ef4444;       /* Red 500 */
-  --color-warning: #f59e0b;      /* Amber 500 */
-  --color-success: #10b981;      /* Emerald 500 */
-  
+  --color-primary: #10b981; /* Emerald 500 */
+  --color-danger: #ef4444; /* Red 500 */
+  --color-warning: #f59e0b; /* Amber 500 */
+  --color-success: #10b981; /* Emerald 500 */
+
   /* Dark theme surfaces */
   --zinc-900: #18181b;
   --zinc-800: #27272a;
   --zinc-700: #3f3f46;
-  
+
   /* Spacing */
-  --spacing-unit: 0.25rem;       /* 4px base unit */
-  
+  --spacing-unit: 0.25rem; /* 4px base unit */
+
   /* Typography */
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'Fira Code', monospace;
-  
+
   /* Shadows */
   --shadow-glow-green: 0 0 20px rgba(16, 185, 129, 0.3);
   --shadow-glow-red: 0 0 20px rgba(239, 68, 68, 0.3);
@@ -203,23 +205,47 @@ Defined in `@layer components` of `index.css`:
 #### Modal Patterns
 
 ```css
-.modal-overlay { /* Fixed overlay with backdrop blur */ }
-.modal { /* Dialog box */ }
-.modal-header { /* Header with border */ }
-.modal-title { /* Title styling */ }
-.modal-content { /* Scrollable content */ }
-.modal-close { /* Close button */ }
+.modal-overlay {
+  /* Fixed overlay with backdrop blur */
+}
+.modal {
+  /* Dialog box */
+}
+.modal-header {
+  /* Header with border */
+}
+.modal-title {
+  /* Title styling */
+}
+.modal-content {
+  /* Scrollable content */
+}
+.modal-close {
+  /* Close button */
+}
 ```
 
 #### Table Patterns
 
 ```css
-.table-container { /* Wrapper with border and bg */ }
-.table { /* Base table styles */ }
-.table thead { /* Header row */ }
-.table th { /* Header cells */ }
-.table td { /* Data cells */ }
-.table tbody tr:hover { /* Row hover state */ }
+.table-container {
+  /* Wrapper with border and bg */
+}
+.table {
+  /* Base table styles */
+}
+.table thead {
+  /* Header row */
+}
+.table th {
+  /* Header cells */
+}
+.table td {
+  /* Data cells */
+}
+.table tbody tr:hover {
+  /* Row hover state */
+}
 ```
 
 #### Button Patterns (CVA-based)
@@ -250,6 +276,7 @@ const buttonVariants = cva('base-button-classes', {
 ### Styling Guidelines
 
 **DO:**
+
 - ✅ Use Tailwind utilities directly in JSX
 - ✅ Extract repeated patterns to `@layer components`
 - ✅ Use CVA for component variants (Button, Input, etc.)
@@ -257,6 +284,7 @@ const buttonVariants = cva('base-button-classes', {
 - ✅ Use spacing scale (0.25rem multiples: 0, 1, 2, 3, 4, etc.)
 
 **DON'T:**
+
 - ❌ Create new CSS Modules
 - ❌ Use inline styles (except for dynamic values)
 - ❌ Add vendor-specific CSS without autoprefixer
@@ -266,6 +294,7 @@ const buttonVariants = cva('base-button-classes', {
 ### Accessibility
 
 Always include:
+
 - Focus states (`:focus-visible`)
 - High contrast mode support (`@media (prefers-contrast: high)`)
 - Reduced motion support (`@media (prefers-reduced-motion: reduce)`)
@@ -287,12 +316,14 @@ Example:
 ### Recent Cleanup (November 2025)
 
 **Removed:**
+
 - 6 deprecated pages (HomePage, PortfolioPage, VisualizationPage, etc.)
 - 15+ orphaned components (dashboard, chart, demo)
 - 9+ CSS Modules for deleted components
 - 2 orphaned style files (accessibility.css, themes.css)
 
 **Result:**
+
 - CSS: 121.72 kB → 89.89 kB (-31.83 kB, -26.1%)
 - Gzipped: 20.43 kB → 15.09 kB (-5.34 kB)
 - All builds passing, TypeScript clean
@@ -354,7 +385,7 @@ import { TradeTab } from '@/pages/wheel/components/drawers/TradeTab';
 it('renders date picker when feature flag is enabled', () => {
   env.features.tradeDTE = true;
   render(<TradeTab />);
-  
+
   expect(screen.getByLabelText(/Expiration/i)).toHaveAttribute('type', 'date');
 });
 ```
@@ -473,6 +504,7 @@ netlify deploy --prod --dir=dist
 #### Static Hosting
 
 Upload `dist/` folder to:
+
 - GitHub Pages
 - AWS S3 + CloudFront
 - Firebase Hosting
@@ -516,7 +548,7 @@ export function getUser(id: string): User | null {
 type User = {
   id: string;
   name: string;
-}
+};
 
 export function getUser(id) {
   // ...
@@ -539,7 +571,7 @@ interface UserCardProps {
 
 export const UserCard: React.FC<UserCardProps> = ({ user, onEdit }) => {
   const displayName = useMemo(() => formatName(user.name), [user.name]);
-  
+
   return (
     <div>
       <h3>{displayName}</h3>
@@ -579,11 +611,13 @@ import { useTradeComposer } from '../hooks/useTradeComposer';
 ### Git Hooks
 
 **Pre-commit** (via Husky):
+
 - Lint + format staged files (lint-staged)
 - Type check (tsc)
 - Run unit tests (Vitest)
 
 **Pre-push:**
+
 - Build check
 
 ---
@@ -593,6 +627,7 @@ import { useTradeComposer } from '../hooks/useTradeComposer';
 ### November 4, 2025 - Trade DTE Feature
 
 **Added:**
+
 - ✅ Trade drawer date picker UI (feature-flagged)
 - ✅ DTE chip showing calculated days to expiration
 - ✅ Advanced toggle for direct numeric DTE input
@@ -604,10 +639,12 @@ import { useTradeComposer } from '../hooks/useTradeComposer';
 - ✅ Feature documentation in FEATURES.md
 
 **Changed:**
+
 - ✅ Wheel DTE calculation now uses shared utility
 - ✅ Feature flag system extended with `VITE_FEATURE_TRADE_DTE`
 
 **Files:**
+
 - `src/utils/dates.ts` (new)
 - `src/utils/env.ts` (extended)
 - `src/utils/telemetry.ts` (new events)
@@ -619,27 +656,32 @@ import { useTradeComposer } from '../hooks/useTradeComposer';
 ### November 3, 2025 - Project Cleanup
 
 **Removed:**
+
 - ✅ 6 deprecated pages (HomePage, PortfolioPage, VisualizationPage, AnalysisPage, TaxPage, ImportPage)
 - ✅ 15+ orphaned components (dashboard, chart, demo, legacy UI)
 - ✅ 9+ CSS Modules for deleted components
 - ✅ 2 orphaned style files (accessibility.css, themes.css)
 
 **Added:**
+
 - ✅ High-contrast mode support in `index.css`
 - ✅ Modal and table global patterns
 
 **Results:**
+
 - CSS: 121.72 kB → 89.89 kB (-31.83 kB, -26.1%)
 - Gzipped: 20.43 kB → 15.09 kB (-5.34 kB)
 - All builds passing, TypeScript clean
 
 **Documentation:**
+
 - ✅ Updated PROJECT_ORGANIZATION.md
 - ✅ Created cleanup reports
 
 ### November 3, 2025 - Journal Edit Feature
 
 **Added:**
+
 - ✅ Journal edit drawer with slide-in panel
 - ✅ Full-field editing with audit trail
 - ✅ Soft-delete pattern (deleted_at, edit_reason)
@@ -648,6 +690,7 @@ import { useTradeComposer } from '../hooks/useTradeComposer';
 - ✅ Feature flag: `VITE_FEATURE_JOURNAL_EDIT_DRAWER`
 
 **Components:**
+
 - `src/pages/journal/components/drawers/JournalDrawer.tsx` (new)
 - `src/stores/useJournalUIStore.ts` (new)
 - `src/stores/useEntriesStore.ts` (extended)
@@ -655,6 +698,7 @@ import { useTradeComposer } from '../hooks/useTradeComposer';
 ### October 2025 - Core Platform
 
 **Added:**
+
 - ✅ Wheel strategy dashboard
 - ✅ Journal transaction history
 - ✅ CSV import with multi-broker support
@@ -673,6 +717,7 @@ import { useTradeComposer } from '../hooks/useTradeComposer';
 **Issue:** "Module not found" after adding new file
 
 **Solution:** Restart TypeScript server in VS Code:
+
 - `Ctrl/Cmd + Shift + P`
 - "TypeScript: Restart TS Server"
 
@@ -681,6 +726,7 @@ import { useTradeComposer } from '../hooks/useTradeComposer';
 **Issue:** HMR not working
 
 **Solution:**
+
 - Check browser console for errors
 - Clear Vite cache: `rm -rf node_modules/.vite`
 - Restart dev server
@@ -704,6 +750,7 @@ resolve: {
 **Issue:** Build succeeds but preview shows blank page
 
 **Solution:**
+
 - Check browser console for errors
 - Verify base path in `vite.config.ts`:
   ```typescript

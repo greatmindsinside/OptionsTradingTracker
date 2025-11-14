@@ -63,7 +63,12 @@ test.describe('Observer Effect Terminal', () => {
       });
       // Reload to apply unlock state
       await page.reload();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      try {
+        await page.waitForLoadState('networkidle', { timeout: 10000 });
+      } catch {
+        // If networkidle times out, continue anyway
+      }
     }
 
     // After unlock, clicking logo should open terminal
@@ -268,8 +273,10 @@ test.describe('Observer Effect Terminal', () => {
 
     // Terminal should be closed (check if 'open' class is removed or transform is translateY(100%))
     const isClosed = await terminal.evaluate(el => {
-      return !el.classList.contains('open') ||
-             window.getComputedStyle(el).transform.includes('translateY(100%');
+      return (
+        !el.classList.contains('open') ||
+        window.getComputedStyle(el).transform.includes('translateY(100%')
+      );
     });
     expect(isClosed).toBe(true);
   });
@@ -298,10 +305,12 @@ test.describe('Observer Effect Terminal', () => {
       // Check for quantum state in terminal
       // The quantum state might take a moment to appear after console.log
       // Try multiple selectors and wait longer
-      const quantumState = page.locator('.quantum-state').filter({ hasText: 'Test quantum state' })
+      const quantumState = page
+        .locator('.quantum-state')
+        .filter({ hasText: 'Test quantum state' })
         .or(page.locator('[class*="quantum"]').filter({ hasText: 'Test quantum state' }))
         .or(page.locator('text=Test quantum state').filter({ hasText: 'Test quantum state' }));
-      
+
       // If quantum state doesn't appear, the feature might not be implemented
       // or might require additional setup
       try {

@@ -91,6 +91,7 @@ export function clearAllDteOverrides(): void {
 
 /**
  * Apply DTE overrides to positions array
+ * Also returns override expiration dates if available
  */
 export function applyDteOverrides<T extends { id: string; dte: number }>(positions: T[]): T[] {
   const overrides = loadDteOverrides();
@@ -106,4 +107,12 @@ export function applyDteOverrides<T extends { id: string; dte: number }>(positio
     }
     return position;
   });
+}
+
+/**
+ * Get override expiration date for a position if it exists
+ */
+export function getOverrideExpiration(positionId: string): string | null {
+  const override = getDteOverride(positionId);
+  return override?.overrideExpiration || null;
 }

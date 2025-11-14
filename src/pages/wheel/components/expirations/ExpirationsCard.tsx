@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 
 import { useWheelStore } from '@/stores/useWheelStore';
 import type { ExpRow } from '@/types/wheel';
-import { ymd } from '@/utils/wheel-calculations';
+import { addDaysToYmd, daysTo } from '@/utils/wheel-calculations';
 
 import { ExpirationRow } from './ExpirationRow';
 import { useExpirationSort } from './useExpirationSort';
@@ -11,19 +11,38 @@ import { useExpirationSort } from './useExpirationSort';
 export const ExpirationsCard: React.FC = () => {
   const positions = useWheelStore(s => s.positions);
   const rows: ExpRow[] = useMemo(
-    () =>
-      positions.map(p => ({
-        id: p.id,
-        symbol: p.ticker,
-        type: p.type,
-        strike: p.strike,
-        expiration: ymd(new Date(new Date(p.opened).getTime() + p.dte * 864e5)),
-        side: p.side,
-        qty: p.qty,
-      })),
+    () => {
+      const result = positions.map(p => {
+        const calculatedExpiration = addDaysToYmd(p.opened, p.dte);
+
+        // Debug logging to track date calculation
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[ExpirationsCard] Position expiration calculation:', {
+            id: p.id,
+            ticker: p.ticker,
+            strike: p.strike,
+            opened: p.opened,
+            dte: p.dte,
+            calculatedExpiration,
+          });
+        }
+
+        return {
+          id: p.id,
+          symbol: p.ticker,
+          type: p.type,
+          strike: p.strike,
+          expiration: calculatedExpiration,
+          side: p.side,
+          qty: p.qty,
+        };
+      });
+      return result;
+    },
     [positions]
   );
   const sorted = useExpirationSort(rows);
+  const filtered = sorted.filter(row => daysTo(row.expiration) >= 0);
 
   return (
     <div className="glass-card-deep rounded-2xl p-4">
@@ -32,10 +51,10 @@ export const ExpirationsCard: React.FC = () => {
         Upcoming Expirations
       </div>
       <div className="space-y-2">
-        {sorted.length === 0 && (
+        {filtered.length === 0 && (
           <div className="py-4 text-center text-sm text-slate-500">No upcoming expirations</div>
         )}
-        {sorted.map(row => (
+        {filtered.map(row => (
           <ExpirationRow key={row.id} row={row} />
         ))}
       </div>

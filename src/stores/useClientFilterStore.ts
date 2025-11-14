@@ -13,4 +13,3 @@ export const useClientFilterStore = create<ClientFilterState>(set => ({
   setAmountRange: (min, max) => set({ minAmount: min, maxAmount: max }),
   clearAmountRange: () => set({ minAmount: null, maxAmount: null }),
 }));
-

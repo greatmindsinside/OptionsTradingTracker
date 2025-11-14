@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { BaseDAO } from './dao-base';
 import type { SQLiteDatabase } from './sqlite';
-import { type Portfolio,PortfolioSchema } from './validation';
+import { type Portfolio, PortfolioSchema } from './validation';
 
 /**
  * Portfolio Data Access Object

@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { beforeEach,describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { JournalDrawer } from '@/pages/journal/components/drawers/JournalDrawer';
 import { useJournalUIStore } from '@/stores/useJournalUIStore';

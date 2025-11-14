@@ -168,6 +168,7 @@ CREATE TABLE accounts (
 - `option_premium` - Premium cashflow (present in types; not currently emitted by templates)
 
 Notes:
+
 - Manual buy-to-close actions from the Wheel trade drawer are currently recorded as `fee` entries (negative amount) rather than `buy_to_close`. A dedicated template is planned.
 - Templates emit `sell_to_open` (credit) rather than a separate `option_premium` row.
 
@@ -320,6 +321,7 @@ The import system will map normalized trades to the same templates used by manua
 - Updates both pages
 
 **Feature: Trade DTE UI** (controlled by `VITE_FEATURE_TRADE_DTE`):
+
 - When enabled: Shows expiration date picker, DTE chip (calculated), and Advanced toggle for direct DTE input
 - When disabled: Shows original numeric DTE field
 - DTE calculation uses shared `calcDTE()` utility from `src/utils/dates.ts` for consistency with Wheel page

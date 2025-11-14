@@ -15,16 +15,18 @@
 ## Feature Ideas
 
 ### [Feature Name]
-- **Description:** 
-- **Priority:** 
-- **Status:** 
-- **Notes:** 
+
+- **Description:**
+- **Priority:**
+- **Status:**
+- **Notes:**
 
 ---
 
 ## Observations
 
 ### [Date] - [Topic]
+
 - Observation or finding
 - Related files/components:
 - Action items:
@@ -34,6 +36,7 @@
 ## Improvements
 
 ### [Area/Component]
+
 - Current behavior:
 - Suggested improvement:
 - Implementation notes:
@@ -43,6 +46,7 @@
 ## Questions & Research
 
 ### [Question/Topic]
+
 - Question:
 - Findings:
 - Resolution:
@@ -52,6 +56,7 @@
 ## Testing Notes
 
 ### [Test/Feature]
+
 - Test scenario:
 - Results:
 - Issues found:
@@ -62,6 +67,7 @@
 ## Performance Notes
 
 ### [Component/Feature]
+
 - Performance observation:
 - Metrics:
 - Optimization ideas:
@@ -71,6 +77,7 @@
 ## UI/UX Notes
 
 ### [Page/Component]
+
 - User experience observation:
 - Design consideration:
 - Accessibility note:
@@ -80,6 +87,7 @@
 ## Technical Notes
 
 ### [Technical Topic]
+
 - Technical detail:
   - User identifiers (UIDs) continue to leverage email addresses as the canonical unique ID, fully integrated into both authentication middleware and all database models (see `auth/user.ts`). This ensures alignment with the current authentication flow and simplifies future user migrations, as described in the architecture docs.
   - To advance onboarding and monetization, the next priority is implementing a unified login/signup experience with tier selection:
@@ -89,9 +97,7 @@
     - Subscription plans and pricing logic are being formalized in `shared/constants/plans.ts`.
 
   - UI iconography is managed exclusively using whitelisted open-source icon sets (current policy: only `react-icons` with Feather and Heroicons packs). Enforcement is implemented in project lint rules and visually centralized via `frontend/components/Icon.tsx`.
-  
   - Quote and price data retrieval is still handled through a backend Node.js microservice that integrates with Python’s `yfinance` library. In-progress work extends this integration to earnings/calendar data alongside quotes, all surfaced via unified API endpoints.
-  
   - Frontend consumers are required to adapt to the standardized quote/earnings response shape as specified in `backend/routes/quotes.ts` and refined in the OpenAPI contract (`docs/API_SPEC.yaml`).
 
 - Implementation approach:
@@ -118,11 +124,12 @@
 ## Bug Tracking
 
 ### [Bug Description]
-- **Date Found:** 
-- **Severity:** 
-- **Steps to Reproduce:** 
-- **Status:** 
-- **Fix:** 
+
+- **Date Found:**
+- **Severity:**
+- **Steps to Reproduce:**
+- **Status:**
+- **Fix:**
 
 ---
 
@@ -138,4 +145,3 @@
 
 - [Link to related documentation]
 - [Link to external resource]
-

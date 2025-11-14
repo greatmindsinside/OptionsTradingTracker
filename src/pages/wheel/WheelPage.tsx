@@ -7,6 +7,7 @@ import { QuickActionFAB } from '@/pages/wheel/components/actions/QuickActionFAB'
 import { AlertsCard } from '@/pages/wheel/components/alerts/AlertsCard';
 import { ActionsDrawer } from '@/pages/wheel/components/drawers/ActionsDrawer';
 import { ExpirationsCard } from '@/pages/wheel/components/expirations/ExpirationsCard';
+import { HistoricalMinStrikesCard } from '@/pages/wheel/components/historical-min-strikes/HistoricalMinStrikesCard';
 import { WheelContainer } from '@/pages/wheel/components/layout/WheelContainer';
 import { SummaryMetrics } from '@/pages/wheel/components/metrics/SummaryMetrics';
 import { SharesCard } from '@/pages/wheel/components/shares/SharesCard';
@@ -91,6 +92,7 @@ export default function WheelPage() {
         dte?: number;
         type?: 'C' | 'P';
         side?: 'S' | 'B';
+        opened?: string;
       };
       const rawPositions = ((data.positions || []) as RawPosition[]).map(p => ({
         id: p.id || crypto.randomUUID(),
@@ -102,7 +104,7 @@ export default function WheelPage() {
         dte: p.dte || 0,
         type: p.type === 'C' || p.type === 'P' ? p.type : 'P',
         side: p.side === 'S' || p.side === 'B' ? p.side : 'S',
-        opened: new Date().toISOString().slice(0, 10),
+        opened: p.opened || new Date().toISOString().slice(0, 10),
       }));
 
       // Apply DTE overrides from localStorage
@@ -171,6 +173,9 @@ export default function WheelPage() {
             </div>
             <div className="py-3">
               <SharesCard />
+            </div>
+            <div className="py-3">
+              <HistoricalMinStrikesCard />
             </div>
           </div>
         </main>

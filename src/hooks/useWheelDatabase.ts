@@ -9,7 +9,6 @@ import { all, initDb } from '@/db/sql';
 import type { SQLiteDatabase } from '@/modules/db/sqlite';
 import { initDatabase } from '@/modules/db/sqlite';
 import type { Entry } from '@/types/entry';
-import { calcDTE } from '@/utils/dates';
 
 // Types expected by the Wheel page
 export interface Position {
@@ -23,6 +22,7 @@ export interface Position {
   mark: number;
   dte: number;
   m: number;
+  opened?: string; // YYYY-MM-DD date when position was opened
   linkedLotId?: string;
 }
 
@@ -98,10 +98,11 @@ export function useWheelDatabase() {
       // Initialize journal database
       await initDb();
 
-      // Query all entries from journal table
+      // Query all non-deleted entries from journal table
+      // The all() function automatically filters deleted entries when includeDeleted is false (default)
       const entries = all<Entry>(`
-        SELECT id, ts, account_id, symbol, type, qty, amount, strike, expiration, underlying_price, notes, meta 
-        FROM journal 
+        SELECT id, ts, account_id, symbol, type, qty, amount, strike, expiration, underlying_price, notes, meta
+        FROM journal
         ORDER BY datetime(ts) DESC
       `);
 
@@ -217,6 +218,33 @@ export function transformJournalToPositions(entries: Entry[]): Position[] {
         }
       }
 
+      // Extract YYYY-MM-DD from entry.ts (ISO string)
+      const openedDate = entry.ts ? entry.ts.slice(0, 10) : new Date().toISOString().slice(0, 10);
+
+      // Calculate DTE from the opened date, not from today
+      // This ensures the expiration date matches what was entered
+      const expirationDate = entry.expiration ? (entry.expiration.includes('T') ? entry.expiration.slice(0, 10) : entry.expiration) : null;
+      let dte = 0;
+      if (expirationDate) {
+        // Calculate days between opened date and expiration date
+        const opened = new Date(openedDate + 'T00:00:00');
+        const expiration = new Date(expirationDate + 'T00:00:00');
+        const diffMs = expiration.getTime() - opened.getTime();
+        dte = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+        // Debug logging
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[transformJournalToPositions] DTE calculation:', {
+            symbol: entry.symbol,
+            strike: entry.strike,
+            openedDate,
+            expirationDate,
+            dte,
+            entryExpiration: entry.expiration,
+          });
+        }
+      }
+
       positionMap.set(key, {
         id: key,
         ticker: entry.symbol,
@@ -224,10 +252,11 @@ export function transformJournalToPositions(entries: Entry[]): Position[] {
         qty: 0,
         entry: 0,
         mark: 0,
-        dte: calculateDTE(entry.expiration),
+        dte: dte,
         m: 0,
         type: optionType,
         side: 'S',
+        opened: openedDate,
       });
     }
 
@@ -289,7 +318,7 @@ export function transformJournalToPositions(entries: Entry[]): Position[] {
   return positions;
 }
 
-function transformJournalToShareLots(entries: Entry[]): ShareLot[] {
+export function transformJournalToShareLots(entries: Entry[]): ShareLot[] {
   const lots: ShareLot[] = [];
   const lotMap = new Map<string, { qty: number; totalCost: number }>();
 
@@ -340,11 +369,6 @@ function transformJournalToShareLots(entries: Entry[]): ShareLot[] {
 }
 
 // Note: We avoid a per-trade symbol lookup by computing tickers from positions/share lots above.
-
-function calculateDTE(expirationDate: string): number {
-  // Use shared DTE util to avoid drift between pages
-  return calcDTE(expirationDate);
-}
 
 function generateAlertsFromData(positions: Position[], tickers: string[]): Alert[] {
   const alerts: Alert[] = [];

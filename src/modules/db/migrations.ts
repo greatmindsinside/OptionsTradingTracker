@@ -4,7 +4,7 @@
  * Handles database schema initialization and upgrades
  */
 
-import { type DatabaseSchema,generateSchemaSQL, SCHEMA_V1 } from './schema';
+import { type DatabaseSchema, generateSchemaSQL, SCHEMA_V1 } from './schema';
 import type { SQLiteDatabase } from './sqlite';
 
 export interface Migration {
@@ -153,6 +153,37 @@ export class MigrationManager {
         'DROP INDEX IF EXISTS idx_symbol_events_date',
         'DROP INDEX IF EXISTS idx_symbol_events_symbol',
         'DROP TABLE IF EXISTS symbol_events',
+      ],
+    });
+
+    // Migration v4: Add ticker_min_strikes table for historical minimum strike tracking
+    this.migrations.push({
+      version: 4,
+      description:
+        'Add ticker_min_strikes table for tracking historical minimum strike prices for covered calls',
+      up: [
+        // Create ticker_min_strikes table
+        `CREATE TABLE IF NOT EXISTS ticker_min_strikes (
+          id TEXT PRIMARY KEY,
+          ticker TEXT NOT NULL,
+          date TEXT NOT NULL,
+          avg_cost REAL NOT NULL,
+          premium_received REAL NOT NULL DEFAULT 0,
+          min_strike REAL NOT NULL,
+          shares_owned REAL NOT NULL,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )`,
+
+        // Create indexes
+        'CREATE INDEX IF NOT EXISTS idx_ticker_min_strikes_ticker_date ON ticker_min_strikes(ticker, date)',
+        'CREATE INDEX IF NOT EXISTS idx_ticker_min_strikes_ticker ON ticker_min_strikes(ticker)',
+        'CREATE INDEX IF NOT EXISTS idx_ticker_min_strikes_date ON ticker_min_strikes(date)',
+      ],
+      down: [
+        'DROP INDEX IF EXISTS idx_ticker_min_strikes_date',
+        'DROP INDEX IF EXISTS idx_ticker_min_strikes_ticker',
+        'DROP INDEX IF EXISTS idx_ticker_min_strikes_ticker_date',
+        'DROP TABLE IF EXISTS ticker_min_strikes',
       ],
     });
   }

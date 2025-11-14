@@ -100,16 +100,16 @@ src/
 3. Use in component:
    ```typescript
    import { env } from '@/utils/env';
-   if (env.features.myFeature) { /* ... */ }
+   if (env.features.myFeature) {
+     /* ... */
+   }
    ```
 
 ### Add telemetry event
 
 1. Add event name to `src/utils/telemetry.ts`:
    ```typescript
-   export type TelemetryEventName =
-     | 'existing_event'
-     | 'my_new_event';
+   export type TelemetryEventName = 'existing_event' | 'my_new_event';
    ```
 2. Track in component:
    ```typescript

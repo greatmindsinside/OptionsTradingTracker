@@ -6,7 +6,7 @@ import type { Entry } from '@/types/entry';
 
 /**
  * Test that positions are removed from Upcoming Expirations after recording a Put Assignment.
- * 
+ *
  * When a Put Assignment is recorded:
  * 1. A position should exist (from selling a put)
  * 2. An assignment entry is created with meta.assigned: true
@@ -43,10 +43,7 @@ describe('Assignment Position Removal', () => {
     });
 
     // Combine all entries
-    const allEntries: Entry[] = [
-      ...sellPutRows,
-      ...assignmentRows,
-    ].map(row => ({
+    const allEntries: Entry[] = [...sellPutRows, ...assignmentRows].map(row => ({
       id: row.id,
       ts: row.ts,
       account_id: row.account_id,
@@ -65,9 +62,7 @@ describe('Assignment Position Removal', () => {
     const positions = transformJournalToPositions(allEntries);
 
     // Verify: Position should NOT be in results (it was closed by assignment)
-    const matchingPosition = positions.find(
-      p => p.ticker === symbol && p.strike === strike
-    );
+    const matchingPosition = positions.find(p => p.ticker === symbol && p.strike === strike);
 
     expect(matchingPosition).toBeUndefined();
     expect(positions.length).toBe(0);
@@ -102,10 +97,7 @@ describe('Assignment Position Removal', () => {
     });
 
     // Combine all entries
-    const allEntries: Entry[] = [
-      ...sellPutRows,
-      ...assignmentRows,
-    ].map(row => ({
+    const allEntries: Entry[] = [...sellPutRows, ...assignmentRows].map(row => ({
       id: row.id,
       ts: row.ts,
       account_id: row.account_id,
@@ -124,9 +116,7 @@ describe('Assignment Position Removal', () => {
     const positions = transformJournalToPositions(allEntries);
 
     // Verify: Position should still exist with qty = 1 (2 - 1 = 1)
-    const matchingPosition = positions.find(
-      p => p.ticker === symbol && p.strike === strike
-    );
+    const matchingPosition = positions.find(p => p.ticker === symbol && p.strike === strike);
 
     expect(matchingPosition).toBeDefined();
     expect(matchingPosition?.qty).toBe(1);
@@ -169,11 +159,7 @@ describe('Assignment Position Removal', () => {
       expiration,
     });
 
-    const allEntries: Entry[] = [
-      ...sellPut1,
-      ...sellPut2,
-      ...assignment,
-    ].map(row => ({
+    const allEntries: Entry[] = [...sellPut1, ...sellPut2, ...assignment].map(row => ({
       id: row.id,
       ts: row.ts,
       account_id: row.account_id,
@@ -254,9 +240,7 @@ describe('Assignment Position Removal', () => {
     const positions = transformJournalToPositions(allEntries);
 
     // Verify: Position should still exist (expired worthless, not assigned)
-    const matchingPosition = positions.find(
-      p => p.ticker === symbol && p.strike === strike
-    );
+    const matchingPosition = positions.find(p => p.ticker === symbol && p.strike === strike);
 
     // Note: Currently the function doesn't handle expiration without assignment,
     // so the position will remain. This test documents the current behavior.
@@ -293,10 +277,7 @@ describe('Assignment Position Removal', () => {
     });
 
     // Convert meta to JSON string for one of the expiration entries
-    const allEntries: Entry[] = [
-      ...sellPutRows,
-      ...assignmentRows,
-    ].map(row => {
+    const allEntries: Entry[] = [...sellPutRows, ...assignmentRows].map(row => {
       const entry: Entry = {
         id: row.id,
         ts: row.ts,
@@ -323,12 +304,9 @@ describe('Assignment Position Removal', () => {
     const positions = transformJournalToPositions(allEntries);
 
     // Verify: Position should be closed even with JSON string meta
-    const matchingPosition = positions.find(
-      p => p.ticker === symbol && p.strike === strike
-    );
+    const matchingPosition = positions.find(p => p.ticker === symbol && p.strike === strike);
 
     expect(matchingPosition).toBeUndefined();
     expect(positions.length).toBe(0);
   });
 });
-

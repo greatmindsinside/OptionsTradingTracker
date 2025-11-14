@@ -1,5 +1,5 @@
 import { Icon } from '@iconify/react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { DropdownMenu, type DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import { all } from '@/db/sql';
@@ -7,6 +7,7 @@ import { useEntriesStore } from '@/stores/useEntriesStore';
 import { useWheelStore } from '@/stores/useWheelStore';
 import { useWheelUIStore } from '@/stores/useWheelUIStore';
 import type { Entry } from '@/types/entry';
+import { fmt } from '@/utils/wheel-calculations';
 
 import { usePhaseCalculation } from './usePhaseCalculation';
 
@@ -16,6 +17,61 @@ export const TickerPhaseRow: React.FC<{ ticker: string }> = ({ ticker }) => {
   const openActions = useWheelUIStore(s => s.openActions);
   const { deleteEntry } = useEntriesStore();
   const reloadFn = useWheelStore(s => s.reloadFn);
+  const lots = useWheelStore(s => s.lots);
+  const positions = useWheelStore(s => s.positions);
+
+  // Calculate average cost for the ticker
+  const avgCost = useMemo(() => {
+    const tickerLots = lots.filter(l => l.ticker === ticker);
+    if (tickerLots.length === 0) return 0;
+    const totalShares = tickerLots.reduce((sum, l) => sum + l.qty, 0);
+    const totalCost = tickerLots.reduce((sum, l) => sum + l.qty * l.cost, 0);
+    return totalShares > 0 ? totalCost / totalShares : 0;
+  }, [lots, ticker]);
+
+  // Calculate minimum strike and check if current calls are profitable
+  const minStrikeInfo = useMemo(() => {
+    // Calculate for phases where we have shares (Sell Covered Calls or Call Expires Worthless)
+    if ((phase !== 'Sell Covered Calls' && phase !== 'Call Expires Worthless') || avgCost === 0)
+      return null;
+
+    const shortCalls = positions.filter(
+      p => p.ticker === ticker && p.type === 'C' && p.side === 'S'
+    );
+
+    if (shortCalls.length === 0) {
+      // No calls yet - minimum strike depends on premium received
+      // Without premium, we can't calculate exact minimum strike
+      // Show average cost as reference (minimum strike will be lower than this)
+      return {
+        minimumStrike: avgCost,
+        hasOpenCalls: false,
+        allProfitable: true,
+        anyProfitable: true,
+        note: 'Based on avg cost (premium will lower min strike)',
+      };
+    }
+
+    // Calculate average premium per share from open calls
+    const totalPremium = shortCalls.reduce((sum, p) => sum + p.entry * p.qty, 0);
+    const totalContracts = shortCalls.reduce((sum, p) => sum + p.qty, 0);
+    const avgPremiumPerShare = totalContracts > 0 ? totalPremium / totalContracts : 0;
+
+    const minimumStrike = avgCost - avgPremiumPerShare;
+
+    // Check if all/any calls are profitable
+    const profitableCalls = shortCalls.filter(p => p.strike >= minimumStrike);
+    const allProfitable = profitableCalls.length === shortCalls.length;
+    const anyProfitable = profitableCalls.length > 0;
+
+    return {
+      minimumStrike,
+      hasOpenCalls: true,
+      allProfitable,
+      anyProfitable,
+      openCallsCount: shortCalls.length,
+    };
+  }, [phase, avgCost, positions, ticker]);
 
   // Determine action button based on phase
   const getPhaseAction = () => {
@@ -180,11 +236,41 @@ export const TickerPhaseRow: React.FC<{ ticker: string }> = ({ ticker }) => {
         >
           {phase}
         </span>
+        {minStrikeInfo && (
+          <span
+            className="rounded px-2 py-1 text-xs font-semibold"
+            style={{
+              border: minStrikeInfo.allProfitable
+                ? '1px solid rgba(34, 197, 94, 0.5)'
+                : minStrikeInfo.anyProfitable
+                  ? '1px solid rgba(251, 146, 60, 0.5)'
+                  : '1px solid rgba(239, 68, 68, 0.5)',
+              background: minStrikeInfo.allProfitable
+                ? 'rgba(34, 197, 94, 0.15)'
+                : minStrikeInfo.anyProfitable
+                  ? 'rgba(251, 146, 60, 0.15)'
+                  : 'rgba(239, 68, 68, 0.15)',
+              color: minStrikeInfo.allProfitable
+                ? '#22C55E'
+                : minStrikeInfo.anyProfitable
+                  ? '#FB923C'
+                  : '#EF4444',
+            }}
+            title={
+              minStrikeInfo.hasOpenCalls
+                ? `Min Strike: $${fmt(minStrikeInfo.minimumStrike, 2)} | Avg Cost: $${fmt(avgCost, 2)} | ${minStrikeInfo.openCallsCount} call${minStrikeInfo.openCallsCount > 1 ? 's' : ''} ${minStrikeInfo.allProfitable ? 'all profitable' : minStrikeInfo.anyProfitable ? 'some profitable' : 'all losing'}`
+                : `Avg Cost: $${fmt(avgCost, 2)} | Min Strike will be lower than avg cost (depends on premium received)`
+            }
+          >
+            {minStrikeInfo.allProfitable ? '✓' : minStrikeInfo.anyProfitable ? '⚠' : '⚠'} Min
+            Strike: ${fmt(minStrikeInfo.minimumStrike, 2)}
+          </span>
+        )}
       </div>
-      <div className="relative ml-auto z-10">
+      <div className="relative z-10 ml-auto">
         <DropdownMenu
           align="right"
-          className="[&>button]:rounded! [&>button]:px-1.5! [&>button]:py-0.5! [&>button]:text-xs! [&>button]:font-semibold! [&>button]:transition-all! [&>button]:border! [&>button]:border-[rgba(245,179,66,0.3)]! [&>button]:bg-[rgba(245,179,66,0.08)]! [&>button]:text-[#F5B342]! [&>button]:shadow-[0_0_4px_rgba(245,179,66,0.06)]! [&>button]:hover:border-[rgba(245,179,66,0.5)]! [&>button]:hover:bg-[rgba(245,179,66,0.15)]! [&>button]:hover:shadow-[0_0_6px_rgba(245,179,66,0.1)]! [&>button]:flex! [&>button]:items-center! [&>button]:gap-1! [&>button]:min-w-0! [&>button_svg:last-child]:hidden!"
+          className="[&>button]:flex! [&>button]:min-w-0! [&>button]:items-center! [&>button]:gap-1! [&>button]:rounded! [&>button]:border! [&>button]:border-[rgba(245,179,66,0.3)]! [&>button]:bg-[rgba(245,179,66,0.08)]! [&>button]:px-1.5! [&>button]:py-0.5! [&>button]:text-xs! [&>button]:font-semibold! [&>button]:text-[#F5B342]! [&>button]:shadow-[0_0_4px_rgba(245,179,66,0.06)]! [&>button]:transition-all! [&>button]:hover:border-[rgba(245,179,66,0.5)]! [&>button]:hover:bg-[rgba(245,179,66,0.15)]! [&>button]:hover:shadow-[0_0_6px_rgba(245,179,66,0.1)]! [&>button_svg:last-child]:hidden!"
           trigger={<Icon icon="mdi:dots-vertical" className="h-4 w-4" />}
           items={[
             ...(phaseAction
@@ -204,6 +290,10 @@ export const TickerPhaseRow: React.FC<{ ticker: string }> = ({ ticker }) => {
             },
             {
               label: 'Close Position',
+              onClick: handleClosePosition,
+            },
+            {
+              label: 'Delete',
               onClick: handleClosePosition,
             },
           ]}

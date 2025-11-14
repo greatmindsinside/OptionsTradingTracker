@@ -133,7 +133,7 @@ test.describe('Robinhood CSV Import', () => {
     try {
       const importResult = page.getByTestId('drawer.import');
       const resultText = await importResult.textContent();
-      
+
       // Should show error or have no success message
       if (resultText) {
         expect(resultText).not.toContain('Import Successful');

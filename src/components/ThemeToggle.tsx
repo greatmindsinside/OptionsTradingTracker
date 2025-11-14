@@ -1,5 +1,5 @@
 import type { Theme } from '../contexts/theme';
-import { useIsDark,useTheme } from '../hooks/useTheme';
+import { useIsDark, useTheme } from '../hooks/useTheme';
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();

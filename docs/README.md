@@ -58,6 +58,7 @@ Welcome to the Options Trading Tracker documentation. This guide will help you f
 ### Troubleshooting
 
 See `troubleshooting/` folder for:
+
 - Known issues and solutions
 - Common error messages
 - Debugging guides
@@ -65,6 +66,7 @@ See `troubleshooting/` folder for:
 ### Historical Reports
 
 See `archive/` and `reports/` folders for:
+
 - Past technical reports
 - Cleanup summaries
 - Migration documentation
@@ -73,6 +75,7 @@ See `archive/` and `reports/` folders for:
 ### Completed Work
 
 See `complete/` folder for:
+
 - Archived project tracking
 - Finished work summaries
 
@@ -81,16 +84,19 @@ See `complete/` folder for:
 ## 🚀 Quick Links
 
 **Getting Started:**
+
 1. Read [../README.md](../README.md) for quick start
 2. Check [FEATURES.md](FEATURES.md) to understand capabilities
 3. Follow [DEVELOPMENT.md](DEVELOPMENT.md) to set up your environment
 
 **Feature Development:**
+
 1. Review [DATA_ARCHITECTURE.md](DATA_ARCHITECTURE.md) for system design
 2. Follow code standards in [DEVELOPMENT.md](DEVELOPMENT.md#code-standards)
 3. Update [CHANGELOG.md](CHANGELOG.md) with your changes
 
 **Troubleshooting:**
+
 1. Check [troubleshooting/](troubleshooting/) for known issues
 2. Review [CHANGELOG.md](CHANGELOG.md) for recent changes
 3. Search GitHub Issues

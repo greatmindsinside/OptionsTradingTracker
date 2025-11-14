@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 
-import { useTerminalStore } from '@/stores/useTerminalStore';
 import { useFilterStore } from '@/stores/useFilterStore';
+import { useTerminalStore } from '@/stores/useTerminalStore';
 import { useWheelUIStore } from '@/stores/useWheelUIStore';
 
 /**
@@ -38,11 +38,16 @@ export function AppHeader() {
   const importing = useWheelUIStore(s => s.importing);
 
   // Journal page actions
-  const [journalNewEntryOpen, setJournalNewEntryOpen] = useState(false);
+  const [, setJournalNewEntryOpen] = useState(false);
 
   // Observer Effect Terminal trigger mechanism
-  const { isUnlocked, unlock, open: openTerminal, addSequenceStep, resetSequence } =
-    useTerminalStore();
+  const {
+    isUnlocked,
+    unlock,
+    open: openTerminal,
+    addSequenceStep,
+    resetSequence,
+  } = useTerminalStore();
   const [hiddenInput, setHiddenInput] = useState('');
   const sequenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const requiredSequence = useMemo(() => ['heisenberg', 'schrödinger', 'bohr'], []);
@@ -70,8 +75,9 @@ export function AppHeader() {
     const { sequenceProgress } = useTerminalStore.getState();
     if (sequenceProgress.length >= 3) {
       const normalizedProgress = sequenceProgress.map(s => s.toLowerCase().trim());
-      const isComplete =
-        normalizedProgress.slice(-3).every((step, idx) => step === requiredSequence[idx]);
+      const isComplete = normalizedProgress
+        .slice(-3)
+        .every((step, idx) => step === requiredSequence[idx]);
 
       if (isComplete && !isUnlocked) {
         unlock();
@@ -100,15 +106,20 @@ export function AppHeader() {
         }, 2000);
       }
     }
-  }, [hiddenInput, isUnlocked, unlock, openTerminal, addSequenceStep, resetSequence, requiredSequence]);
+  }, [
+    hiddenInput,
+    isUnlocked,
+    unlock,
+    openTerminal,
+    addSequenceStep,
+    resetSequence,
+    requiredSequence,
+  ]);
 
   // Handle keyboard input for sequence
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
-      ) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
         return;
       }
 
@@ -207,7 +218,7 @@ export function AppHeader() {
             className="h-10 max-h-10 w-auto object-contain"
             loading="eager"
             decoding="sync"
-            onError={(e) => {
+            onError={e => {
               const img = e.currentTarget as HTMLImageElement;
               img.onerror = null;
               img.src = '/vite.svg';
@@ -268,7 +279,7 @@ export function AppHeader() {
               placeholder={
                 isWheelPage ? 'Search tickers...' : 'Search symbol, notes, type, amount...'
               }
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-900/50 py-1.5 px-4 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-600"
+              className="w-full rounded-lg border border-zinc-700 bg-zinc-900/50 px-4 py-1.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 focus:outline-none"
               aria-label={isWheelPage ? 'Filter tickers' : 'Search journal entries'}
             />
           </div>
@@ -279,7 +290,7 @@ export function AppHeader() {
           {isWheelPage && (
             <button
               onClick={handleActionClick}
-              className="rounded-lg bg-zinc-800 px-4 py-1.5 text-sm font-medium text-zinc-100 transition-colors hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-lg bg-zinc-800 px-4 py-1.5 text-sm font-medium text-zinc-100 transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={importing}
               aria-busy={importing}
               data-testid="wheel.action.open"

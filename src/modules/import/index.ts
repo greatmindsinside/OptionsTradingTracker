@@ -37,7 +37,7 @@ export type {
   ValidationOptions,
   ValidationWarning,
 } from './validation-service';
-export { DEFAULT_VALIDATION_OPTIONS,ImportValidationService } from './validation-service';
+export { DEFAULT_VALIDATION_OPTIONS, ImportValidationService } from './validation-service';
 
 // Symbol Service
 export type {
@@ -47,7 +47,7 @@ export type {
   SymbolNormalizationOptions,
   SymbolNormalizationResult,
 } from './symbol-service';
-export { DEFAULT_NORMALIZATION_OPTIONS,SymbolNormalizationService } from './symbol-service';
+export { DEFAULT_NORMALIZATION_OPTIONS, SymbolNormalizationService } from './symbol-service';
 
 // Progress Tracking
 export type {

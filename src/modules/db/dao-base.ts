@@ -6,7 +6,7 @@ import {
   QueryHelper,
   type QueryResult,
 } from './query-helpers';
-import { DatabaseError, NotFoundError,ValidationError } from './query-helpers';
+import { DatabaseError, NotFoundError, ValidationError } from './query-helpers';
 import type { SQLiteDatabase, SqlValue } from './sqlite';
 
 /**
@@ -339,4 +339,4 @@ export interface DAOOptions {
 /**
  * Export common error types for DAO implementations
  */
-export { DatabaseError, NotFoundError,ValidationError };
+export { DatabaseError, NotFoundError, ValidationError };

@@ -96,9 +96,7 @@ export const useTerminalStore = create<TerminalState>(set => ({
   toggleBlur: () => set(s => ({ blurEnabled: !s.blurEnabled })),
   collapseState: id =>
     set(s => ({
-      history: s.history.map(state =>
-        state.id === id ? { ...state, collapsed: true } : state
-      ),
+      history: s.history.map(state => (state.id === id ? { ...state, collapsed: true } : state)),
     })),
   addSequenceStep: step =>
     set(s => {
@@ -121,4 +119,3 @@ export const useTerminalStore = create<TerminalState>(set => ({
     }),
   resetSequence: () => set({ sequenceProgress: [] }),
 }));
-

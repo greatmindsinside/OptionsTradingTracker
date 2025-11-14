@@ -29,14 +29,16 @@ test.describe('Journal -> Wheel sync', () => {
       // Entry might be saved but not visible yet - proceed anyway
       console.log('Entry might not be visible yet, proceeding to Wheel page');
     }
-    
+
     // Give additional time for database sync
     await page.waitForTimeout(2000);
 
     // Take a full-page screenshot of the Journal page after save (optional, skip if it takes too long)
     try {
       const journalFull = await page.screenshot({ fullPage: true, timeout: 5000 });
-      await test.info().attach('journal-after-save', { body: journalFull, contentType: 'image/png' });
+      await test
+        .info()
+        .attach('journal-after-save', { body: journalFull, contentType: 'image/png' });
     } catch {
       // Skip screenshot if it times out - not critical for the test
     }
@@ -56,10 +58,10 @@ test.describe('Journal -> Wheel sync', () => {
       },
       { timeout: 10000 }
     );
-    
+
     // Give additional time for data processing and database sync
     await page.waitForTimeout(3000);
-    
+
     // Reload the page to ensure fresh data is loaded from the database
     await page.reload();
     await page.waitForLoadState('networkidle');

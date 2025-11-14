@@ -81,7 +81,9 @@ export const AlertDetailModal: React.FC<AlertDetailModalProps> = ({ alert, onClo
             {/* Category */}
             <div>
               <h3 className="mb-2 text-sm font-semibold text-slate-300">Category</h3>
-              <p className="text-sm text-slate-400 capitalize">{alert.category.replace('_', ' ')}</p>
+              <p className="text-sm text-slate-400 capitalize">
+                {alert.category.replace('_', ' ')}
+              </p>
             </div>
 
             {/* Metadata */}
@@ -120,7 +122,10 @@ export const AlertDetailModal: React.FC<AlertDetailModalProps> = ({ alert, onClo
                         border: `1px solid ${config.borderColor}`,
                       }}
                       onMouseEnter={e => {
-                        e.currentTarget.style.backgroundColor = config.bgColor.replace('0.15', '0.25');
+                        e.currentTarget.style.backgroundColor = config.bgColor.replace(
+                          '0.15',
+                          '0.25'
+                        );
                       }}
                       onMouseLeave={e => {
                         e.currentTarget.style.backgroundColor = config.bgColor;
@@ -138,4 +143,3 @@ export const AlertDetailModal: React.FC<AlertDetailModalProps> = ({ alert, onClo
     </div>
   );
 };
-

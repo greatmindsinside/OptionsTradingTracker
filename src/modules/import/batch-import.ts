@@ -10,7 +10,7 @@
 import { PortfolioDAO } from '../db/portfolio-dao';
 import type { SQLiteDatabase } from '../db/sqlite';
 import { SymbolDAO } from '../db/symbol-dao';
-import { type DatabaseTrade,TradeDAO } from '../db/trade-dao';
+import { type DatabaseTrade, TradeDAO } from '../db/trade-dao';
 import type { Portfolio } from '../db/validation';
 import {
   type BrokerDetectionResult,

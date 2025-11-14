@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@/components/Button';
+import { SymbolInput } from '@/components/SymbolInput';
 import { Input } from '@/components/ui/Input';
 import { useEntriesStore } from '@/stores/useEntriesStore';
 import { useJournalUIStore } from '@/stores/useJournalUIStore';
@@ -39,6 +40,13 @@ export const JournalDrawer: React.FC = () => {
   const [form, setForm] = useState<Partial<Entry>>({});
   const [reason, setReason] = useState('');
   const [saving, setSaving] = useState(false);
+  const [strikeInput, setStrikeInput] = useState<string>('');
+  const [underlyingPriceInput, setUnderlyingPriceInput] = useState<string>('');
+  const [amountInput, setAmountInput] = useState<string>('');
+  const [deltaInput, setDeltaInput] = useState<string>('');
+  const [ivRankInput, setIvRankInput] = useState<string>('');
+  const [ivPercentileInput, setIvPercentileInput] = useState<string>('');
+  const [commissionInput, setCommissionInput] = useState<string>('');
 
   // Initialize form from selected entry
   useEffect(() => {
@@ -71,8 +79,36 @@ export const JournalDrawer: React.FC = () => {
         notes: entry.notes ?? '',
         meta: parsedMeta,
       });
+      setStrikeInput(
+        entry.strike !== null && entry.strike !== undefined ? String(entry.strike) : ''
+      );
+      setUnderlyingPriceInput(
+        entry.underlying_price !== null && entry.underlying_price !== undefined
+          ? String(entry.underlying_price)
+          : ''
+      );
+      setAmountInput(
+        entry.amount !== null && entry.amount !== undefined ? String(entry.amount) : ''
+      );
+
+      // Initialize meta field inputs
+      const meta = parsedMeta || {};
+      setDeltaInput(meta.delta !== null && meta.delta !== undefined ? String(meta.delta) : '');
+      setIvRankInput(
+        meta.iv_rank !== null && meta.iv_rank !== undefined ? String(meta.iv_rank) : ''
+      );
+      setIvPercentileInput(
+        meta.iv_percentile !== null && meta.iv_percentile !== undefined
+          ? String(meta.iv_percentile)
+          : ''
+      );
+      setCommissionInput(
+        meta.commission !== null && meta.commission !== undefined ? String(meta.commission) : ''
+      );
+
       setReason('');
-      if (open) track('journal_edit_open', { id: entry.id, symbol: entry.symbol, type: entry.type });
+      if (open)
+        track('journal_edit_open', { id: entry.id, symbol: entry.symbol, type: entry.type });
     }
   }, [entry, open]);
 
@@ -134,7 +170,10 @@ export const JournalDrawer: React.FC = () => {
       account_id: form.account_id,
       symbol: (form.symbol || '').toUpperCase(),
       type: form.type as TradeType,
-  qty: form.qty === undefined || form.qty === null || (form.qty as unknown) === '' ? null : Number(form.qty),
+      qty:
+        form.qty === undefined || form.qty === null || (form.qty as unknown) === ''
+          ? null
+          : Number(form.qty),
       amount: form.amount === undefined ? entry.amount : Number(form.amount),
       strike:
         form.strike === undefined || form.strike === null || (form.strike as unknown) === ''
@@ -186,11 +225,18 @@ export const JournalDrawer: React.FC = () => {
   };
 
   // Type options
-  const typeOptions = useMemo(() => (TradeTypeSchema.options as string[]).map(t => ({ value: t, label: t.replaceAll('_', ' ') })), []);
+  const typeOptions = useMemo(
+    () =>
+      (TradeTypeSchema.options as string[]).map(t => ({ value: t, label: t.replaceAll('_', ' ') })),
+    []
+  );
 
   // Calculate DTE
-  const dte = calculateDTE(form.ts || entry?.ts || null, form.expiration || entry?.expiration || null);
-  
+  const dte = calculateDTE(
+    form.ts || entry?.ts || null,
+    form.expiration || entry?.expiration || null
+  );
+
   // Amount sign helper
   const isCredit = (form.amount ?? 0) > 0;
   const isDebit = (form.amount ?? 0) < 0;
@@ -220,41 +266,46 @@ export const JournalDrawer: React.FC = () => {
   };
 
   // Calculate derived metrics
-  const premiumPerDay = dte && dte > 0 && form.amount && isCredit 
-    ? (form.amount / dte).toFixed(2) 
-    : null;
-  
-  const breakeven = form.strike && form.amount && form.qty
-    ? (() => {
-        const premiumPerContract = Math.abs(form.amount) / (form.qty || 1);
-        const isPut = form.type === 'sell_to_open' || form.type === 'buy_to_close';
-        return isPut 
-          ? (form.strike - premiumPerContract).toFixed(2)
-          : (form.strike + premiumPerContract).toFixed(2);
-      })()
-    : null;
+  const premiumPerDay =
+    dte && dte > 0 && form.amount && isCredit ? (form.amount / dte).toFixed(2) : null;
+
+  const breakeven =
+    form.strike && form.amount && form.qty
+      ? (() => {
+          const premiumPerContract = Math.abs(form.amount) / (form.qty || 1);
+          const isPut = form.type === 'sell_to_open' || form.type === 'buy_to_close';
+          return isPut
+            ? (form.strike - premiumPerContract).toFixed(2)
+            : (form.strike + premiumPerContract).toFixed(2);
+        })()
+      : null;
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-40" aria-modal role="dialog" aria-labelledby="journal-edit-title">
+    <div
+      className="fixed inset-0 z-40"
+      aria-modal
+      role="dialog"
+      aria-labelledby="journal-edit-title"
+    >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onOverlayClick} />
-      <div className="absolute top-0 right-0 bottom-0 w-full max-w-3xl border-l border-[rgba(245,179,66,0.3)] bg-zinc-950/95 shadow-2xl shadow-[rgba(245,179,66,0.2)] overflow-y-auto">
+      <div className="absolute top-0 right-0 bottom-0 w-full max-w-3xl overflow-y-auto border-l border-[rgba(245,179,66,0.3)] bg-zinc-950/95 shadow-2xl shadow-[rgba(245,179,66,0.2)]">
         {/* Header */}
         <div className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/95 p-3 backdrop-blur-sm">
           <div className="mb-2 flex items-center justify-between">
             <h2 id="journal-edit-title" className="text-base font-semibold text-[#F5B342]">
               Edit Entry
             </h2>
-            <button 
-              onClick={onOverlayClick} 
+            <button
+              onClick={onOverlayClick}
               className="rounded-lg px-2.5 py-1 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
               aria-label="Close"
             >
               Close
             </button>
           </div>
-          
+
           {/* Pills and Meta */}
           <div className="flex flex-wrap items-center gap-1.5">
             <div className="rounded-full bg-[rgba(245,179,66,0.2)] px-2.5 py-0.5 text-xs font-medium text-[#F5B342]">
@@ -277,25 +328,27 @@ export const JournalDrawer: React.FC = () => {
         </div>
 
         {/* Body: Single Column Layout */}
-        <div className="p-3 space-y-6">
+        <div className="space-y-6 p-3">
           <div className="space-y-6">
             {/* Entry Identity Card */}
             <div className="rounded-2xl border border-[rgba(245,179,66,0.3)] bg-linear-to-br from-black/80 to-[rgba(11,15,14,0.8)] p-5 shadow-lg shadow-[rgba(245,179,66,0.2)] backdrop-blur-xl">
-              <h3 className="mb-3 text-sm font-semibold tracking-wide text-[#F5B342] uppercase">📊 Entry Identity</h3>
+              <h3 className="mb-3 text-sm font-semibold tracking-wide text-[#F5B342] uppercase">
+                📊 Entry Identity
+              </h3>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Input 
-                    label="Symbol" 
-                    value={form.symbol ?? entry?.symbol ?? ''} 
-                    onChange={e => setForm(f => ({ ...f, symbol: e.target.value.toUpperCase() }))} 
-                    disabled={disabled} 
-                    placeholder="e.g., AAPL, SPY" 
+                  <SymbolInput
+                    label="Symbol"
+                    value={form.symbol ?? entry?.symbol ?? ''}
+                    onChange={value => setForm(f => ({ ...f, symbol: value.toUpperCase() }))}
+                    disabled={disabled}
+                    placeholder="e.g., AAPL, SPY"
                   />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-zinc-200">Type</label>
                   <select
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 focus:border-[#F5B342] focus:outline-none focus:ring-2 focus:ring-[rgba(245,179,66,0.3)]"
+                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 focus:border-[#F5B342] focus:ring-2 focus:ring-[rgba(245,179,66,0.3)] focus:outline-none"
                     value={(form.type as string) ?? entry?.type ?? ''}
                     onChange={e => setForm(f => ({ ...f, type: e.target.value as TradeType }))}
                     disabled={disabled}
@@ -308,12 +361,12 @@ export const JournalDrawer: React.FC = () => {
                   </select>
                 </div>
                 <div className="col-span-2">
-                  <Input 
-                    label="Account" 
-                    value={form.account_id ?? entry?.account_id ?? ''} 
-                    onChange={e => setForm(f => ({ ...f, account_id: e.target.value }))} 
-                    disabled={disabled} 
-                    placeholder="e.g., Main-Brokerage" 
+                  <Input
+                    label="Account"
+                    value={form.account_id ?? entry?.account_id ?? ''}
+                    onChange={e => setForm(f => ({ ...f, account_id: e.target.value }))}
+                    disabled={disabled}
+                    placeholder="e.g., Main-Brokerage"
                   />
                 </div>
               </div>
@@ -321,16 +374,20 @@ export const JournalDrawer: React.FC = () => {
 
             {/* Contract Details Card */}
             <div className="rounded-2xl border border-[rgba(245,179,66,0.3)] bg-linear-to-br from-black/80 to-[rgba(11,15,14,0.8)] p-5 shadow-lg shadow-[rgba(245,179,66,0.2)] backdrop-blur-xl">
-              <h3 className="mb-3 text-sm font-semibold tracking-wide text-[#F5B342] uppercase">📋 Contract Details</h3>
+              <h3 className="mb-3 text-sm font-semibold tracking-wide text-[#F5B342] uppercase">
+                📋 Contract Details
+              </h3>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-zinc-200">
-                    {form.type === 'assignment_shares' || form.type === 'share_sale' ? 'Shares' : 'Contracts'}
+                    {form.type === 'assignment_shares' || form.type === 'share_sale'
+                      ? 'Shares'
+                      : 'Contracts'}
                   </label>
                   <input
                     type="text"
                     inputMode="numeric"
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 focus:outline-none"
                     value={form.qty === null || form.qty === undefined ? '' : String(form.qty)}
                     onChange={e => {
                       const val = e.target.value;
@@ -344,31 +401,75 @@ export const JournalDrawer: React.FC = () => {
                       }
                     }}
                     disabled={disabled}
-                    placeholder={form.type === 'assignment_shares' || form.type === 'share_sale' ? 'e.g., 100' : 'e.g., 1'}
+                    placeholder={
+                      form.type === 'assignment_shares' || form.type === 'share_sale'
+                        ? 'e.g., 100'
+                        : 'e.g., 1'
+                    }
                   />
-                  <p className="mt-1 text-[11px] text-zinc-500">Number of {form.type === 'assignment_shares' || form.type === 'share_sale' ? 'shares' : 'option contracts'}</p>
+                  <p className="mt-1 text-[11px] text-zinc-500">
+                    Number of{' '}
+                    {form.type === 'assignment_shares' || form.type === 'share_sale'
+                      ? 'shares'
+                      : 'option contracts'}
+                  </p>
                 </div>
-                
+
                 <div>
                   <label className="mb-1 block text-xs font-medium text-zinc-200">Strike</label>
                   <input
                     type="text"
                     inputMode="decimal"
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-                    value={(form.strike ?? entry?.strike ?? '') as number | string}
-                    onChange={e => setForm(f => ({ ...f, strike: e.target.value === '' ? null : Number(e.target.value) }))}
+                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 focus:outline-none"
+                    value={strikeInput}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setStrikeInput(val);
+                      // Update form state with parsed number or null
+                      if (val === '') {
+                        setForm(f => ({ ...f, strike: null }));
+                      } else {
+                        const num = parseFloat(val);
+                        setForm(f => ({ ...f, strike: isNaN(num) ? null : num }));
+                      }
+                    }}
+                    onBlur={e => {
+                      // Normalize the value on blur
+                      const val = e.target.value.trim();
+                      if (val === '') {
+                        setStrikeInput('');
+                        setForm(f => ({ ...f, strike: null }));
+                      } else {
+                        const num = parseFloat(val);
+                        if (isNaN(num)) {
+                          // Invalid input, reset to previous value
+                          setStrikeInput(
+                            form.strike !== null && form.strike !== undefined
+                              ? String(form.strike)
+                              : ''
+                          );
+                        } else {
+                          setStrikeInput(String(num));
+                          setForm(f => ({ ...f, strike: num }));
+                        }
+                      }
+                    }}
                     disabled={disabled}
                     placeholder="e.g., 170.00"
                   />
                 </div>
-                
+
                 <div className="col-span-2">
-                  <label className="mb-1 block text-xs font-medium text-zinc-200">Expiration Date</label>
+                  <label className="mb-1 block text-xs font-medium text-zinc-200">
+                    Expiration Date
+                  </label>
                   <input
                     type="date"
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 focus:border-[#F5B342] focus:outline-none focus:ring-2 focus:ring-[rgba(245,179,66,0.3)]"
+                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 focus:border-[#F5B342] focus:ring-2 focus:ring-[rgba(245,179,66,0.3)] focus:outline-none"
                     value={toYmd(form.expiration ?? entry?.expiration ?? null)}
-                    onChange={e => setForm(f => ({ ...f, expiration: e.target.value ? e.target.value : null }))}
+                    onChange={e =>
+                      setForm(f => ({ ...f, expiration: e.target.value ? e.target.value : null }))
+                    }
                     disabled={disabled}
                   />
                   <p className="mt-1 text-[11px] text-zinc-500">Options contract expiration</p>
@@ -378,30 +479,64 @@ export const JournalDrawer: React.FC = () => {
 
             {/* Market Context Card */}
             <div className="rounded-2xl border border-[rgba(245,179,66,0.3)] bg-linear-to-br from-black/80 to-[rgba(11,15,14,0.8)] p-5 shadow-lg shadow-[rgba(245,179,66,0.2)] backdrop-blur-xl">
-              <h3 className="mb-3 text-sm font-semibold tracking-wide text-[#F5B342] uppercase">📅 Market Context</h3>
+              <h3 className="mb-3 text-sm font-semibold tracking-wide text-[#F5B342] uppercase">
+                📅 Market Context
+              </h3>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Input 
-                    label="Trade Date" 
-                    type="date" 
-                    value={toYmd(form.ts || entry?.ts || '')} 
-                    onChange={e => setForm(f => ({ ...f, ts: e.target.value }))} 
-                    disabled={disabled} 
+                  <Input
+                    label="Trade Date"
+                    type="date"
+                    value={toYmd(form.ts || entry?.ts || '')}
+                    onChange={e => setForm(f => ({ ...f, ts: e.target.value }))}
+                    disabled={disabled}
                   />
                   <p className="mt-1 text-[11px] text-zinc-500">When the trade was executed</p>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-zinc-200">Underlying Price</label>
+                  <label className="mb-1 block text-xs font-medium text-zinc-200">
+                    Underlying Price
+                  </label>
                   <input
                     type="text"
                     inputMode="decimal"
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-                    value={(form.underlying_price ?? entry?.underlying_price ?? '') as number | string}
-                    onChange={e => setForm(f => ({ ...f, underlying_price: e.target.value === '' ? null : Number(e.target.value) }))}
+                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 focus:outline-none"
+                    value={underlyingPriceInput}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setUnderlyingPriceInput(val);
+                      if (val === '') {
+                        setForm(f => ({ ...f, underlying_price: null }));
+                      } else {
+                        const num = parseFloat(val);
+                        setForm(f => ({ ...f, underlying_price: isNaN(num) ? null : num }));
+                      }
+                    }}
+                    onBlur={e => {
+                      const val = e.target.value.trim();
+                      if (val === '') {
+                        setUnderlyingPriceInput('');
+                        setForm(f => ({ ...f, underlying_price: null }));
+                      } else {
+                        const num = parseFloat(val);
+                        if (isNaN(num)) {
+                          setUnderlyingPriceInput(
+                            form.underlying_price !== null && form.underlying_price !== undefined
+                              ? String(form.underlying_price)
+                              : ''
+                          );
+                        } else {
+                          setUnderlyingPriceInput(String(num));
+                          setForm(f => ({ ...f, underlying_price: num }));
+                        }
+                      }
+                    }}
                     disabled={disabled}
                     placeholder="e.g., 172.50"
                   />
-                  <p className="mt-1 text-[11px] text-zinc-500">Stock price when you entered the trade</p>
+                  <p className="mt-1 text-[11px] text-zinc-500">
+                    Stock price when you entered the trade
+                  </p>
                 </div>
               </div>
             </div>
@@ -409,98 +544,256 @@ export const JournalDrawer: React.FC = () => {
             {/* Money Card */}
             <div className="rounded-2xl border border-green-500/30 bg-linear-to-br from-black/80 to-green-950/20 p-5 shadow-lg shadow-green-500/20 backdrop-blur-xl">
               <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-sm font-semibold tracking-wide text-green-400 uppercase">💰 Money</h3>
-                {(form.type === 'assignment_shares' || form.type === 'share_sale') && form.qty && form.strike && (
-                  <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-medium text-emerald-400">✓ Auto-calculated</span>
-                )}
+                <h3 className="text-sm font-semibold tracking-wide text-green-400 uppercase">
+                  💰 Money
+                </h3>
+                {(form.type === 'assignment_shares' || form.type === 'share_sale') &&
+                  form.qty &&
+                  form.strike && (
+                    <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-medium text-emerald-400">
+                      ✓ Auto-calculated
+                    </span>
+                  )}
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-zinc-200">Amount</label>
                 <input
                   type="text"
                   inputMode="decimal"
-                  value={String(form.amount ?? entry?.amount ?? 0)}
-                  onChange={e => setForm(f => ({ ...f, amount: e.target.value === '' ? 0 : Number(e.target.value) }))}
+                  value={amountInput}
+                  onChange={e => {
+                    const val = e.target.value;
+                    setAmountInput(val);
+                    if (val === '') {
+                      setForm(f => ({ ...f, amount: 0 }));
+                    } else {
+                      const num = parseFloat(val);
+                      setForm(f => ({ ...f, amount: isNaN(num) ? 0 : num }));
+                    }
+                  }}
+                  onBlur={e => {
+                    const val = e.target.value.trim();
+                    if (val === '') {
+                      setAmountInput('0');
+                      setForm(f => ({ ...f, amount: 0 }));
+                    } else {
+                      const num = parseFloat(val);
+                      if (isNaN(num)) {
+                        setAmountInput(
+                          form.amount !== null && form.amount !== undefined
+                            ? String(form.amount)
+                            : '0'
+                        );
+                      } else {
+                        setAmountInput(String(num));
+                        setForm(f => ({ ...f, amount: num }));
+                      }
+                    }
+                  }}
                   disabled={disabled}
                   placeholder="0.00"
-                  className={`w-full rounded-lg border bg-zinc-900/60 px-4 py-3 text-lg font-bold placeholder:text-zinc-500/50 focus:outline-none focus:ring-2 focus:ring-green-500/30 ${
+                  className={`w-full rounded-lg border bg-zinc-900/60 px-4 py-3 text-lg font-bold placeholder:text-zinc-500/50 focus:ring-2 focus:ring-green-500/30 focus:outline-none ${
                     isCredit
                       ? 'border-green-500/50 text-green-400 focus:border-green-400'
                       : isDebit
-                      ? 'border-red-500/50 text-red-400 focus:border-red-400'
-                      : 'border-green-500/30 text-green-400 focus:border-green-400'
+                        ? 'border-red-500/50 text-red-400 focus:border-red-400'
+                        : 'border-green-500/30 text-green-400 focus:border-green-400'
                   }`}
                 />
-                <p className={`mt-2 text-xs ${
-                  isCredit ? 'text-green-400/80' : isDebit ? 'text-red-400/80' : 'text-zinc-500'
-                }`}>
-                  {isCredit ? 'Credit adds to your cash' : isDebit ? 'Debit reduces your cash' : 'Enter the net cash flow'}
+                <p
+                  className={`mt-2 text-xs ${
+                    isCredit ? 'text-green-400/80' : isDebit ? 'text-red-400/80' : 'text-zinc-500'
+                  }`}
+                >
+                  {isCredit
+                    ? 'Credit adds to your cash'
+                    : isDebit
+                      ? 'Debit reduces your cash'
+                      : 'Enter the net cash flow'}
                 </p>
               </div>
             </div>
 
             {/* Options Analytics Card */}
             <div className="rounded-2xl border border-green-500/30 bg-linear-to-br from-black/80 to-green-950/20 p-5 shadow-lg shadow-green-500/20 backdrop-blur-xl">
-              <h3 className="mb-3 text-sm font-semibold tracking-wide text-green-400 uppercase">📊 Options Analytics</h3>
+              <h3 className="mb-3 text-sm font-semibold tracking-wide text-green-400 uppercase">
+                📊 Options Analytics
+              </h3>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-zinc-200">Delta</label>
                   <input
                     type="text"
                     inputMode="decimal"
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-                    value={getMetaValue('delta') ?? ''}
-                    onChange={e => setMetaValue('delta', e.target.value === '' ? null : Number(e.target.value))}
+                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 focus:outline-none"
+                    value={deltaInput}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setDeltaInput(val);
+                      if (val === '') {
+                        setMetaValue('delta', null);
+                      } else {
+                        const num = parseFloat(val);
+                        setMetaValue('delta', isNaN(num) ? null : num);
+                      }
+                    }}
+                    onBlur={e => {
+                      const val = e.target.value.trim();
+                      if (val === '') {
+                        setDeltaInput('');
+                        setMetaValue('delta', null);
+                      } else {
+                        const num = parseFloat(val);
+                        if (isNaN(num)) {
+                          setDeltaInput(
+                            getMetaValue('delta') !== null ? String(getMetaValue('delta')) : ''
+                          );
+                        } else {
+                          setDeltaInput(String(num));
+                          setMetaValue('delta', num);
+                        }
+                      }
+                    }}
                     disabled={disabled}
                     placeholder="e.g., 0.30"
                   />
-                  <p className="mt-1 text-[11px] text-zinc-500">Option delta (e.g., 0.30 for 30-delta)</p>
+                  <p className="mt-1 text-[11px] text-zinc-500">
+                    Option delta (e.g., 0.30 for 30-delta)
+                  </p>
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-zinc-200">IV Rank</label>
                   <input
                     type="text"
                     inputMode="numeric"
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-                    value={getMetaValue('iv_rank') ?? ''}
-                    onChange={e => setMetaValue('iv_rank', e.target.value === '' ? null : Number(e.target.value))}
+                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 focus:outline-none"
+                    value={ivRankInput}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setIvRankInput(val);
+                      if (val === '') {
+                        setMetaValue('iv_rank', null);
+                      } else {
+                        const num = parseFloat(val);
+                        setMetaValue('iv_rank', isNaN(num) ? null : num);
+                      }
+                    }}
+                    onBlur={e => {
+                      const val = e.target.value.trim();
+                      if (val === '') {
+                        setIvRankInput('');
+                        setMetaValue('iv_rank', null);
+                      } else {
+                        const num = parseFloat(val);
+                        if (isNaN(num)) {
+                          setIvRankInput(
+                            getMetaValue('iv_rank') !== null ? String(getMetaValue('iv_rank')) : ''
+                          );
+                        } else {
+                          setIvRankInput(String(num));
+                          setMetaValue('iv_rank', num);
+                        }
+                      }
+                    }}
                     disabled={disabled}
                     placeholder="e.g., 45"
                   />
                   <p className="mt-1 text-[11px] text-zinc-500">IV Rank (0-100)</p>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-zinc-200">IV Percentile</label>
+                  <label className="mb-1 block text-xs font-medium text-zinc-200">
+                    IV Percentile
+                  </label>
                   <input
                     type="text"
                     inputMode="numeric"
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-                    value={getMetaValue('iv_percentile') ?? ''}
-                    onChange={e => setMetaValue('iv_percentile', e.target.value === '' ? null : Number(e.target.value))}
+                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 focus:outline-none"
+                    value={ivPercentileInput}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setIvPercentileInput(val);
+                      if (val === '') {
+                        setMetaValue('iv_percentile', null);
+                      } else {
+                        const num = parseFloat(val);
+                        setMetaValue('iv_percentile', isNaN(num) ? null : num);
+                      }
+                    }}
+                    onBlur={e => {
+                      const val = e.target.value.trim();
+                      if (val === '') {
+                        setIvPercentileInput('');
+                        setMetaValue('iv_percentile', null);
+                      } else {
+                        const num = parseFloat(val);
+                        if (isNaN(num)) {
+                          setIvPercentileInput(
+                            getMetaValue('iv_percentile') !== null
+                              ? String(getMetaValue('iv_percentile'))
+                              : ''
+                          );
+                        } else {
+                          setIvPercentileInput(String(num));
+                          setMetaValue('iv_percentile', num);
+                        }
+                      }
+                    }}
                     disabled={disabled}
                     placeholder="e.g., 75"
                   />
                   <p className="mt-1 text-[11px] text-zinc-500">IV Percentile (0-100)</p>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-zinc-200">Commission/Fees</label>
+                  <label className="mb-1 block text-xs font-medium text-zinc-200">
+                    Commission/Fees
+                  </label>
                   <input
                     type="text"
                     inputMode="decimal"
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-                    value={getMetaValue('commission') ?? ''}
-                    onChange={e => setMetaValue('commission', e.target.value === '' ? null : Number(e.target.value))}
+                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 focus:outline-none"
+                    value={commissionInput}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setCommissionInput(val);
+                      if (val === '') {
+                        setMetaValue('commission', null);
+                      } else {
+                        const num = parseFloat(val);
+                        setMetaValue('commission', isNaN(num) ? null : num);
+                      }
+                    }}
+                    onBlur={e => {
+                      const val = e.target.value.trim();
+                      if (val === '') {
+                        setCommissionInput('');
+                        setMetaValue('commission', null);
+                      } else {
+                        const num = parseFloat(val);
+                        if (isNaN(num)) {
+                          setCommissionInput(
+                            getMetaValue('commission') !== null
+                              ? String(getMetaValue('commission'))
+                              : ''
+                          );
+                        } else {
+                          setCommissionInput(String(num));
+                          setMetaValue('commission', num);
+                        }
+                      }
+                    }}
                     disabled={disabled}
                     placeholder="e.g., 0.65"
                   />
                   <p className="mt-1 text-[11px] text-zinc-500">Broker commissions/fees</p>
                 </div>
               </div>
-              
+
               {/* Calculated Metrics Display */}
               {(dte !== null || premiumPerDay || breakeven) && (
                 <div className="mt-4 rounded-lg border border-zinc-700/50 bg-zinc-900/40 p-3">
-                  <h4 className="mb-2 text-xs font-semibold text-zinc-300 uppercase">Calculated Metrics</h4>
+                  <h4 className="mb-2 text-xs font-semibold text-zinc-300 uppercase">
+                    Calculated Metrics
+                  </h4>
                   <div className="grid grid-cols-3 gap-3 text-xs">
                     {dte !== null && (
                       <div>
@@ -528,27 +821,33 @@ export const JournalDrawer: React.FC = () => {
 
           {/* Bottom (Full Width): Notes & Reason Card */}
           <div className="rounded-2xl border border-green-500/30 bg-linear-to-br from-black/80 to-green-950/20 p-5 shadow-lg shadow-green-500/20 backdrop-blur-xl">
-            <h3 className="mb-4 text-sm font-semibold tracking-wide text-green-400 uppercase">📝 Notes & Reason</h3>
+            <h3 className="mb-4 text-sm font-semibold tracking-wide text-green-400 uppercase">
+              📝 Notes & Reason
+            </h3>
             <div className="space-y-4">
               <div>
                 <label className="mb-2 block text-xs font-medium text-zinc-200">Notes</label>
                 <textarea
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 min-h-[100px]"
-                  value={(form.notes as string) ?? (entry?.notes ?? '')}
+                  className="min-h-[100px] w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 focus:outline-none"
+                  value={(form.notes as string) ?? entry?.notes ?? ''}
                   onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
                   placeholder="e.g., Sold 30-delta put, IV Rank 45%, earnings next week"
                   disabled={disabled}
                 />
               </div>
               <div className="rounded-lg border border-amber-700/50 bg-linear-to-br from-amber-950/30 to-black/80 p-4">
-                <label className="mb-2 block text-xs font-medium text-amber-400">⚠️ Edit Reason (required)</label>
+                <label className="mb-2 block text-xs font-medium text-amber-400">
+                  ⚠️ Edit Reason (required)
+                </label>
                 <textarea
-                  className="w-full rounded-lg border border-amber-700/50 bg-amber-950/40 px-4 py-3 text-amber-100 placeholder-zinc-500 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/30 min-h-[100px]"
+                  className="min-h-[100px] w-full rounded-lg border border-amber-700/50 bg-amber-950/40 px-4 py-3 text-amber-100 placeholder-zinc-500 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 focus:outline-none"
                   value={reason}
                   onChange={e => setReason(e.target.value)}
                   placeholder="e.g., Correcting strike price from broker statement"
                 />
-                <p className="mt-2 text-[11px] text-amber-500">Creates a new corrected entry and soft-deletes the original.</p>
+                <p className="mt-2 text-[11px] text-amber-500">
+                  Creates a new corrected entry and soft-deletes the original.
+                </p>
               </div>
             </div>
           </div>

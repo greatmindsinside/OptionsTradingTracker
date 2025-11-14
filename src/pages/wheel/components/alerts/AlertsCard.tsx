@@ -25,9 +25,10 @@ const AlertsCardComponent: React.FC = () => {
                 backgroundColor:
                   urgentCount > 0 ? 'rgba(217, 119, 6, 0.25)' : 'rgba(245, 179, 66, 0.2)',
                 color: urgentCount > 0 ? '#D97706' : '#F5B342',
-                boxShadow: urgentCount > 0
-                  ? '0 0 8px rgba(217, 119, 6, 0.3)'
-                  : '0 0 6px rgba(245, 179, 66, 0.2)',
+                boxShadow:
+                  urgentCount > 0
+                    ? '0 0 8px rgba(217, 119, 6, 0.3)'
+                    : '0 0 6px rgba(245, 179, 66, 0.2)',
               }}
             >
               {alerts.length}
@@ -73,20 +74,27 @@ const AlertsCardComponent: React.FC = () => {
               onMouseEnter={e => {
                 if (!isUrgent) {
                   e.currentTarget.style.boxShadow = `0 0 16px ${glowColor}50, 0 0 24px ${glowColor}25, 0 4px 12px rgba(0, 0, 0, 0.6)`;
-                  e.currentTarget.style.borderColor = config.borderColor.replace('0.3', '0.5').replace('0.4', '0.6');
+                  e.currentTarget.style.borderColor = config.borderColor
+                    .replace('0.3', '0.5')
+                    .replace('0.4', '0.6');
                 }
               }}
               onMouseLeave={e => {
                 if (!isUrgent) {
                   e.currentTarget.style.boxShadow = glowShadow;
-                  e.currentTarget.style.borderColor = config.borderColor.replace('0.4', '0.3').replace('0.5', '0.3');
+                  e.currentTarget.style.borderColor = config.borderColor
+                    .replace('0.4', '0.3')
+                    .replace('0.5', '0.3');
                 }
               }}
             >
               {/* Alert title only - no icon, no truncation */}
               <div className="relative z-10 flex items-center">
                 <div className="flex-1">
-                  <span className="text-xs leading-relaxed text-slate-200" style={{ color: config.color }}>
+                  <span
+                    className="text-xs leading-relaxed text-slate-200"
+                    style={{ color: config.color }}
+                  >
                     {alert.title}
                   </span>
                 </div>

@@ -1,19 +1,59 @@
 import { Icon } from '@iconify/react';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { DropdownMenu } from '@/components/ui/DropdownMenu';
+import { all } from '@/db/sql';
 import { useQuickActions } from '@/pages/wheel/components/actions/useQuickActions';
+import { useEntriesStore } from '@/stores/useEntriesStore';
 import { useWheelStore } from '@/stores/useWheelStore';
+import type { Entry } from '@/types/entry';
 import type { ExpRow } from '@/types/wheel';
-import { daysTo } from '@/utils/wheel-calculations';
+import { daysTo, fmt } from '@/utils/wheel-calculations';
 
 import { InlineDateEdit } from './InlineDateEdit';
 
 export const ExpirationRow: React.FC<{ row: ExpRow }> = ({ row }) => {
   const updateExpiration = useWheelStore(s => s.updateExpiration);
   const { openForm } = useQuickActions();
+  const { deleteEntry } = useEntriesStore();
+  const reloadFn = useWheelStore(s => s.reloadFn);
+  const lots = useWheelStore(s => s.lots);
+  const positions = useWheelStore(s => s.positions);
   const d = daysTo(row.expiration);
   const [isEditingDate, setIsEditingDate] = useState(false);
+
+  // Find the position to get entry (premium) price
+  const position = useMemo(() => {
+    return positions.find(p => p.id === row.id);
+  }, [positions, row.id]);
+
+  // Calculate average cost for the ticker
+  const avgCost = useMemo(() => {
+    const tickerLots = lots.filter(l => l.ticker === row.symbol);
+    if (tickerLots.length === 0) return 0;
+    const totalShares = tickerLots.reduce((sum, l) => sum + l.qty, 0);
+    const totalCost = tickerLots.reduce((sum, l) => sum + l.qty * l.cost, 0);
+    return totalShares > 0 ? totalCost / totalShares : 0;
+  }, [lots, row.symbol]);
+
+  // Calculate profit/loss for covered calls
+  const profitLoss = useMemo(() => {
+    // Only calculate for Call + Sell positions where shares exist
+    if (row.type !== 'C' || row.side !== 'S' || avgCost === 0 || !position) return null;
+
+    const premiumPerShare = position.entry; // entry is already per share
+    const minimumStrike = avgCost - premiumPerShare;
+    const isProfitable = row.strike >= minimumStrike;
+
+    // Calculate profit/loss amount: (Strike - Average Cost + Premium) * Contracts * 100
+    const profitLossAmount = (row.strike - avgCost + premiumPerShare) * row.qty * 100;
+
+    return {
+      isProfitable,
+      amount: profitLossAmount,
+      minimumStrike,
+    };
+  }, [row.type, row.side, row.strike, row.qty, avgCost, position]);
 
   // Determine urgency styling
   const isUrgent = d === 0;
@@ -21,6 +61,159 @@ export const ExpirationRow: React.FC<{ row: ExpRow }> = ({ row }) => {
 
   // Show Assign button for options expiring soon (DTE ≤ 3)
   const showAssignButton = d <= 3 && d >= 0;
+
+  const handleDelete = async () => {
+    const confirmed = window.confirm(
+      `Delete position for ${row.symbol} ${row.type} ${row.strike} expiring ${row.expiration}?\n\n` +
+        `This will soft-delete all journal entries for this position.\n` +
+        `Entries can be restored from the Journal page's Deleted tab.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      // Extract YYYY-MM-DD from expiration date (handle both ISO strings and YYYY-MM-DD)
+      const expDate = row.expiration.includes('T') ? row.expiration.slice(0, 10) : row.expiration;
+
+      // Query database for all entries matching this position
+      // The position ID is constructed as: ${symbol}_${strike}_${expiration}
+      // But expiration in DB might be ISO format while row.expiration is YYYY-MM-DD
+      // So we query by symbol and strike, and match expiration dates flexibly
+      const mainEntriesSql = `
+        SELECT id, ts, account_id, symbol, type, qty, amount, strike, expiration,
+               underlying_price, notes, meta
+        FROM journal
+        WHERE symbol = ?
+          AND strike = ?
+          AND expiration IS NOT NULL
+          AND expiration != ''
+          AND (
+            substr(expiration, 1, 10) = ?
+            OR expiration LIKE ?
+            OR datetime(substr(expiration, 1, 10)) = datetime(?)
+          )
+          AND (deleted_at IS NULL OR deleted_at = '')
+      `;
+      const expDatePattern = `${expDate}%`; // Match any expiration starting with this date
+      const mainEntries = await all<Entry>(mainEntriesSql, [
+        row.symbol,
+        row.strike,
+        expDate,
+        expDatePattern,
+        expDate,
+      ]);
+
+      // Debug logging
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Delete Debug]', {
+          symbol: row.symbol,
+          strike: row.strike,
+          expiration: row.expiration,
+          expDate,
+          foundEntries: mainEntries.length,
+          entryTypes: mainEntries.map(e => e.type),
+        });
+      }
+
+      // Find the sell_to_open entry to get its date for matching fee entries
+      const sellToOpenEntry = mainEntries.find(
+        e => e.type === 'sell_to_open' || e.type === 'option_premium'
+      );
+      const positionDate = sellToOpenEntry?.ts ? sellToOpenEntry.ts.slice(0, 10) : expDate;
+
+      // Find related fee entries (same symbol, same date, no strike/expiration)
+      const feeEntriesSql = `
+        SELECT id, ts, account_id, symbol, type, qty, amount, strike, expiration,
+               underlying_price, notes, meta
+        FROM journal
+        WHERE symbol = ?
+          AND type = 'fee'
+          AND substr(ts, 1, 10) = ?
+          AND (strike IS NULL OR strike = 0)
+          AND (expiration IS NULL OR expiration = '')
+          AND (deleted_at IS NULL OR deleted_at = '')
+      `;
+      const feeEntries = await all<Entry>(feeEntriesSql, [row.symbol, positionDate]);
+
+      // Combine all entries
+      let positionEntries = [...mainEntries, ...feeEntries];
+
+      // If no entries found, try a broader search by symbol and strike only
+      // (in case expiration date doesn't match exactly)
+      if (positionEntries.length === 0) {
+        console.warn('[Delete] No entries found with expiration date, trying broader search...');
+        const fallbackSql = `
+          SELECT id, ts, account_id, symbol, type, qty, amount, strike, expiration,
+                 underlying_price, notes, meta
+          FROM journal
+          WHERE symbol = ?
+            AND strike = ?
+            AND expiration IS NOT NULL
+            AND expiration != ''
+            AND (deleted_at IS NULL OR deleted_at = '')
+          ORDER BY datetime(ts) DESC
+        `;
+        const fallbackEntries = await all<Entry>(fallbackSql, [row.symbol, row.strike]);
+
+        if (fallbackEntries.length > 0) {
+          // Use the most recent entry's date for fee matching
+          const mostRecentEntry = fallbackEntries[0];
+          if (!mostRecentEntry) {
+            console.error('[Delete] No entries in fallback results');
+            return;
+          }
+          const fallbackDate = mostRecentEntry.ts ? mostRecentEntry.ts.slice(0, 10) : expDate;
+
+          const fallbackFeeEntries = await all<Entry>(
+            `SELECT id, ts, account_id, symbol, type, qty, amount, strike, expiration,
+                    underlying_price, notes, meta
+             FROM journal
+             WHERE symbol = ?
+               AND type = 'fee'
+               AND substr(ts, 1, 10) = ?
+               AND (strike IS NULL OR strike = 0)
+               AND (expiration IS NULL OR expiration = '')
+               AND (deleted_at IS NULL OR deleted_at = '')`,
+            [row.symbol, fallbackDate]
+          );
+
+          positionEntries = [...fallbackEntries, ...fallbackFeeEntries];
+          console.log('[Delete] Found entries with fallback search:', positionEntries.length);
+        }
+      }
+
+      if (positionEntries.length === 0) {
+        alert(
+          `No entries found for ${row.symbol} ${row.type} ${row.strike} expiring ${row.expiration}.\n\n` +
+            `This position may have already been deleted or the entries may not exist in the database.`
+        );
+        return;
+      }
+
+      // Delete all entries for this position
+      for (const entry of positionEntries) {
+        await deleteEntry(entry.id, `Position deleted for ${row.symbol} ${row.type} ${row.strike}`);
+      }
+
+      // Save database after all deletions
+      await import('@/db/sql').then(({ saveDb }) => saveDb());
+
+      // Reload wheel data to reflect changes
+      if (reloadFn) {
+        await reloadFn();
+      } else {
+        // Fallback: reload the page if reloadFn is not available
+        window.location.reload();
+      }
+
+      alert(
+        `Successfully deleted ${positionEntries.length} entries for ${row.symbol} ${row.type} ${row.strike}`
+      );
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert(`Failed to delete position: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  };
 
   return (
     <div
@@ -56,8 +249,32 @@ export const ExpirationRow: React.FC<{ row: ExpRow }> = ({ row }) => {
       >
         {row.symbol}
       </div>
-      <div className="text-xs text-slate-500">
-        {row.type} {row.strike}
+      <div className="flex items-center gap-2">
+        <div className="text-xs text-slate-500">
+          {row.type} {row.strike}
+        </div>
+        {profitLoss && (
+          <span
+            className="rounded px-1.5 py-0.5 text-xs font-semibold"
+            style={{
+              border: profitLoss.isProfitable
+                ? '1px solid rgba(34, 197, 94, 0.5)'
+                : '1px solid rgba(239, 68, 68, 0.5)',
+              background: profitLoss.isProfitable
+                ? 'rgba(34, 197, 94, 0.15)'
+                : 'rgba(239, 68, 68, 0.15)',
+              color: profitLoss.isProfitable ? '#22C55E' : '#EF4444',
+            }}
+            title={
+              profitLoss.isProfitable
+                ? `Profit if assigned: $${fmt(Math.abs(profitLoss.amount), 2)} | Min Strike: $${fmt(profitLoss.minimumStrike, 2)} | Calculation: (Strike $${fmt(row.strike, 2)} - Avg Cost $${fmt(avgCost, 2)} + Premium $${fmt(position?.entry || 0, 2)}) × ${row.qty} contracts`
+                : `Loss if assigned: $${fmt(Math.abs(profitLoss.amount), 2)} | Min Strike: $${fmt(profitLoss.minimumStrike, 2)} | Calculation: (Strike $${fmt(row.strike, 2)} - Avg Cost $${fmt(avgCost, 2)} + Premium $${fmt(position?.entry || 0, 2)}) × ${row.qty} contracts`
+            }
+          >
+            {profitLoss.isProfitable ? '✓' : '⚠'} {profitLoss.isProfitable ? 'Profit' : 'Loss'} if
+            assigned: ${fmt(Math.abs(profitLoss.amount), 2)}
+          </span>
+        )}
       </div>
       <div
         className="rounded px-2 py-1 text-xs font-medium"
@@ -85,7 +302,7 @@ export const ExpirationRow: React.FC<{ row: ExpRow }> = ({ row }) => {
               : '0 0 5px rgba(245, 179, 66, 0.075)',
         }}
       >
-        {row.expiration} · DTE {d}
+        {row.expiration} · DTE {Math.max(0, d)}
       </div>
       <div className="ml-auto flex items-center gap-2">
         {isEditingDate ? (
@@ -136,7 +353,7 @@ export const ExpirationRow: React.FC<{ row: ExpRow }> = ({ row }) => {
             <div className="relative z-10">
               <DropdownMenu
                 align="right"
-                className="[&>button]:rounded! [&>button]:px-1.5! [&>button]:py-0.5! [&>button]:text-xs! [&>button]:font-semibold! [&>button]:transition-all! [&>button]:border! [&>button]:border-[rgba(245,179,66,0.3)]! [&>button]:bg-[rgba(245,179,66,0.08)]! [&>button]:text-[#F5B342]! [&>button]:shadow-[0_0_4px_rgba(245,179,66,0.06)]! [&>button]:hover:border-[rgba(245,179,66,0.5)]! [&>button]:hover:bg-[rgba(245,179,66,0.15)]! [&>button]:hover:shadow-[0_0_6px_rgba(245,179,66,0.1)]! [&>button]:flex! [&>button]:items-center! [&>button]:gap-1! [&>button]:min-w-0! [&>button_svg:last-child]:hidden!"
+                className="[&>button]:flex! [&>button]:min-w-0! [&>button]:items-center! [&>button]:gap-1! [&>button]:rounded! [&>button]:border! [&>button]:border-[rgba(245,179,66,0.3)]! [&>button]:bg-[rgba(245,179,66,0.08)]! [&>button]:px-1.5! [&>button]:py-0.5! [&>button]:text-xs! [&>button]:font-semibold! [&>button]:text-[#F5B342]! [&>button]:shadow-[0_0_4px_rgba(245,179,66,0.06)]! [&>button]:transition-all! [&>button]:hover:border-[rgba(245,179,66,0.5)]! [&>button]:hover:bg-[rgba(245,179,66,0.15)]! [&>button]:hover:shadow-[0_0_6px_rgba(245,179,66,0.1)]! [&>button_svg:last-child]:hidden!"
                 trigger={<Icon icon="mdi:dots-vertical" className="h-4 w-4" />}
                 items={[
                   {
@@ -154,6 +371,13 @@ export const ExpirationRow: React.FC<{ row: ExpRow }> = ({ row }) => {
                         oldExpiration: row.expiration,
                       });
                     },
+                  },
+                  {
+                    divider: true,
+                  },
+                  {
+                    label: 'Delete',
+                    onClick: handleDelete,
                   },
                 ]}
               />

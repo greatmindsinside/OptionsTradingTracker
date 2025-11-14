@@ -20,9 +20,26 @@ export function useWheelMetrics() {
     const sharesBy = new Map<string, number>();
     lots.forEach(l => sharesBy.set(l.ticker, (sharesBy.get(l.ticker) || 0) + l.qty));
     const shortBy = new Map<string, number>();
-    positions
-      .filter(p => p.type === 'C' && p.side === 'S')
-      .forEach(p => shortBy.set(p.ticker, (shortBy.get(p.ticker) || 0) + p.qty * 100));
+    const shortCallPositions = positions.filter(p => p.type === 'C' && p.side === 'S');
+
+    // Debug: Log all short call positions to identify duplicates
+    if (process.env.NODE_ENV === 'development' && shortCallPositions.length > 0) {
+      console.log('[Shares For Calls Debug] All short call positions:',
+        shortCallPositions.map(p => ({
+          ticker: p.ticker,
+          qty: p.qty,
+          strike: p.strike,
+          expiration: p.dte,
+          id: p.id
+        }))
+      );
+    }
+
+    shortCallPositions.forEach(p => {
+      const existing = shortBy.get(p.ticker) || 0;
+      const newValue = existing + p.qty * 100;
+      shortBy.set(p.ticker, newValue);
+    });
 
     // Calculate total shares needed for all short calls
     // Each call contract represents 100 shares, so we sum up all short call shares

@@ -227,9 +227,9 @@ export function tmplRoll(
 ): JournalRow[] {
   const oldExp = toIso(p.oldExpiration);
   const newExp = toIso(p.newExpiration);
-  
+
   const rows: JournalRow[] = [];
-  
+
   // Close old position
   // If closePremium is provided, use buy_to_close; otherwise use expiration (letting it expire)
   if (p.closePremium !== undefined && p.closePremium !== 0) {
@@ -262,7 +262,7 @@ export function tmplRoll(
       })
     );
   }
-  
+
   // Close fee if provided
   if (p.closeFee && p.closeFee !== 0) {
     rows.push(
@@ -271,7 +271,7 @@ export function tmplRoll(
       })
     );
   }
-  
+
   // Open new position
   rows.push(
     baseRow(p, 'sell_to_open', p.newPremiumPerContract * OPT_MULT * p.newContracts, {
@@ -285,7 +285,7 @@ export function tmplRoll(
       },
     })
   );
-  
+
   // Add expiration entry for new position (for future closing)
   rows.push(
     baseRow({ ...p, date: p.newExpiration }, 'expiration', 0, {
@@ -295,7 +295,7 @@ export function tmplRoll(
       meta: { closes: 'sell_to_open' },
     })
   );
-  
+
   // Open fee if provided
   if (p.openFee && p.openFee !== 0) {
     rows.push(
@@ -304,11 +304,11 @@ export function tmplRoll(
       })
     );
   }
-  
+
   // Link entries via meta after creation (since baseRow generates new IDs)
   const closeEntry = rows[0];
   const openEntry = rows.find(r => r.type === 'sell_to_open');
-  
+
   if (closeEntry && openEntry) {
     // Link entries via meta
     if (closeEntry.meta && typeof closeEntry.meta === 'object') {
@@ -318,6 +318,6 @@ export function tmplRoll(
       openEntry.meta.rolledFrom = closeEntry.id;
     }
   }
-  
+
   return rows;
 }

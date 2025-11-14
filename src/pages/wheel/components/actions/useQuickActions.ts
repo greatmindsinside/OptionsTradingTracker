@@ -1,6 +1,12 @@
 import { create } from 'zustand';
 
-export type QuickActionType = 'assignPut' | 'assignCall' | 'buyShares' | 'sellShares' | 'rollPut' | 'rollCall';
+export type QuickActionType =
+  | 'assignPut'
+  | 'assignCall'
+  | 'buyShares'
+  | 'sellShares'
+  | 'rollPut'
+  | 'rollCall';
 
 export interface PrefillData {
   symbol?: string;

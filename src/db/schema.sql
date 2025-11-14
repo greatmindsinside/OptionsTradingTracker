@@ -66,3 +66,19 @@ SELECT
   net_cash,
   CASE WHEN shares != 0 THEN (-net_cash) / shares ELSE NULL END AS avg_cost
 FROM share_flows;
+
+-- ticker_min_strikes table: historical snapshots of minimum strike prices for covered calls
+CREATE TABLE IF NOT EXISTS ticker_min_strikes (
+  id TEXT PRIMARY KEY,
+  ticker TEXT NOT NULL,
+  date TEXT NOT NULL,
+  avg_cost REAL NOT NULL,
+  premium_received REAL NOT NULL DEFAULT 0,
+  min_strike REAL NOT NULL,
+  shares_owned REAL NOT NULL,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_ticker_min_strikes_ticker_date ON ticker_min_strikes(ticker, date);
+CREATE INDEX IF NOT EXISTS idx_ticker_min_strikes_ticker ON ticker_min_strikes(ticker);
+CREATE INDEX IF NOT EXISTS idx_ticker_min_strikes_date ON ticker_min_strikes(date);

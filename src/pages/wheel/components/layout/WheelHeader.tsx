@@ -21,7 +21,7 @@
  * 6) Testing hooks:
  *    - data-testid attributes on brand and open-actions button to support UI tests.
  */
-import React, { useEffect, useMemo,useRef, useState } from 'react'; // React for JSX
+import React, { useEffect, useMemo, useRef, useState } from 'react'; // React for JSX
 import { useNavigate } from 'react-router-dom'; // client-side navigation
 
 import { useTerminalStore } from '@/stores/useTerminalStore'; // Observer Effect Terminal
@@ -43,8 +43,13 @@ export const WheelHeader: React.FC = () => {
   const importing = useWheelUIStore(s => s.importing);
 
   // Observer Effect Terminal trigger mechanism
-  const { isUnlocked, unlock, open: openTerminal, addSequenceStep, resetSequence } =
-    useTerminalStore();
+  const {
+    isUnlocked,
+    unlock,
+    open: openTerminal,
+    addSequenceStep,
+    resetSequence,
+  } = useTerminalStore();
   const [hiddenInput, setHiddenInput] = useState('');
   const sequenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const requiredSequence = useMemo(() => ['heisenberg', 'schrödinger', 'bohr'], []);
@@ -75,8 +80,9 @@ export const WheelHeader: React.FC = () => {
     const { sequenceProgress } = useTerminalStore.getState();
     if (sequenceProgress.length >= 3) {
       const normalizedProgress = sequenceProgress.map(s => s.toLowerCase().trim());
-      const isComplete =
-        normalizedProgress.slice(-3).every((step, idx) => step === requiredSequence[idx]);
+      const isComplete = normalizedProgress
+        .slice(-3)
+        .every((step, idx) => step === requiredSequence[idx]);
 
       if (isComplete && !isUnlocked) {
         unlock();
@@ -106,16 +112,21 @@ export const WheelHeader: React.FC = () => {
         }, 2000);
       }
     }
-  }, [hiddenInput, isUnlocked, unlock, openTerminal, addSequenceStep, resetSequence, requiredSequence]);
+  }, [
+    hiddenInput,
+    isUnlocked,
+    unlock,
+    openTerminal,
+    addSequenceStep,
+    resetSequence,
+    requiredSequence,
+  ]);
 
   // Handle keyboard input for sequence
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       // Only capture if not typing in an input/textarea
-      if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
-      ) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
         return;
       }
 
@@ -210,7 +221,7 @@ export const WheelHeader: React.FC = () => {
             className="page-header__brand-image"
             loading="eager"
             decoding="sync"
-            onError={(e) => {
+            onError={e => {
               const img = e.currentTarget as HTMLImageElement;
               // Prevent infinite loop then swap to a local fallback icon
               img.onerror = null;

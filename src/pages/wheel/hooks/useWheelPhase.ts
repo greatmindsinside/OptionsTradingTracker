@@ -6,10 +6,8 @@ import type { WheelPhase } from '@/types/wheel';
 export function useWheelPhase(symbol: string): WheelPhase {
   // Memoize selectors to prevent unnecessary re-subscriptions
   // Zustand does reference equality checking, so we only re-render when positions/lots actually change
-  const positions = useWheelStore(
-    useMemo(() => (state) => state.positions, [])
-  );
-  const lots = useWheelStore(useMemo(() => (state) => state.lots, []));
+  const positions = useWheelStore(useMemo(() => state => state.positions, []));
+  const lots = useWheelStore(useMemo(() => state => state.lots, []));
 
   return useMemo(() => {
     const hasShares = lots.some(l => l.ticker === symbol && l.qty > 0);

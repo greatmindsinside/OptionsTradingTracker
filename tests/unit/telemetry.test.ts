@@ -1,4 +1,4 @@
-import { beforeEach,describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { env } from '@/utils/env';
 import { track } from '@/utils/telemetry';
@@ -15,14 +15,14 @@ describe('telemetry utility', () => {
   it('does not persist when analytics disabled', () => {
     env.features.analytics = false;
     track('journal_edit_open', { id: 'e1' });
-  const mocked = window.localStorage as unknown as { setItem: { mock?: { calls: unknown[] } } };
-  expect(mocked.setItem.mock?.calls.length ?? 0).toBe(0);
+    const mocked = window.localStorage as unknown as { setItem: { mock?: { calls: unknown[] } } };
+    expect(mocked.setItem.mock?.calls.length ?? 0).toBe(0);
   });
 
   it('persists when analytics enabled', () => {
     env.features.analytics = true;
-  track('journal_edit_open', { id: 'e1' });
-  const mocked = window.localStorage as unknown as { setItem: { mock?: { calls: unknown[] } } };
-  expect((mocked.setItem.mock?.calls.length ?? 0) > 0).toBe(true);
+    track('journal_edit_open', { id: 'e1' });
+    const mocked = window.localStorage as unknown as { setItem: { mock?: { calls: unknown[] } } };
+    expect((mocked.setItem.mock?.calls.length ?? 0) > 0).toBe(true);
   });
 });

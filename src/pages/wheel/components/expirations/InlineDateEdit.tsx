@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import { todayYMD } from '@/utils/wheel-calculations';
+
 interface InlineDateEditProps {
   date: string;
   onSave: (ymd: string) => void;
@@ -59,6 +61,7 @@ export const InlineDateEdit: React.FC<InlineDateEditProps> = ({
         className="rounded border border-green-500/30 bg-zinc-950/60 px-2 py-1 text-xs text-green-400"
         value={val}
         onChange={e => setVal(e.target.value)}
+        min={todayYMD()}
       />
       <button
         className="rounded border border-green-500 bg-green-500/15 px-2 py-1 text-xs text-green-400 transition-colors hover:bg-green-500/25"

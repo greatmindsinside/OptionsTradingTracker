@@ -22,7 +22,9 @@ export const RollForm: React.FC<RollFormProps> = ({ type, prefillData, onClose }
 
   // Old position (pre-filled if from ExpirationRow)
   const [symbol, setSymbol] = useState(prefillData?.symbol || '');
-  const [oldContracts, setOldContracts] = useState(prefillData?.oldContracts || prefillData?.contracts || 1);
+  const [oldContracts, setOldContracts] = useState(
+    prefillData?.oldContracts || prefillData?.contracts || 1
+  );
   const [oldStrike, setOldStrike] = useState(prefillData?.oldStrike || prefillData?.strike || 0);
   const [oldExpiration, setOldExpiration] = useState(
     prefillData?.oldExpiration || prefillData?.expiration || new Date().toISOString().slice(0, 10)
@@ -31,12 +33,17 @@ export const RollForm: React.FC<RollFormProps> = ({ type, prefillData, onClose }
   const [closeFee, setCloseFee] = useState(0);
 
   // New position
-  const [newContracts, setNewContracts] = useState(prefillData?.oldContracts || prefillData?.contracts || 1);
+  const [newContracts, setNewContracts] = useState(
+    prefillData?.oldContracts || prefillData?.contracts || 1
+  );
   const [newStrike, setNewStrike] = useState(prefillData?.oldStrike || prefillData?.strike || 0);
   const [newPremiumPerContract, setNewPremiumPerContract] = useState(0);
   const [newExpiration, setNewExpiration] = useState(() => {
     // Default to 30 days from old expiration
-    const oldDate = prefillData?.oldExpiration || prefillData?.expiration || new Date().toISOString().slice(0, 10);
+    const oldDate =
+      prefillData?.oldExpiration ||
+      prefillData?.expiration ||
+      new Date().toISOString().slice(0, 10);
     const date = new Date(oldDate);
     date.setDate(date.getDate() + 30);
     return date.toISOString().slice(0, 10);
@@ -76,11 +83,22 @@ export const RollForm: React.FC<RollFormProps> = ({ type, prefillData, onClose }
     if (newContracts <= 0 || newStrike <= 0 || newPremiumPerContract <= 0) return false;
     if (!newExpiration || newExpiration <= oldExpiration) return false;
     return true;
-  }, [symbol, oldContracts, oldStrike, newContracts, newStrike, newPremiumPerContract, newExpiration, oldExpiration]);
+  }, [
+    symbol,
+    oldContracts,
+    oldStrike,
+    newContracts,
+    newStrike,
+    newPremiumPerContract,
+    newExpiration,
+    oldExpiration,
+  ]);
 
   const handleSubmit = async () => {
     if (!isValid) {
-      showError('Please fill in all required fields and ensure new expiration is after old expiration');
+      showError(
+        'Please fill in all required fields and ensure new expiration is after old expiration'
+      );
       return;
     }
 
@@ -117,7 +135,12 @@ export const RollForm: React.FC<RollFormProps> = ({ type, prefillData, onClose }
         await reloadFn();
       }
 
-      const rollTypeLabel = rollType === 'same_strike' ? 'same strike' : rollType === 'up_strike' ? 'up strike' : 'down strike';
+      const rollTypeLabel =
+        rollType === 'same_strike'
+          ? 'same strike'
+          : rollType === 'up_strike'
+            ? 'up strike'
+            : 'down strike';
       const netLabel = netCredit >= 0 ? 'credit' : 'debit';
       showSuccess(
         `✅ ${type === 'put' ? 'Put' : 'Call'} rolled: ${oldContracts} → ${newContracts} contracts, ${rollTypeLabel}, $${Math.abs(netCredit).toFixed(2)} ${netLabel}`
@@ -147,7 +170,9 @@ export const RollForm: React.FC<RollFormProps> = ({ type, prefillData, onClose }
         <div className="space-y-6 p-6">
           {/* Old Position Section */}
           <div className="rounded-lg border border-[rgba(245,179,66,0.2)] bg-[rgba(11,15,14,0.4)] p-4">
-            <div className="mb-3 text-sm font-semibold text-[rgba(245,179,66,0.9)]">Old Position (Closing)</div>
+            <div className="mb-3 text-sm font-semibold text-[rgba(245,179,66,0.9)]">
+              Old Position (Closing)
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Input
@@ -217,7 +242,9 @@ export const RollForm: React.FC<RollFormProps> = ({ type, prefillData, onClose }
 
           {/* New Position Section */}
           <div className="rounded-lg border border-[rgba(245,179,66,0.2)] bg-[rgba(11,15,14,0.4)] p-4">
-            <div className="mb-3 text-sm font-semibold text-[rgba(245,179,66,0.9)]">New Position (Opening)</div>
+            <div className="mb-3 text-sm font-semibold text-[rgba(245,179,66,0.9)]">
+              New Position (Opening)
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Input
@@ -282,30 +309,42 @@ export const RollForm: React.FC<RollFormProps> = ({ type, prefillData, onClose }
               <div>
                 <span className="font-semibold">Roll Type:</span>{' '}
                 <span className="text-[#F5B342]">
-                  {rollType === 'same_strike' ? 'Same Strike' : rollType === 'up_strike' ? 'Up Strike' : 'Down Strike'}
+                  {rollType === 'same_strike'
+                    ? 'Same Strike'
+                    : rollType === 'up_strike'
+                      ? 'Up Strike'
+                      : 'Down Strike'}
                 </span>
               </div>
               <div>
-                Closing {oldContracts} contract{oldContracts !== 1 ? 's' : ''} @ ${oldStrike.toFixed(2)} expiring {oldExpiration}
+                Closing {oldContracts} contract{oldContracts !== 1 ? 's' : ''} @ $
+                {oldStrike.toFixed(2)} expiring {oldExpiration}
               </div>
               <div>
-                Opening {newContracts} contract{newContracts !== 1 ? 's' : ''} @ ${newStrike.toFixed(2)} expiring {newExpiration}
+                Opening {newContracts} contract{newContracts !== 1 ? 's' : ''} @ $
+                {newStrike.toFixed(2)} expiring {newExpiration}
               </div>
-              <div className="pt-2 border-t border-[rgba(245,179,66,0.2)]">
+              <div className="border-t border-[rgba(245,179,66,0.2)] pt-2">
                 <div className="flex items-center justify-between">
                   <span>New Premium:</span>
-                  <span className="text-green-400">+${(newPremiumPerContract * 100 * newContracts).toFixed(2)}</span>
+                  <span className="text-green-400">
+                    +${(newPremiumPerContract * 100 * newContracts).toFixed(2)}
+                  </span>
                 </div>
                 {closePremium > 0 && (
                   <div className="flex items-center justify-between">
                     <span>Close Cost:</span>
-                    <span className="text-red-400">-${(closePremium * 100 * oldContracts).toFixed(2)}</span>
+                    <span className="text-red-400">
+                      -${(closePremium * 100 * oldContracts).toFixed(2)}
+                    </span>
                   </div>
                 )}
                 {(closeFee > 0 || openFee > 0) && (
                   <div className="flex items-center justify-between">
                     <span>Fees:</span>
-                    <span className="text-red-400">-${((closeFee || 0) + (openFee || 0)).toFixed(2)}</span>
+                    <span className="text-red-400">
+                      -${((closeFee || 0) + (openFee || 0)).toFixed(2)}
+                    </span>
                   </div>
                 )}
                 <div className="flex items-center justify-between pt-2 text-base font-semibold">
@@ -336,4 +375,3 @@ export const RollForm: React.FC<RollFormProps> = ({ type, prefillData, onClose }
     </div>
   );
 };
-

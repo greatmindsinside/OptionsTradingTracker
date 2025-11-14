@@ -1,5 +1,5 @@
 import type { Position } from '@/types/wheel';
-import { daysTo, pctMaxShortCall } from '@/utils/wheel-calculations';
+import { addDaysToYmd, daysTo, pctMaxShortCall } from '@/utils/wheel-calculations';
 
 import type { Alert, AlertContext, AlertRule } from './alertTypes';
 
@@ -97,15 +97,20 @@ export const expirationWarningRule: AlertRule = {
   enabled: true,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   check: (position: Position, _context: AlertContext): Alert | null => {
+    // Calculate actual DTE from today (not from when position was opened)
+    // position.dte is days from opened to expiration, we need days from today to expiration
+    const expirationDate = addDaysToYmd(position.opened, position.dte);
+    const dteFromToday = daysTo(expirationDate);
+
     // DTE 0-1: Urgent
-    if (position.dte <= 1) {
+    if (dteFromToday <= 1) {
       return {
         id: `exp-urgent-${position.id}`,
         ticker: position.ticker,
         category: 'expiration',
         priority: 'urgent',
-        title: `${position.ticker} expires ${position.dte === 0 ? 'today' : 'tomorrow'}`,
-        message: `${position.ticker} ${position.type} $${position.strike} expires in ${position.dte} day${position.dte === 1 ? '' : 's'}. Take action immediately.`,
+        title: `${position.ticker} expires ${dteFromToday === 0 ? 'today' : 'tomorrow'}`,
+        message: `${position.ticker} ${position.type} $${position.strike} expires in ${dteFromToday} day${dteFromToday === 1 ? '' : 's'}. Take action immediately.`,
         actions: [
           { label: 'Close', action: 'close' },
           { label: 'Roll', action: 'roll' },
@@ -115,13 +120,13 @@ export const expirationWarningRule: AlertRule = {
     }
 
     // DTE 2-3: Warning
-    if (position.dte <= 3) {
+    if (dteFromToday <= 3) {
       return {
         id: `exp-warning-${position.id}`,
         ticker: position.ticker,
         category: 'expiration',
         priority: 'warning',
-        title: `${position.ticker} expires in ${position.dte} days`,
+        title: `${position.ticker} expires in ${dteFromToday} days`,
         message: `${position.ticker} ${position.type} $${position.strike} expires soon. Plan your action.`,
         actions: [
           { label: 'Close', action: 'close' },
@@ -132,13 +137,13 @@ export const expirationWarningRule: AlertRule = {
     }
 
     // DTE 4-7: Info
-    if (position.dte <= 7) {
+    if (dteFromToday <= 7) {
       return {
         id: `exp-info-${position.id}`,
         ticker: position.ticker,
         category: 'expiration',
         priority: 'info',
-        title: `${position.ticker} expires in ${position.dte} days`,
+        title: `${position.ticker} expires in ${dteFromToday} days`,
         message: `${position.ticker} ${position.type} $${position.strike} expires this week. Monitor closely.`,
         actions: [{ label: 'View', action: 'view' }],
         dismissible: true,
@@ -241,7 +246,12 @@ export const rollOpportunityRule: AlertRule = {
   check: (position: Position, _context: AlertContext): Alert | null => {
     // Only for short positions with high profit and near expiration
     if (position.side !== 'S') return null;
-    if (position.dte > 7 || position.dte < 3) return null;
+
+    // Calculate actual DTE from today (not from when position was opened)
+    const expirationDate = addDaysToYmd(position.opened, position.dte);
+    const dteFromToday = daysTo(expirationDate);
+
+    if (dteFromToday > 7 || dteFromToday < 3) return null;
 
     const pct = pctMaxShortCall(position.entry, position.mark);
 
@@ -253,7 +263,7 @@ export const rollOpportunityRule: AlertRule = {
         category: 'roll_opportunity',
         priority: 'info',
         title: `${position.ticker} ready to roll`,
-        message: `${position.ticker} ${position.type} $${position.strike} has ${position.dte} DTE and ${pct.toFixed(0)}% profit captured. Consider rolling to next month for additional premium.`,
+        message: `${position.ticker} ${position.type} $${position.strike} has ${dteFromToday} DTE and ${pct.toFixed(0)}% profit captured. Consider rolling to next month for additional premium.`,
         actions: [
           { label: 'Roll', action: 'roll' },
           { label: 'Close', action: 'close' },

@@ -279,7 +279,11 @@ export const FilterBar: React.FC = () => {
                     variant="secondary"
                     size="sm"
                     className="h-7 flex-1 text-xs"
-                    title={filterPresets.length > 0 ? `View ${filterPresets.length} saved filter preset(s)` : 'View saved filter presets'}
+                    title={
+                      filterPresets.length > 0
+                        ? `View ${filterPresets.length} saved filter preset(s)`
+                        : 'View saved filter presets'
+                    }
                   >
                     {filterPresets.length > 0 ? `Presets (${filterPresets.length})` : 'Save Preset'}
                   </Button>

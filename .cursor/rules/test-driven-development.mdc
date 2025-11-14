@@ -1,0 +1,26 @@
+---
+description: Enforce Test-Driven Development (TDD) practices with incremental testing
+alwaysApply: true
+---
+
+## Test-Driven Development Workflow
+
+Before implementing any functionality, write comprehensive tests to define expected behavior. Follow this incremental workflow:
+
+1. **Write tests first (commented out)**: Create all test cases that define the expected behavior, but keep them commented out initially.
+
+2. **Incremental implementation and testing**:
+   - Uncomment tests one at a time (or in small groups) as you implement functionality
+   - Run tests frequently after each change to verify the implementation works
+   - Make minimal changes to get the current test(s) to pass
+   - Only move to the next test(s) once the current ones pass
+
+3. **Benefits of this approach**:
+   - Clear specification of requirements before implementation
+   - Incremental validation ensures changes work as you code
+   - Minimal changes reduce risk of breaking existing functionality
+   - Better code quality and maintainability
+   - Confidence in refactoring
+   - Documentation of expected behavior through tests
+
+**Key principle**: Run tests as you code to ensure each change works before proceeding to the next test or feature.

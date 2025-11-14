@@ -6,8 +6,8 @@
 export { BaseDAO, type BatchResult, type DAOOptions } from './dao-base';
 export { PortfolioDAO } from './portfolio-dao';
 export { SymbolDAO } from './symbol-dao';
-export { type SymbolEvent,SymbolEventDAO } from './symbol-event-dao';
-export { type DatabaseTrade,TradeDAO } from './trade-dao';
+export { type SymbolEvent, SymbolEventDAO } from './symbol-event-dao';
+export { type DatabaseTrade, TradeDAO } from './trade-dao';
 export {
   type WheelCycleFilters,
   type WheelCycleSummary,

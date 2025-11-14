@@ -8,7 +8,13 @@ export interface ToastProps {
   undo?: () => void;
 }
 
-export const Toast: React.FC<ToastProps> = ({ message, type = 'success', duration = 3000, onClose, undo }) => {
+export const Toast: React.FC<ToastProps> = ({
+  message,
+  type = 'success',
+  duration = 3000,
+  onClose,
+  undo,
+}) => {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
@@ -33,7 +39,7 @@ export const Toast: React.FC<ToastProps> = ({ message, type = 'success', duratio
     <div
       className={`fixed top-4 right-4 z-50 rounded-lg border px-4 py-3 shadow-lg backdrop-blur-sm transition-all ${
         typeStyles[type]
-      } ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}`}
+      } ${visible ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0'}`}
       role="alert"
     >
       <div className="flex items-center gap-2">
@@ -67,7 +73,12 @@ export const Toast: React.FC<ToastProps> = ({ message, type = 'success', duratio
 };
 
 export interface ToastContainerProps {
-  toasts: Array<{ id: string; message: string; type?: 'success' | 'error' | 'info' | 'warning'; undo?: () => void }>;
+  toasts: Array<{
+    id: string;
+    message: string;
+    type?: 'success' | 'error' | 'info' | 'warning';
+    undo?: () => void;
+  }>;
   onRemove: (id: string) => void;
 }
 
@@ -86,4 +97,3 @@ export const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, onRemove
     </div>
   );
 };
-

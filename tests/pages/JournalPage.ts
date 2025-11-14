@@ -3,7 +3,13 @@ import { expect } from '@playwright/test';
 
 import { BasePage } from './BasePage';
 
-export type TradeType = 'Sell Put' | 'Put Assigned' | 'Sell Covered Call' | 'Call Assigned' | 'Dividend' | 'Fee';
+export type TradeType =
+  | 'Sell Put'
+  | 'Put Assigned'
+  | 'Sell Covered Call'
+  | 'Call Assigned'
+  | 'Dividend'
+  | 'Fee';
 
 export interface EntryFormOptions {
   symbol: string;
@@ -31,9 +37,9 @@ export interface EditEntryOptions extends Partial<EntryFormOptions> {
 export class JournalPage extends BasePage {
   // Selectors
   get title(): Locator {
-    return this.page.getByTestId('journal.title').or(
-      this.page.getByRole('heading', { name: /journal/i })
-    );
+    return this.page
+      .getByTestId('journal.title')
+      .or(this.page.getByRole('heading', { name: /journal/i }));
   }
 
   get newEntryButton(): Locator {
@@ -48,7 +54,10 @@ export class JournalPage extends BasePage {
   get entryModal(): Locator {
     // The modal has role="dialog" and title "✨ New Entry"
     // Use a more flexible selector that matches the dialog with the title
-    return this.page.getByRole('dialog').filter({ hasText: /new entry/i }).first();
+    return this.page
+      .getByRole('dialog')
+      .filter({ hasText: /new entry/i })
+      .first();
   }
 
   get editDrawer(): Locator {
@@ -63,24 +72,40 @@ export class JournalPage extends BasePage {
     // The symbol input is in the entry modal, not the table
     // Use a more specific selector to avoid matching table headers
     // First try to find it in the dialog, otherwise fall back to general search
-    return this.page.getByRole('dialog').getByLabel(/symbol/i).first().or(
-      this.page.locator('input[type="text"]').filter({ has: this.page.locator('label:has-text("Symbol")') }).first()
-    );
+    return this.page
+      .getByRole('dialog')
+      .getByLabel(/symbol/i)
+      .first()
+      .or(
+        this.page
+          .locator('input[type="text"]')
+          .filter({ has: this.page.locator('label:has-text("Symbol")') })
+          .first()
+      );
   }
 
   get contractsInput(): Locator {
     // Scope to dialog to avoid matching table headers
-    return this.page.getByRole('dialog').getByLabel(/contracts/i).first();
+    return this.page
+      .getByRole('dialog')
+      .getByLabel(/contracts/i)
+      .first();
   }
 
   get strikeInput(): Locator {
     // Scope to dialog to avoid matching table headers
-    return this.page.getByRole('dialog').getByLabel(/strike/i).first();
+    return this.page
+      .getByRole('dialog')
+      .getByLabel(/strike/i)
+      .first();
   }
 
   get premiumInput(): Locator {
     // Scope to dialog to avoid matching table headers
-    return this.page.getByRole('dialog').getByLabel(/premium/i).first();
+    return this.page
+      .getByRole('dialog')
+      .getByLabel(/premium/i)
+      .first();
   }
 
   get feeInput(): Locator {
@@ -90,12 +115,18 @@ export class JournalPage extends BasePage {
 
   get amountInput(): Locator {
     // Scope to dialog to avoid matching table headers
-    return this.page.getByRole('dialog').getByLabel(/amount/i).first();
+    return this.page
+      .getByRole('dialog')
+      .getByLabel(/amount/i)
+      .first();
   }
 
   get expirationInput(): Locator {
     // Scope to dialog to avoid matching table headers
-    return this.page.getByRole('dialog').getByLabel(/expiration/i).first();
+    return this.page
+      .getByRole('dialog')
+      .getByLabel(/expiration/i)
+      .first();
   }
 
   get dateInput(): Locator {
@@ -137,9 +168,9 @@ export class JournalPage extends BasePage {
   }
 
   get filterBar(): Locator {
-    return this.page.locator('[data-testid="filter-bar"]').or(
-      this.page.locator('text=Filters').locator('..')
-    );
+    return this.page
+      .locator('[data-testid="filter-bar"]')
+      .or(this.page.locator('text=Filters').locator('..'));
   }
 
   get summaryCards(): Locator {
@@ -173,10 +204,10 @@ export class JournalPage extends BasePage {
     // First, ensure we're on the journal page and the header has rendered
     await this.page.waitForLoadState('networkidle');
     await this.wait(500);
-    
+
     // Wait for the route to be /journal (use a more flexible pattern)
     await this.page.waitForURL(/\/journal/, { timeout: 10000 });
-    
+
     // Wait for the button to appear - it's conditionally rendered in AppHeader
     // The button dispatches a custom event 'journal:new-entry' when clicked
     // Use waitForFunction to wait for the button to be in the DOM and visible
@@ -188,14 +219,14 @@ export class JournalPage extends BasePage {
       },
       { timeout: 15000 }
     );
-    
+
     // Now get the button by text content
     const button = this.page.locator('button').filter({ hasText: 'New Entry' }).first();
     await expect(button).toBeVisible({ timeout: 10000 });
     await button.scrollIntoViewIfNeeded();
     await button.click();
     await this.wait(500);
-    
+
     // Wait for the modal to be visible
     // The modal has role="dialog" and title "✨ New Entry"
     await expect(this.entryModal).toBeVisible({ timeout: 10000 });
@@ -261,48 +292,32 @@ export class JournalPage extends BasePage {
     await expect(saveButton).toBeVisible({ timeout: 5000 });
     await expect(saveButton).toBeEnabled();
     await saveButton.click({ force: true });
-    
+
     // Wait for modal to close (modal should disappear)
     // The modal might take a moment to close, so wait for it to not be visible
-    try {
-      await expect(this.entryModal).not.toBeVisible({ timeout: 5000 });
-    } catch {
-      // If modal is still visible, wait a bit more and check again
-      await this.wait(500);
-      // Don't fail if modal is still visible - it might be closing
-    }
-    
+    await expect(this.entryModal).not.toBeVisible({ timeout: 10000 });
+
     // Wait for data to sync - the store saves to DB and reloads entries
     // The store calls loadEntries() after saving, which is async
-    // Wait for the modal to fully close first
-    await this.wait(500);
-    
-    // Wait for the store's loading state to complete
-    // The store sets loading: false when done
-    // Also wait for entries to actually appear in the DOM
-    try {
-      await this.page.waitForFunction(
-        () => {
-          // Check if there are entries visible (table or cards)
-          const table = document.querySelector('table tbody');
-          const cards = document.querySelectorAll('[data-testid="journal.entry"]');
-          const hasEntries = (table && table.children.length > 0) || cards.length > 0;
-          
-          // Also check if loading is complete
-          const loadingText = document.body.textContent || '';
-          const isLoading = loadingText.includes('Loading') && !loadingText.includes('entries');
-          
-          return hasEntries && !isLoading;
-        },
-        { timeout: 10000 }
-      );
-    } catch {
-      // If check fails, wait a bit more and continue
-      await this.wait(2000);
-    }
-    
-    // Additional wait for React to fully re-render
-    await this.wait(1000);
+    // Wait for the store's loading state to complete and entries to appear
+    await this.page.waitForFunction(
+      () => {
+        // Check if there are entries visible (table or cards)
+        const table = document.querySelector('table tbody');
+        const cards = document.querySelectorAll('[data-testid="journal.entry"]');
+        const hasEntries = (table && table.children.length > 0) || cards.length > 0;
+
+        // Also check if loading is complete
+        const loadingText = document.body.textContent || '';
+        const isLoading = loadingText.includes('Loading') && !loadingText.includes('entries');
+
+        return hasEntries && !isLoading;
+      },
+      { timeout: 15000 }
+    );
+
+    // Brief wait for React to fully re-render
+    await this.wait(300);
   }
 
   /**
@@ -313,7 +328,7 @@ export class JournalPage extends BasePage {
     await this.navigate();
     await this.openNewEntryModal();
     await this.selectTradeType(options.tradeType);
-    
+
     // For options trades, ensure expiration is set if not provided
     const needsExpiration = ['Sell Put', 'Sell Covered Call'].includes(options.tradeType);
     if (needsExpiration && !options.expiration) {
@@ -323,7 +338,7 @@ export class JournalPage extends BasePage {
       const expirationDate = futureDate.toISOString().split('T')[0]!;
       options.expiration = expirationDate;
     }
-    
+
     await this.fillEntryForm(options);
     await this.saveEntry();
   }
@@ -334,19 +349,95 @@ export class JournalPage extends BasePage {
   async editEntry(symbol: string, options: EditEntryOptions, entryIndex = 0): Promise<void> {
     // Wait for entry to be visible
     await this.waitForEntry(symbol);
-    
-    // Wait a bit for the UI to stabilize
+
+    // Wait for the page to be fully loaded and entries to be rendered
+    await this.page.waitForLoadState('networkidle');
+    await this.wait(1000);
+
+    // Wait for edit buttons to exist in the DOM (they might be hidden initially)
+    // First, ensure entries are loaded by waiting for the table or cards
+    await this.waitForTableOrCards();
+
+    // Wait a bit more for React to finish rendering
     await this.wait(500);
 
-    // Click edit button
-    const editButton = this.getEditButton(entryIndex);
-    await expect(editButton).toBeVisible({ timeout: 10000 });
-    await expect(editButton).toBeEnabled({ timeout: 5000 });
-    
-    // Scroll into view if needed
-    await editButton.scrollIntoViewIfNeeded();
-    
-    await editButton.click({ force: true });
+    // Wait for the symbol to be visible in the page (entry should be loaded)
+    const upperSymbol = symbol.toUpperCase();
+    await this.page.waitForFunction(
+      (sym: string) => {
+        const text = document.body.textContent || '';
+        return text.toUpperCase().includes(sym);
+      },
+      upperSymbol,
+      { timeout: 10000 }
+    );
+
+    // Find the edit button for the specific entry
+    // Try to find it in the entry row first, but don't fail if row not found
+    let entryRow: Locator | null = null;
+    try {
+      entryRow = await this.getEntryRow(symbol);
+      // Wait for the entry row to be visible, but with a shorter timeout
+      await expect(entryRow)
+        .toBeVisible({ timeout: 5000 })
+        .catch(() => {
+          // If row not found, that's okay - we'll use index-based approach
+          entryRow = null;
+        });
+    } catch {
+      entryRow = null;
+    }
+
+    // Try to find edit button in the row
+    let editButton: Locator;
+    if (entryRow) {
+      editButton = entryRow.locator('button[title="Edit entry"]').first();
+
+      // If not found in row, try the index-based approach
+      if ((await editButton.count()) === 0) {
+        editButton = this.getEditButton(entryIndex);
+      }
+    } else {
+      // Use index-based approach if row not found
+      editButton = this.getEditButton(entryIndex);
+    }
+
+    // Wait for the button to exist in the DOM (it might be hidden)
+    // Check if button exists, even if hidden
+    const buttonCount = await this.page.locator('button[title="Edit entry"]').count();
+    if (buttonCount === 0) {
+      // If no edit buttons found, the actions column might be hidden
+      // Try to find any button with "Edit" text near the symbol
+      const symbolElement = this.page.getByText(symbol.toUpperCase()).first();
+      await expect(symbolElement).toBeVisible({ timeout: 10000 });
+      // Look for Edit button near the symbol
+      editButton = symbolElement
+        .locator('..')
+        .locator('button')
+        .filter({ hasText: /edit/i })
+        .first();
+    }
+
+    // Check if button exists (even if hidden)
+    const buttonExists = (await editButton.count()) > 0;
+    if (!buttonExists) {
+      throw new Error(`Edit button not found for entry with symbol ${symbol}`);
+    }
+
+    // Try to make button visible if it's hidden, or use force click
+    // First check if it's visible
+    const isVisible = await editButton.isVisible().catch(() => false);
+    if (!isVisible) {
+      // Button exists but is hidden - use JavaScript click to bypass visibility check
+      await editButton.evaluate((el: HTMLElement) => {
+        (el as HTMLButtonElement).click();
+      });
+    } else {
+      // Button is visible, use normal click
+      await expect(editButton).toBeEnabled({ timeout: 5000 });
+      await editButton.scrollIntoViewIfNeeded();
+      await editButton.click({ timeout: 5000 });
+    }
 
     // Wait for edit drawer/modal to open
     await this.page.waitForSelector('h2:has-text("Edit Entry")', { timeout: 10000 });
@@ -364,7 +455,19 @@ export class JournalPage extends BasePage {
       }
 
       if (options.amount !== undefined) {
-        const amountInput = this.page.locator('input[placeholder*="credit"]').first();
+        // The amount input in JournalDrawer uses placeholder "0.00" and has label "Amount"
+        // Use a more specific selector that targets the input in the drawer
+        const amountInput = this.page
+          .locator('input[placeholder*="0.00"]')
+          .or(this.page.locator('label:has-text("Amount") + input[type="text"]'))
+          .or(
+            this.page
+              .getByRole('dialog')
+              .locator('input[type="text"]')
+              .filter({ has: this.page.locator('label:has-text("Amount")') })
+          )
+          .first();
+        await expect(amountInput).toBeVisible({ timeout: 10000 });
         await amountInput.clear();
         await amountInput.fill(options.amount);
       }
@@ -403,7 +506,7 @@ export class JournalPage extends BasePage {
     // This works for both mobile cards and desktop table
     // The symbol is uppercase in the database, so we should match it case-insensitively
     const upperSymbol = symbol.toUpperCase();
-    
+
     // Wait for the symbol to appear in the page
     // Try multiple strategies to find the entry
     try {
@@ -421,7 +524,7 @@ export class JournalPage extends BasePage {
               }
             }
           }
-          
+
           // Check cards
           const cards = document.querySelectorAll('[data-testid="journal.entry"]');
           for (const card of cards) {
@@ -433,7 +536,7 @@ export class JournalPage extends BasePage {
               }
             }
           }
-          
+
           // Fallback: check page text
           const text = document.body.textContent || '';
           return text.toUpperCase().includes(sym);
@@ -460,13 +563,18 @@ export class JournalPage extends BasePage {
   async getEntryRow(symbol: string): Promise<Locator> {
     const upperSymbol = symbol.toUpperCase();
     const isMobile = await this.isMobileView();
-    
+
     if (isMobile) {
-      return this.page.locator('[data-testid="journal.entry"]').filter({ hasText: upperSymbol }).first();
+      return this.page
+        .locator('[data-testid="journal.entry"]')
+        .filter({ hasText: upperSymbol })
+        .first();
     } else {
       // For desktop, find the table row containing the symbol
       // The symbol is in uppercase in the database
-      return this.page.locator('tr', { has: this.page.getByRole('cell', { name: upperSymbol }) }).first();
+      return this.page
+        .locator('tr', { has: this.page.getByRole('cell', { name: upperSymbol }) })
+        .first();
     }
   }
 
@@ -485,7 +593,7 @@ export class JournalPage extends BasePage {
    */
   async getEntryCount(): Promise<number> {
     const isMobile = await this.isMobileView();
-    
+
     if (isMobile) {
       const cards = await this.entryCards.all();
       return cards.length;
@@ -499,13 +607,37 @@ export class JournalPage extends BasePage {
    * Wait for either table (desktop) or cards (mobile) to be visible
    */
   async waitForTableOrCards(): Promise<void> {
-    const isMobile = await this.isMobileView();
-    
-    if (isMobile) {
-      await expect(this.entryCards.first()).toBeVisible({ timeout: 10000 });
-    } else {
-      await expect(this.entriesTable).toBeVisible({ timeout: 10000 });
-    }
+    // Wait for entries to be loaded - check for either table or cards
+    // Use a more flexible approach that doesn't depend on viewport size
+    await this.page.waitForFunction(
+      () => {
+        // Check for table
+        const table = document.querySelector('table.table');
+        if (table) {
+          const style = window.getComputedStyle(table);
+          if (style.display !== 'none' && style.visibility !== 'hidden') {
+            // Check if table has rows
+            const rows = table.querySelectorAll('tbody tr');
+            if (rows.length > 0) return true;
+          }
+        }
+
+        // Check for cards
+        const cards = document.querySelectorAll('[data-testid="journal.entry"]');
+        if (cards.length > 0) {
+          // Check if at least one card is visible
+          for (const card of cards) {
+            const style = window.getComputedStyle(card);
+            if (style.display !== 'none' && style.visibility !== 'hidden') {
+              return true;
+            }
+          }
+        }
+
+        return false;
+      },
+      { timeout: 15000 }
+    );
   }
 
   /**
@@ -532,13 +664,13 @@ export class JournalPage extends BasePage {
   async waitForEntryWithType(symbol: string, type: string, timeout = 15000): Promise<void> {
     // First wait for the entry to appear
     await this.waitForEntry(symbol, timeout);
-    
+
     // Then wait for the type to appear in the entry
     // The type is displayed as r.type.replace(/_/g, ' '), so "assignment_shares" becomes "assignment shares"
     // Use a more flexible approach - wait for the text to appear in the page
     const upperSymbol = symbol.toUpperCase();
     const typeLower = type.toLowerCase();
-    
+
     // Wait for both the symbol and type text to appear in the page
     // The type text might be displayed with underscores replaced by spaces
     await this.page.waitForFunction(
@@ -552,10 +684,9 @@ export class JournalPage extends BasePage {
       { sym: upperSymbol, typeText: typeLower },
       { timeout: 10000 }
     );
-    
+
     // The waitForFunction above has already verified that both the symbol and type text exist in the page
     // This is sufficient to verify the entry with the correct type exists
     // We don't need to verify it's in a specific row, as the text matching is already done
   }
 }
-

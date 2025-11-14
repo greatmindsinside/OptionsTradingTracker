@@ -9,6 +9,7 @@ All notable changes to the Options Trading Tracker project.
 ### November 4, 2025 - Trade DTE Enhancement
 
 **Added**
+
 - Trade drawer date picker UI (feature-flagged with `VITE_FEATURE_TRADE_DTE`)
 - DTE chip showing calculated days to expiration
 - "Advanced" toggle for direct numeric DTE input
@@ -20,12 +21,14 @@ All notable changes to the Options Trading Tracker project.
 - Comprehensive feature documentation in `docs/FEATURES.md`
 
 **Changed**
+
 - Wheel DTE calculation refactored to use shared `calcDTE()` utility
 - TradeTab expiration persistence now uses selected date when feature enabled
 - Feature flag system extended in `src/utils/env.ts`
 - Documentation consolidated into professional set (FEATURES.md, DEVELOPMENT.md)
 
 **Files**
+
 - `src/utils/dates.ts` (new)
 - `src/utils/env.ts` (extended with tradeDTE flag)
 - `src/utils/telemetry.ts` (new trade events)
@@ -46,6 +49,7 @@ All notable changes to the Options Trading Tracker project.
 ### Cleanup Phase 1-7: Code Removal
 
 **Removed**
+
 - 6 deprecated pages: HomePage, PortfolioPage, VisualizationPage, AnalysisPage, TaxPage, ImportPage (+ CSS Modules)
 - 15+ orphaned components:
   - Dashboard: OptionsCalculator, PortfolioSummary, PositionTracker, RiskDashboard, TaxLotDashboard, WheelAnalyticsDashboard
@@ -57,6 +61,7 @@ All notable changes to the Options Trading Tracker project.
 - Unused dependencies from deleted components
 
 **Results**
+
 - CSS bundle: 121.72 kB → 89.89 kB (-31.83 kB, -26.1% reduction)
 - Gzipped: 20.43 kB → 15.09 kB (-5.34 kB)
 - All builds passing
@@ -66,6 +71,7 @@ All notable changes to the Options Trading Tracker project.
 ### CSS Architecture Implementation
 
 **Added**
+
 - Global modal patterns in `@layer components`:
   - `.modal-overlay`, `.modal`, `.modal-header`, `.modal-title`, `.modal-content`, `.modal-close`
 - Global table patterns in `@layer components`:
@@ -74,12 +80,14 @@ All notable changes to the Options Trading Tracker project.
 - Consolidated all CSS into `src/index.css` (single source of truth)
 
 **Migrated**
+
 - Modal component to use global patterns
 - JournalPage tables (2 instances) to global patterns
 - PortfolioPage tables (2 instances) to global patterns
 - ~80 lines of repetitive inline Tailwind classes removed
 
 **Documentation**
+
 - Created `docs/complete/PROJECT_CLEANUP_TRACKER.md` (archived)
 - Created `docs/CLEANUP_COMPLETION_REPORT.md` (summary)
 - Created `docs/reports/MODAL_TABLE_PATTERN_MIGRATION.md`
@@ -90,6 +98,7 @@ All notable changes to the Options Trading Tracker project.
 ## November 3, 2025 - Journal Edit Feature
 
 **Added**
+
 - Journal edit drawer with slide-in panel (feature-flagged)
 - Full-field editing for all Journal entry fields
 - Soft-delete pattern with audit trail (`deleted_at`, `edit_reason`)
@@ -102,11 +111,13 @@ All notable changes to the Options Trading Tracker project.
 - Documentation in `docs/JOURNAL_EDIT_FEATURE.md`
 
 **Components**
+
 - `src/pages/journal/components/drawers/JournalDrawer.tsx` (new)
 - `src/stores/useJournalUIStore.ts` (new - drawer state)
 - `src/stores/useEntriesStore.ts` (extended with editEntry method)
 
 **UX**
+
 - Entry point: Edit icon in Journal table Actions column
 - Right-side slide drawer (max-width 24-28rem)
 - Overlay with backdrop blur and 60% black background
@@ -121,6 +132,7 @@ All notable changes to the Options Trading Tracker project.
 ### Initial Release
 
 **Features**
+
 - Wheel strategy dashboard (`/`)
   - Position tracking (puts, covered calls)
   - Share lots management
@@ -137,11 +149,12 @@ All notable changes to the Options Trading Tracker project.
   - Strike, premium, DTE, fees
   - Template-based persistence
 - CSV import system
-  - Multi-broker support (Robinhood, TD Ameritrade, Schwab, E*TRADE, Interactive Brokers)
+  - Multi-broker support (Robinhood, TD Ameritrade, Schwab, E\*TRADE, Interactive Brokers)
   - Auto-detection and normalization
   - Batch processing with progress
 
 **Technology Stack**
+
 - React 19.1.1
 - TypeScript 5.9.3
 - Vite 7.1.7
@@ -152,18 +165,21 @@ All notable changes to the Options Trading Tracker project.
 - Vitest 3.2.4 (unit tests)
 
 **Database**
+
 - Journal-first architecture (single source of truth)
 - SQLite with OPFS persistence
 - Audit columns: `deleted_at`, `edit_reason`, `edited_by`, `original_entry_id`
 - Indexes for performance
 
 **Testing**
+
 - E2E test suite with Playwright
 - Unit tests with Vitest + Testing Library
 - Accessibility tests with Axe
 - 95%+ code coverage
 
 **Build & Deploy**
+
 - Optimized production builds
 - Code splitting and lazy loading
 - Service worker for offline support

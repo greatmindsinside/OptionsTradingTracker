@@ -2,6 +2,7 @@ import { Icon } from '@iconify/react';
 import React, { useEffect, useState } from 'react';
 
 import { Button } from '@/components/Button';
+import { SymbolInput } from '@/components/SymbolInput';
 import { Input } from '@/components/ui/Input';
 import { tmplBuyShares, tmplSellShares } from '@/models/templates';
 import { useEntriesStore } from '@/stores/useEntriesStore';
@@ -98,10 +99,10 @@ export const ShareTransactionForm: React.FC<ShareTransactionFormProps> = ({
 
         <div className="space-y-4 p-6">
           <div>
-            <Input
+            <SymbolInput
               label="Symbol"
               value={symbol}
-              onChange={e => setSymbol(e.target.value.toUpperCase())}
+              onChange={value => setSymbol(value.toUpperCase())}
               placeholder="e.g. AAPL"
               required
             />

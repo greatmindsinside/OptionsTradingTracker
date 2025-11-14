@@ -1,14 +1,17 @@
 # Deliverables Definition • Trade menu DTE
 
 ## Goal
+
 Add a DTE feature in the Trade menu. The user selects an expiration date. The app shows DTE as the count of days from today. Advanced mode lets the user type a DTE number which back calculates the date. Store the expiration date in the journal. DTE is derived at render time.
 
 ## Context
+
 This project uses React with TypeScript, Vite, Zustand stores, and an in-browser SQLite database. Manual trade entry lives in `src/pages/wheel/components/drawers/TradeTab.tsx` and writes journal rows through templates. The journal table is the single source of truth. The Wheel page already computes DTE for positions. We will centralize that logic so Trade and Wheel use the same function.
 
 ## Scope
 
 Included
+
 - TradeTab drawer updates with an Expiration picker, a DTE chip, and an Advanced DTE input
 - Shared date utility for DTE math used by both Trade and Wheel
 - Validation with Zod in the form schema
@@ -17,6 +20,7 @@ Included
 - Unit, UI, and accessibility tests
 
 Out of scope
+
 - Broker sync or market data fetches
 - Import pipeline changes
 - Historical backfill for old rows
@@ -77,21 +81,25 @@ Out of scope
 ## Testing and validation
 
 Unit tests with Vitest
+
 - `calcDTE(today, today) returns 0`
 - Month end and leap year cases
 - Round trip: `dateFromDTE(calcDTE(date))` equals start-of-day date
 
 Component tests with Testing Library
+
 - Date change updates the DTE chip
 - Advanced toggle enables numeric input and back calculation
 - Past date shows the warning and requires confirm
 
 E2E with Playwright
+
 - Happy path create, save, and persistence
 - Keyboard only flow
 - Feature flag on and off behavior
 
 Accessibility with Axe
+
 - No violations on the drawer
 
 ## Progress tracker
@@ -170,6 +178,7 @@ Ship a short feature note with screenshots of the drawer, the DTE rules, and lin
 **How to use:**
 
 Set `VITE_FEATURE_TRADE_DTE=true` in `.env.local` or `.env.production`, then:
+
 - Open the Trade drawer from the Wheel page
 - Use the "Expiration" date picker to select a date
 - DTE chip updates automatically
@@ -177,6 +186,7 @@ Set `VITE_FEATURE_TRADE_DTE=true` in `.env.local` or `.env.production`, then:
 - Past dates show a warning and require confirmation
 
 **Files changed:**
+
 - `src/utils/dates.ts` (new)
 - `src/utils/env.ts` (extended feature flags)
 - `src/utils/telemetry.ts` (new event names)
@@ -187,6 +197,7 @@ Set `VITE_FEATURE_TRADE_DTE=true` in `.env.local` or `.env.production`, then:
 - `tests/e2e/smoke.spec.ts` (fixed test assertion)
 
 **Documentation updated:**
+
 - `docs/DATA_ARCHITECTURE.md` - Added feature flag, utilities, TradeTab details
 - `docs/PROJECT_ORGANIZATION.md` - Updated file structure and date
 - `docs/DELIVERABLES_TRADE_DTE.md` - This file (progress tracker, implementation summary)

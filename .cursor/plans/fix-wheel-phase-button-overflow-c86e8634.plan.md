@@ -1,4 +1,5 @@
 <!-- c86e8634-fe72-4460-8aea-712bad92eb11 19807ebd-00fb-432e-8cf3-14b0c02bb890 -->
+
 # Minimalist Header Design Options
 
 ## Current State Analysis

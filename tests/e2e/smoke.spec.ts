@@ -48,9 +48,7 @@ test('home page loads and renders header', async ({ page }, testInfo) => {
     'Cross-Origin Request Blocked', // CORS errors from iconify API in test environment
     'CORS request did not succeed',
   ];
-  const filtered = errors.filter(
-    e => !benignPatterns.some(pattern => e.includes(pattern))
-  );
+  const filtered = errors.filter(e => !benignPatterns.some(pattern => e.includes(pattern)));
   expect(filtered, 'No significant console/page errors expected during initial load').toEqual([]);
 });
 
@@ -60,7 +58,7 @@ test('home page loads and renders header', async ({ page }, testInfo) => {
 test('actions drawer can open (if present)', async ({ page }) => {
   const wheelPage = new WheelPage(page);
   await wheelPage.navigate();
-  
+
   const actionsBtn = wheelPage.actionsButton;
   if (await actionsBtn.count()) {
     if (await actionsBtn.first().isVisible()) {
@@ -75,12 +73,12 @@ test('journal page loads and shows entries', async ({ page }) => {
   const journalPage = new JournalPage(page);
   await journalPage.navigate();
   await expect(journalPage.title).toBeVisible();
-  
+
   // Wait for entries to load - the database might need time to initialize
   // The seed entry should exist, so at least one should be visible
   // Entries can be in table (desktop) or cards (mobile), both have the testid
   const entryLocator = page.getByTestId('journal.entry');
-  
+
   // Wait for at least one entry to be visible
   // Check if any entry is visible (either in table or cards)
   await page.waitForFunction(
@@ -89,12 +87,17 @@ test('journal page loads and shows entries', async ({ page }) => {
       return Array.from(entries).some(entry => {
         const rect = entry.getBoundingClientRect();
         const style = window.getComputedStyle(entry);
-        return rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden';
+        return (
+          rect.width > 0 &&
+          rect.height > 0 &&
+          style.display !== 'none' &&
+          style.visibility !== 'hidden'
+        );
       });
     },
     { timeout: 10000 }
   );
-  
+
   // Verify at least one entry is visible using Playwright's visibility check
   await expect(entryLocator.first()).toBeVisible({ timeout: 5000 });
 });

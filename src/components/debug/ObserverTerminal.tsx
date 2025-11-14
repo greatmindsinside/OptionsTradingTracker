@@ -1,8 +1,8 @@
 import '@/styles/observer-terminal.css';
 
-import React, { useCallback,useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { all,initDb } from '@/db/sql';
+import { all, initDb } from '@/db/sql';
 import { useTerminalStore } from '@/stores/useTerminalStore';
 import { getRandomQuantumQuote } from '@/utils/quantum-quotes';
 
@@ -47,16 +47,16 @@ export const ObserverTerminal: React.FC = () => {
     if (isOpen && isFirstRender) {
       setShowMatrixSequence(true);
       setMatrixText('');
-      
+
       const matrixMessages = [
         'Wake up, Neo...',
         'The Matrix has you...',
         'Follow the white rabbit.',
       ];
-      
+
       let messageIndex = 0;
       let charIndex = 0;
-      
+
       const typeWriter = () => {
         if (messageIndex < matrixMessages.length) {
           const currentMessage = matrixMessages[messageIndex]!;
@@ -83,7 +83,7 @@ export const ObserverTerminal: React.FC = () => {
           }
         }
       };
-      
+
       setTimeout(typeWriter, 500); // Initial delay
     }
   }, [isOpen, isFirstRender]);
@@ -174,19 +174,19 @@ export const ObserverTerminal: React.FC = () => {
         case 'database': {
           try {
             await initDb();
-            
+
             // Get table names and row counts
             const tables = all<{ name: string }>(
               "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
             );
-            
+
             // Get view names
             const views = all<{ name: string }>(
               "SELECT name FROM sqlite_master WHERE type='view' ORDER BY name"
             );
-            
+
             let dbOutput = 'Database State:\n\n';
-            
+
             // Tables with row counts
             dbOutput += 'Tables:\n';
             for (const table of tables) {
@@ -195,7 +195,7 @@ export const ObserverTerminal: React.FC = () => {
               )[0];
               dbOutput += `  ${table.name}: ${count?.count || 0} rows\n`;
             }
-            
+
             // Views
             if (views.length > 0) {
               dbOutput += '\nViews:\n';
@@ -203,7 +203,7 @@ export const ObserverTerminal: React.FC = () => {
                 dbOutput += `  ${view.name}\n`;
               }
             }
-            
+
             // Journal table statistics
             const journalStats = all<{
               total: number;
@@ -216,14 +216,14 @@ export const ObserverTerminal: React.FC = () => {
                 SUM(CASE WHEN deleted_at IS NULL THEN 1 ELSE 0 END) as active
                FROM journal`
             )[0];
-            
+
             if (journalStats) {
               dbOutput += '\nJournal Statistics:\n';
               dbOutput += `  Total entries: ${journalStats.total || 0}\n`;
               dbOutput += `  Active entries: ${journalStats.active || 0}\n`;
               dbOutput += `  Deleted entries: ${journalStats.deleted || 0}\n`;
             }
-            
+
             // Schema info for main tables
             dbOutput += '\nTable Schemas:\n';
             for (const table of tables) {
@@ -235,13 +235,13 @@ export const ObserverTerminal: React.FC = () => {
                 dflt_value: string | null;
                 pk: number;
               }>(`PRAGMA table_info(${table.name})`);
-              
+
               dbOutput += `  ${table.name}:\n`;
               for (const col of columns) {
                 dbOutput += `    ${col.name} (${col.type}${col.notnull ? ' NOT NULL' : ''}${col.pk ? ' PRIMARY KEY' : ''})\n`;
               }
             }
-            
+
             output = dbOutput;
           } catch (error) {
             output = `Error querying database: ${error instanceof Error ? error.message : 'Unknown error'}`;
@@ -266,7 +266,7 @@ export const ObserverTerminal: React.FC = () => {
     },
     [clear, toggleBlur, blurEnabled, history, commandHistory, addCommand, close]
   );
-  
+
   // Handle async commands properly
   const handleCommandAsync = useCallback(
     async (cmd: string) => {
@@ -286,17 +286,14 @@ export const ObserverTerminal: React.FC = () => {
       e.preventDefault();
       if (commandHistory.length > 0) {
         const newIndex =
-          commandIndex === -1
-            ? commandHistory.length - 1
-            : Math.max(0, commandIndex - 1);
+          commandIndex === -1 ? commandHistory.length - 1 : Math.max(0, commandIndex - 1);
         setCommandIndex(newIndex);
         setCurrentCommand(commandHistory[newIndex]!.command);
       }
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
       if (commandIndex !== -1) {
-        const newIndex =
-          commandIndex < commandHistory.length - 1 ? commandIndex + 1 : -1;
+        const newIndex = commandIndex < commandHistory.length - 1 ? commandIndex + 1 : -1;
         setCommandIndex(newIndex);
         setCurrentCommand(newIndex === -1 ? '' : commandHistory[newIndex]!.command);
       }
@@ -323,12 +320,15 @@ export const ObserverTerminal: React.FC = () => {
 
         <div className="terminal-output" ref={outputRef}>
           {showMatrixSequence && (
-            <div className="matrix-text-sequence" style={{ color: '#00FF41', marginBottom: '1rem' }}>
+            <div
+              className="matrix-text-sequence"
+              style={{ color: '#00FF41', marginBottom: '1rem' }}
+            >
               {matrixText}
               {matrixText && <span className="matrix-cursor">_</span>}
             </div>
           )}
-          
+
           {commandHistory.map((entry, idx) => (
             <div key={idx} className="terminal-command-entry">
               <div className="command-prompt">
@@ -348,7 +348,9 @@ export const ObserverTerminal: React.FC = () => {
                 [{state.collapsed ? 'COLLAPSED' : 'SUPERPOSITION'}]
               </span>
               <span className="state-message">{state.message}</span>
-              <span className="state-probability">| probability: {state.probability.toFixed(2)}</span>
+              <span className="state-probability">
+                | probability: {state.probability.toFixed(2)}
+              </span>
             </div>
           ))}
         </div>
@@ -371,4 +373,3 @@ export const ObserverTerminal: React.FC = () => {
     </>
   );
 };
-

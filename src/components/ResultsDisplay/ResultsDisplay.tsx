@@ -73,8 +73,12 @@ export function ResultsDisplay({
         {metrics.map((metric, index) => (
           <div key={index} className={clsx('card', styles.metricCard)}>
             <div className={clsx(styles.metricLabel)}>{metric.label}</div>
-            <div className={clsx(styles.metricValue)}>{formatValue(metric.value, metric.format)}</div>
-            {metric.subtitle && <div className={clsx(styles.metricSubtitle)}>{metric.subtitle}</div>}
+            <div className={clsx(styles.metricValue)}>
+              {formatValue(metric.value, metric.format)}
+            </div>
+            {metric.subtitle && (
+              <div className={clsx(styles.metricSubtitle)}>{metric.subtitle}</div>
+            )}
           </div>
         ))}
       </div>

@@ -123,13 +123,45 @@ function runMigrations() {
         console.log('✅ Migration complete: Audit columns added');
       }
     }
+
+    // Migration 002: Create ticker_min_strikes table if it doesn't exist
+    const tables = db.exec(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='ticker_min_strikes'"
+    );
+    if (!tables || !tables[0] || tables[0].values.length === 0) {
+      console.log('Running migration: Create ticker_min_strikes table');
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS ticker_min_strikes (
+          id TEXT PRIMARY KEY,
+          ticker TEXT NOT NULL,
+          date TEXT NOT NULL,
+          avg_cost REAL NOT NULL,
+          premium_received REAL NOT NULL DEFAULT 0,
+          min_strike REAL NOT NULL,
+          shares_owned REAL NOT NULL,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      db.exec(
+        'CREATE INDEX IF NOT EXISTS idx_ticker_min_strikes_ticker_date ON ticker_min_strikes(ticker, date)'
+      );
+      db.exec(
+        'CREATE INDEX IF NOT EXISTS idx_ticker_min_strikes_ticker ON ticker_min_strikes(ticker)'
+      );
+      db.exec('CREATE INDEX IF NOT EXISTS idx_ticker_min_strikes_date ON ticker_min_strikes(date)');
+      console.log('✅ Migration complete: ticker_min_strikes table created');
+    }
   } catch (e) {
     console.error('Migration error:', e);
   }
 }
 
 export async function initDb() {
-  if (ready) return;
+  if (ready) {
+    // Even if DB is ready, ensure migrations are up to date
+    runMigrations();
+    return;
+  }
   // Align with wheel module's loader to avoid divergence.
   let initSqlJsFn: ((opts?: Record<string, unknown>) => Promise<SqlJsStatic>) | undefined;
 
@@ -280,7 +312,7 @@ export async function updateExpirationForPosition(
     expiration: string | null;
     deleted_at: string | null;
   }>(
-    `SELECT id, strike, substr(expiration,1,10) as exp_ymd, deleted_at FROM journal 
+    `SELECT id, strike, substr(expiration,1,10) as exp_ymd, deleted_at FROM journal
      WHERE symbol = ? AND strike = ? AND substr(expiration,1,10) = ?`,
     [symbol, strike, oldExpirationYmd]
   );
@@ -353,17 +385,36 @@ export function softDelete(entryId: string, reason?: string) {
   // Check if audit columns exist
   try {
     const columns = db.exec('PRAGMA table_info(journal)');
-    const hasAuditColumns =
-      columns && columns[0] && columns[0].values.some(col => col[1] === 'deleted_at');
+    if (!columns || !columns[0]) {
+      // No columns found, use hard delete
+      console.warn('Cannot read table info, performing hard delete');
+      run(`DELETE FROM journal WHERE id = ?`, [entryId]);
+      return;
+    }
 
-    if (hasAuditColumns) {
-      // Use full update with audit columns
-      run(
-        `UPDATE journal 
-         SET deleted_at = ?, edit_reason = ?, updated_at = ?
-         WHERE id = ?`,
-        [now, reason || 'User deleted', now, entryId]
-      );
+    const columnNames = columns[0].values.map(col => col[1] as string);
+    const hasDeletedAt = columnNames.includes('deleted_at');
+    const hasUpdatedAt = columnNames.includes('updated_at');
+
+    if (hasDeletedAt) {
+      // Use soft delete with available audit columns
+      if (hasUpdatedAt) {
+        // Full update with all audit columns
+        run(
+          `UPDATE journal
+           SET deleted_at = ?, edit_reason = ?, updated_at = ?
+           WHERE id = ?`,
+          [now, reason || 'User deleted', now, entryId]
+        );
+      } else {
+        // Update without updated_at column
+        run(
+          `UPDATE journal
+           SET deleted_at = ?, edit_reason = ?
+           WHERE id = ?`,
+          [now, reason || 'User deleted', entryId]
+        );
+      }
     } else {
       // Fallback: use hard delete if audit columns don't exist
       console.warn('Audit columns not found, performing hard delete instead of soft delete');
@@ -372,7 +423,12 @@ export function softDelete(entryId: string, reason?: string) {
   } catch (e) {
     console.error('Error in softDelete:', e);
     // Last resort: try hard delete
-    run(`DELETE FROM journal WHERE id = ?`, [entryId]);
+    try {
+      run(`DELETE FROM journal WHERE id = ?`, [entryId]);
+    } catch (deleteError) {
+      console.error('Failed to hard delete entry:', deleteError);
+      throw e; // Re-throw original error
+    }
   }
 }
 
@@ -380,16 +436,33 @@ export function softDelete(entryId: string, reason?: string) {
 export function restoreEntry(entryId: string) {
   try {
     const columns = db.exec('PRAGMA table_info(journal)');
-    const hasAuditColumns =
-      columns && columns[0] && columns[0].values.some(col => col[1] === 'deleted_at');
+    if (!columns || !columns[0]) {
+      console.warn('Cannot read table info, restore operation not supported');
+      return;
+    }
 
-    if (hasAuditColumns) {
-      run(
-        `UPDATE journal 
-         SET deleted_at = NULL, edit_reason = NULL, updated_at = ?
-         WHERE id = ?`,
-        [new Date().toISOString(), entryId]
-      );
+    const columnNames = columns[0].values.map(col => col[1] as string);
+    const hasDeletedAt = columnNames.includes('deleted_at');
+    const hasUpdatedAt = columnNames.includes('updated_at');
+
+    if (hasDeletedAt) {
+      if (hasUpdatedAt) {
+        // Full restore with updated_at
+        run(
+          `UPDATE journal
+           SET deleted_at = NULL, edit_reason = NULL, updated_at = ?
+           WHERE id = ?`,
+          [new Date().toISOString(), entryId]
+        );
+      } else {
+        // Restore without updated_at column
+        run(
+          `UPDATE journal
+           SET deleted_at = NULL, edit_reason = NULL
+           WHERE id = ?`,
+          [entryId]
+        );
+      }
     } else {
       console.warn(
         'Audit columns not found, restore operation not supported for this database version'

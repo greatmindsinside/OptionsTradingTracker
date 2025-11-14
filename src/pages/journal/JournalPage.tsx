@@ -1046,7 +1046,10 @@ const JournalPage: React.FC = () => {
 
   return (
     <KeyboardShortcutsProvider>
-      <div className="relative min-h-screen overflow-hidden text-zinc-100" style={{ backgroundColor: '#0B0F0E' }}>
+      <div
+        className="relative min-h-screen overflow-hidden text-zinc-100"
+        style={{ backgroundColor: '#0B0F0E' }}
+      >
         {/* Base background image layer - same as Wheel page */}
         <div
           className="pointer-events-none absolute inset-0"
@@ -1828,7 +1831,7 @@ const JournalPage: React.FC = () => {
                                       >
                                         <button
                                           onClick={() => handleEditClick(r)}
-                                          className="mr-2 rounded px-2 py-1 text-xs font-semibold touch-manipulation text-blue-400 transition-colors hover:text-blue-300"
+                                          className="mr-2 touch-manipulation rounded px-2 py-1 text-xs font-semibold text-blue-400 transition-colors hover:text-blue-300"
                                           title="Edit entry"
                                           aria-label={`Edit entry for ${r.symbol}`}
                                         >
@@ -1836,7 +1839,7 @@ const JournalPage: React.FC = () => {
                                         </button>
                                         <button
                                           onClick={() => handleDeleteClick(r)}
-                                          className="rounded px-2 py-1 text-xs font-semibold touch-manipulation text-red-400 transition-colors hover:text-red-300"
+                                          className="touch-manipulation rounded px-2 py-1 text-xs font-semibold text-red-400 transition-colors hover:text-red-300"
                                           title="Delete entry"
                                           aria-label={`Delete entry for ${r.symbol}`}
                                         >

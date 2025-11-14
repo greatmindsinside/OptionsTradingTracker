@@ -36,39 +36,36 @@ export const SimpleLineChart: React.FC<SimpleLineChartProps> = ({
   const chartHeight = height - padding * 2;
 
   // Normalize data
-  const xValues = data.map(d => typeof d.x === 'number' ? d.x : 0);
+  const xValues = data.map(d => (typeof d.x === 'number' ? d.x : 0));
   const yValues = data.map(d => d.y);
-  
+
   const minX = Math.min(...xValues);
   const maxX = Math.max(...xValues);
   const minY = Math.min(...yValues, 0);
   const maxY = Math.max(...yValues);
-  
+
   const xRange = maxX - minX || 1;
   const yRange = maxY - minY || 1;
 
   // Convert to SVG coordinates
   const points = data.map((d, i) => {
-    const x = typeof d.x === 'number' 
-      ? padding + ((d.x - minX) / xRange) * chartWidth
-      : padding + (i / (data.length - 1 || 1)) * chartWidth;
+    const x =
+      typeof d.x === 'number'
+        ? padding + ((d.x - minX) / xRange) * chartWidth
+        : padding + (i / (data.length - 1 || 1)) * chartWidth;
     const y = padding + chartHeight - ((d.y - minY) / yRange) * chartHeight;
     return { x, y, label: d.label };
   });
 
   // Create path for line
-  const pathData = points.map((p, i) => 
-    `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`
-  ).join(' ');
+  const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
 
   // Create area path
   const areaPath = `${pathData} L ${points[points.length - 1].x} ${padding + chartHeight} L ${points[0].x} ${padding + chartHeight} Z`;
 
   return (
     <div className="rounded-lg border border-zinc-700 bg-zinc-900/60 p-4">
-      {title && (
-        <h3 className="mb-2 text-sm font-semibold text-zinc-300">{title}</h3>
-      )}
+      {title && <h3 className="mb-2 text-sm font-semibold text-zinc-300">{title}</h3>}
       <svg width={width} height={height} className="overflow-visible">
         {/* Grid lines */}
         {showLabels && (
@@ -92,11 +89,7 @@ export const SimpleLineChart: React.FC<SimpleLineChartProps> = ({
         )}
 
         {/* Area fill */}
-        <path
-          d={areaPath}
-          fill={color}
-          fillOpacity="0.2"
-        />
+        <path d={areaPath} fill={color} fillOpacity="0.2" />
 
         {/* Line */}
         <path
@@ -181,4 +174,3 @@ export const SimpleLineChart: React.FC<SimpleLineChartProps> = ({
     </div>
   );
 };
-

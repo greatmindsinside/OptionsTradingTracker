@@ -154,4 +154,4 @@ export {
   TDAmeritradeBrokerAdapter,
 };
 
-export type { BaseBrokerAdapter, BrokerDetectionResult,BrokerType } from './base-adapter';
+export type { BaseBrokerAdapter, BrokerDetectionResult, BrokerType } from './base-adapter';

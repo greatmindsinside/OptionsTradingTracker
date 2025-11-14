@@ -5,11 +5,13 @@
 
 export const quantumQuotes = [
   {
-    quote: 'The observer, when he seems to be observing a stone, is really, if physics is to be believed, observing the effects of the stone upon himself.',
+    quote:
+      'The observer, when he seems to be observing a stone, is really, if physics is to be believed, observing the effects of the stone upon himself.',
     author: 'Bertrand Russell',
   },
   {
-    quote: 'It is wrong to think that the task of physics is to find out how Nature is. Physics concerns what we say about Nature.',
+    quote:
+      'It is wrong to think that the task of physics is to find out how Nature is. Physics concerns what we say about Nature.',
     author: 'Niels Bohr',
   },
   {
@@ -17,11 +19,12 @@ export const quantumQuotes = [
     author: 'Werner Heisenberg',
   },
   {
-    quote: 'The wave function has not collapsed, I have merely stopped asking about the wave function and started asking about the particle.',
+    quote:
+      'The wave function has not collapsed, I have merely stopped asking about the wave function and started asking about the particle.',
     author: 'David Mermin',
   },
   {
-    quote: 'Reality is that which, when you stop believing in it, doesn\'t go away.',
+    quote: "Reality is that which, when you stop believing in it, doesn't go away.",
     author: 'Philip K. Dick',
   },
   {
@@ -29,7 +32,7 @@ export const quantumQuotes = [
     author: 'J.B.S. Haldane',
   },
   {
-    quote: 'If you think you understand quantum mechanics, you don\'t understand quantum mechanics.',
+    quote: "If you think you understand quantum mechanics, you don't understand quantum mechanics.",
     author: 'Richard Feynman',
   },
   {
@@ -37,7 +40,8 @@ export const quantumQuotes = [
     author: 'John Bell',
   },
   {
-    quote: 'The act of observation is not a passive act but an active engagement that shapes reality.',
+    quote:
+      'The act of observation is not a passive act but an active engagement that shapes reality.',
     author: 'Unknown',
   },
   {
@@ -52,4 +56,3 @@ export const quantumQuotes = [
 export function getRandomQuantumQuote(): { quote: string; author: string } {
   return quantumQuotes[Math.floor(Math.random() * quantumQuotes.length)]!;
 }
-

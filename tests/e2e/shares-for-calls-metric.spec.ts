@@ -74,7 +74,9 @@ test.describe('Shares For Calls Metric', () => {
     // The metric shows total shares needed for all short calls (not just covered shares)
     // Find the card first, then the value within it to avoid strict mode violations
     const sharesForCallsCardContainer = page.locator('text=Shares For Calls').locator('..');
-    const sharesForCallsValue = sharesForCallsCardContainer.locator('[data-testid="shares-for-calls-value"]');
+    const sharesForCallsValue = sharesForCallsCardContainer.locator(
+      '[data-testid="shares-for-calls-value"]'
+    );
 
     await expect(sharesForCallsValue).toBeVisible();
 
