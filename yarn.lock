@@ -3637,12 +3637,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lucide-react@npm:^0.546.0":
-  version: 0.546.0
-  resolution: "lucide-react@npm:0.546.0"
+"lucide-react@npm:^0.553.0":
+  version: 0.553.0
+  resolution: "lucide-react@npm:0.553.0"
   peerDependencies:
     react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/42ee0bd358517f012297aefb69b54da0b3c62f1ac8485ffa24141b63f05c9f4a682eacc2637c4b13f597aed11f9a8c79627af0c17717400bebb25581daeaad80
+  checksum: 10c0/b1283f1a2302a50d6a16bd67b9f7417ae08a74cba59ae5ca9953527cb9724247df12ba8c72ca2fc6a70b745f8315cc709ac7573643c4088728766da151999ef6
   languageName: node
   linkType: hard
 
@@ -3985,7 +3985,7 @@ __metadata:
     husky: "npm:^9.1.7"
     jsdom: "npm:^27.0.1"
     lint-staged: "npm:^16.2.4"
-    lucide-react: "npm:^0.546.0"
+    lucide-react: "npm:^0.553.0"
     papaparse: "npm:^5.5.3"
     playwright-core: "npm:^1.56.1"
     postcss: "npm:^8.5.6"
